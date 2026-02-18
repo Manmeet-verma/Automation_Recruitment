@@ -1,0 +1,2419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECH ON - Automated Recruitment System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap');
+        
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #f97316;
+            --accent-glow: rgba(249, 115, 22, 0.3);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --neon-blue: #06b6d4;
+            --neon-purple: #8b5cf6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .font-tech {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        /* Animated Background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out;
+            z-index: -1;
+        }
+        
+        .glow-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.4) 0%, transparent 70%);
+            top: -10%;
+            right: -10%;
+        }
+        
+        .glow-orb-2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.3) 0%, transparent 70%);
+            bottom: -10%;
+            left: -10%;
+            animation-delay: -10s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .glass-card:hover {
+            border-color: rgba(249, 115, 22, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(249, 115, 22, 0.1);
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.4);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #f97316;
+            color: #f97316;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(249, 115, 22, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Navigation */
+        .nav-link {
+            position: relative;
+            color: #94a3b8;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: #f97316;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #f97316;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        
+        /* Form Styling */
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        /* Progress Steps */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+            cursor: pointer;
+        }
+        
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1e293b;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-circle {
+            background: #f97316;
+            border-color: #f97316;
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+        }
+        
+        .step.completed .step-circle {
+            background: #10b981;
+            border-color: #10b981;
+        }
+        
+        .step-label {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-align: center;
+        }
+        
+        .step.active .step-label {
+            color: #f97316;
+        }
+        
+        /* Exam Interface */
+        .exam-container {
+            position: relative;
+            min-height: 600px;
+        }
+        
+        .question-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .option-label {
+            display: block;
+            padding: 16px;
+            margin: 12px 0;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option-label:hover {
+            border-color: rgba(249, 115, 22, 0.5);
+            background: rgba(249, 115, 22, 0.05);
+        }
+        
+        .option-input:checked + .option-label {
+            border-color: #f97316;
+            background: rgba(249, 115, 22, 0.1);
+        }
+        
+        /* Proctoring Overlay */
+        .proctoring-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(239, 68, 68, 0.95);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            z-index: 9999;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .proctoring-bar.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .webcam-preview {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            background: #000;
+            border: 3px solid #f97316;
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .webcam-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .recording-dot {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Admin Dashboard */
+        .stat-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        /* Merit List Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(30, 41, 59, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .data-table th {
+            background: rgba(249, 115, 22, 0.2);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #f97316;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .data-table tr:hover {
+            background: rgba(249, 115, 22, 0.05);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .status-selected { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status-rejected { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            border-radius: 16px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 32px;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: #f97316;
+        }
+        
+        /* Loading Animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(249, 115, 22, 0.3);
+            border-radius: 50%;
+            border-top-color: #f97316;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Security Overlay */
+        .security-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9998;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .security-overlay.active {
+            display: flex;
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            z-index: 10000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .step-indicator {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .step-indicator::before {
+                display: none;
+            }
+            
+            .webcam-preview {
+                width: 120px;
+                height: 90px;
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #f97316;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ea580c;
+        }
+        
+        .hidden { display: none !important; }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-grid"></div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    
+    <!-- Proctoring Bar -->
+    <div class="proctoring-bar" id="proctoringBar">
+        <i class="fas fa-shield-alt"></i>
+        <span><strong>PROCTORING ACTIVE:</strong> Screen & Webcam Recording in Progress. Do not switch tabs or applications.</span>
+    </div>
+    
+    <!-- Webcam Preview -->
+    <div class="webcam-preview hidden" id="webcamPreview">
+        <video id="webcamVideo" autoplay muted></video>
+        <div class="recording-dot"></div>
+        <div style="position: absolute; bottom: 5px; left: 5px; font-size: 10px; color: white; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px;">
+            LIVE
+        </div>
+    </div>
+    
+    <!-- Security Violation Overlay -->
+    <div class="security-overlay" id="securityOverlay">
+        <i class="fas fa-exclamation-triangle" style="font-size: 64px; color: #ef4444; margin-bottom: 24px;"></i>
+        <h2 style="font-size: 32px; margin-bottom: 16px; color: #ef4444;">Security Violation Detected</h2>
+        <p style="font-size: 18px; color: #94a3b8; margin-bottom: 32px;">
+            You have violated the examination policy. The test has been terminated.
+        </p>
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 20px; border-radius: 8px; max-width: 500px;">
+            <p style="color: #fca5a5; margin-bottom: 8px;"><strong>Violation:</strong> <span id="violationType">Tab Switching</span></p>
+            <p style="color: #fca5a5;"><strong>Time:</strong> <span id="violationTime"></span></p>
+        </div>
+        <button class="btn-primary mt-8" onclick="location.reload()">Return to Home</button>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-card border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('home')">
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-microchip text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-tech text-2xl font-bold text-white tracking-wider">TECH ON</h1>
+                        <p class="text-xs text-orange-400 tracking-widest">AUTOMATED RECRUITMENT</p>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <a href="#" class="nav-link active" onclick="showSection('home')">Home</a>
+                    <a href="#" class="nav-link" onclick="showSection('about')">About Us</a>
+                    <a href="#" class="nav-link" onclick="showSection('careers')">Careers</a>
+                    <a href="#" class="nav-link" onclick="showSection('newJoining')">
+                        <i class="fas fa-user-plus mr-2"></i>New Joining
+                    </a>
+                    <a href="#" class="nav-link text-orange-400" onclick="showSection('admin')">
+                        <i class="fas fa-lock mr-2"></i>Admin
+                    </a>
+                </div>
+                
+                <button class="md:hidden text-white text-2xl" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden glass-card border-t border-white/10">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="#" class="block py-2 text-gray-300 hover:text-orange-400" onclick="showSection('home')">Home</a>
+                <a href="#" class="block py-2 text-gray-300 hover:text-orange-400" onclick="showSection('about')">About Us</a>
+                <a href="#" class="block py-2 text-gray-300 hover:text-orange-400" onclick="showSection('careers')">Careers</a>
+                <a href="#" class="block py-2 text-orange-400 font-semibold" onclick="showSection('newJoining')">
+                    <i class="fas fa-user-plus mr-2"></i>New Joining
+                </a>
+                <a href="#" class="block py-2 text-orange-400" onclick="showSection('admin')">
+                    <i class="fas fa-lock mr-2"></i>Admin Login
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        
+        <!-- HOME SECTION -->
+        <section id="home" class="fade-in">
+            <div class="text-center py-20 lg:py-32">
+                <div class="inline-flex items-center px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-sm font-medium mb-8">
+                    <span class="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></span>
+                    Now Hiring - Multiple Positions Available
+                </div>
+                
+                <h1 class="font-tech text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-orange-200 to-orange-400 bg-clip-text text-transparent">
+                    Future of Hiring<br>Starts Here
+                </h1>
+                
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
+                    Join India's leading LED Display Board manufacturer. Our AI-powered recruitment system 
+                    ensures fair, efficient, and transparent hiring process for Technical, Sales, Engineering, 
+                    and Production roles.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                    <button class="btn-primary text-lg" onclick="showSection('newJoining')">
+                        <i class="fas fa-rocket mr-2"></i>Start Application
+                    </button>
+                    <button class="btn-secondary text-lg" onclick="showSection('about')">
+                        <i class="fas fa-info-circle mr-2"></i>Learn More
+                    </button>
+                </div>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                    <div class="glass-card rounded-xl p-6 text-center">
+                        <div class="text-3xl font-bold text-orange-400 mb-1">500+</div>
+                        <div class="text-sm text-gray-400">Employees</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-6 text-center">
+                        <div class="text-3xl font-bold text-cyan-400 mb-1">15+</div>
+                        <div class="text-sm text-gray-400">Years Experience</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-6 text-center">
+                        <div class="text-3xl font-bold text-purple-400 mb-1">ISO</div>
+                        <div class="text-sm text-gray-400">9001:2015 Certified</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-6 text-center">
+                        <div class="text-3xl font-bold text-green-400 mb-1">50+</div>
+                        <div class="text-sm text-gray-400">Cities Served</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features Grid -->
+            <div class="grid md:grid-cols-3 gap-8 mt-12">
+                <div class="glass-card rounded-2xl p-8 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-orange-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-brain text-orange-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">AI-Powered Assessment</h3>
+                    <p class="text-gray-400">Smart question generation based on your selected department and skill level.</p>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-8 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-shield-alt text-cyan-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Secure Proctoring</h3>
+                    <p class="text-gray-400">Advanced anti-cheating measures with screen monitoring and webcam verification.</p>
+                </div>
+                
+                <div class="glass-card rounded-2xl p-8 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-tachometer-alt text-purple-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Real-time Processing</h3>
+                    <p class="text-gray-400">Instant merit list generation and automated candidate ranking system.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT US SECTION -->
+        <section id="about" class="hidden fade-in">
+            <div class="glass-card rounded-3xl p-8 md:p-12 mb-12">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="font-tech text-4xl font-bold mb-6 text-orange-400">About TECH ON</h2>
+                        <p class="text-gray-300 mb-6 leading-relaxed">
+                            <strong class="text-white">TECH ON (AB SALES)</strong> is India's premier LED Display Board manufacturer, 
+                            specializing in cutting-edge signage solutions, video walls, and digital display systems. 
+                            With our ISO 9001:2015 certification, we maintain the highest standards of quality and innovation.
+                        </p>
+                        <p class="text-gray-300 mb-6 leading-relaxed">
+                            Founded with a vision to revolutionize visual communication, we have grown to become the 
+                            <strong class="text-orange-400">No. 1 LED Board Supplier in India</strong>, serving clients 
+                            across retail, corporate, education, and entertainment sectors.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Multicolour LED Video Walls</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Acrylic Letter Boards & Signage</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Currency Rate Display Boards</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Jewellery Rate Display Systems</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                                <span>Token Display & Production Boards</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="glass-card rounded-2xl p-6 border-l-4 border-orange-500">
+                            <h4 class="font-bold text-lg mb-2 flex items-center">
+                                <i class="fas fa-building mr-3 text-orange-400"></i>
+                                Delhi Office
+                            </h4>
+                            <p class="text-gray-400 text-sm">
+                                Plot No. 2, Shiv Arcade Building,<br>
+                                Ambrahi, Dwarka, Delhi-110075
+                            </p>
+                        </div>
+                        
+                        <div class="glass-card rounded-2xl p-6 border-l-4 border-cyan-500">
+                            <h4 class="font-bold text-lg mb-2 flex items-center">
+                                <i class="fas fa-industry mr-3 text-cyan-400"></i>
+                                Punjab Office
+                            </h4>
+                            <p class="text-gray-400 text-sm">
+                                #11, Main Road, Kabir Nagar,<br>
+                                Daba Road, Ludhiana - 141 003
+                            </p>
+                        </div>
+                        
+                        <div class="glass-card rounded-2xl p-6 border-l-4 border-purple-500">
+                            <h4 class="font-bold text-lg mb-2 flex items-center">
+                                <i class="fas fa-envelope mr-3 text-purple-400"></i>
+                                Contact
+                            </h4>
+                            <p class="text-gray-400 text-sm">
+                                Mr. Ajay Aggarwal<br>
+                                +91-82849-00872<br>
+                                led@leddisplayboards.in
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Company Culture -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-tech font-bold text-orange-400 mb-2">Innovation</div>
+                    <p class="text-gray-400">Pushing boundaries in LED technology</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-tech font-bold text-cyan-400 mb-2">Integrity</div>
+                    <p class="text-gray-400">Transparent business practices</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="text-5xl font-tech font-bold text-purple-400 mb-2">Excellence</div>
+                    <p class="text-gray-400">Quality in every pixel</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CAREERS SECTION -->
+        <section id="careers" class="hidden fade-in">
+            <div class="text-center mb-12">
+                <h2 class="font-tech text-4xl font-bold mb-4">Open Positions</h2>
+                <p class="text-gray-400">Explore opportunities across our departments</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="jobListings">
+                <!-- Jobs will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- NEW JOINING / RECRUITMENT SECTION -->
+        <section id="newJoining" class="hidden fade-in">
+            <!-- Progress Steps -->
+            <div class="max-w-4xl mx-auto mb-12">
+                <div class="step-indicator">
+                    <div class="step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">KYC Verification</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Career Selection</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Document Upload</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Entrance Exam</div>
+                    </div>
+                    <div class="step" data-step="5">
+                        <div class="step-circle">5</div>
+                        <div class="step-label">IQ Test</div>
+                    </div>
+                    <div class="step" data-step="6">
+                        <div class="step-circle">6</div>
+                        <div class="step-label">Interview</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 1: KYC Verification -->
+            <div id="step1" class="max-w-2xl mx-auto">
+                <div class="glass-card rounded-3xl p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-id-card text-orange-400 text-3xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2">Identity Verification</h2>
+                        <p class="text-gray-400">Please provide your basic details for KYC verification</p>
+                    </div>
+                    
+                    <form id="kycForm" class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-input" id="fullName" required placeholder="As per Aadhaar/PAN">
+                            </div>
+                            <div>
+                                <label class="form-label">Email Address *</label>
+                                <input type="email" class="form-input" id="email" required placeholder="your@email.com">
+                            </div>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-input" id="phone" required placeholder="+91 98765 43210" maxlength="10">
+                            </div>
+                            <div>
+                                <label class="form-label">Date of Birth *</label>
+                                <input type="date" class="form-input" id="dob" required>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Aadhaar Number *</label>
+                            <input type="text" class="form-input" id="aadhaar" required placeholder="XXXX XXXX XXXX" maxlength="12">
+                            <p class="text-xs text-gray-500 mt-1">Your Aadhaar is secure with 256-bit encryption</p>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Current Address *</label>
+                            <textarea class="form-input" id="address" rows="3" required placeholder="Complete residential address"></textarea>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="form-label">City *</label>
+                                <input type="text" class="form-input" id="city" required>
+                            </div>
+                            <div>
+                                <label class="form-label">State *</label>
+                                <select class="form-input" id="state" required>
+                                    <option value="">Select State</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Punjab">Punjab</option>
+                                    <option value="Haryana">Haryana</option>
+                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3 pt-4">
+                            <input type="checkbox" id="consent" class="mt-1 w-5 h-5 rounded border-gray-600 text-orange-500 focus:ring-orange-500 bg-gray-800" required>
+                            <label for="consent" class="text-sm text-gray-400">
+                                I consent to the verification of my details and agree to the 
+                                <a href="#" class="text-orange-400 hover:underline">Terms of Service</a> and 
+                                <a href="#" class="text-orange-400 hover:underline">Privacy Policy</a>.
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary w-full text-lg">
+                            <i class="fas fa-arrow-right mr-2"></i>Continue to Career Selection
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Step 2: Career Selection -->
+            <div id="step2" class="max-w-4xl mx-auto hidden">
+                <div class="glass-card rounded-3xl p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-briefcase text-cyan-400 text-3xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2">Select Your Career Path</h2>
+                        <p class="text-gray-400">Choose the department and role that matches your skills</p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mb-8" id="careerOptions">
+                        <!-- Populated by JS -->
+                    </div>
+                    
+                    <div id="selectedCareerDetails" class="hidden glass-card rounded-2xl p-6 border border-orange-500/30 bg-orange-500/5">
+                        <h3 class="text-xl font-bold mb-4 text-orange-400">Selected Position</h3>
+                        <div id="careerInfo"></div>
+                    </div>
+                    
+                    <div class="flex justify-between mt-8">
+                        <button class="btn-secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button class="btn-primary" id="careerNextBtn" onclick="nextStep()" disabled>
+                            Continue<i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Document Upload -->
+            <div id="step3" class="max-w-3xl mx-auto hidden">
+                <div class="glass-card rounded-3xl p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-file-upload text-purple-400 text-3xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2">Document Verification</h2>
+                        <p class="text-gray-400">Upload your CV and relevant certificates</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-orange-500 transition-colors" id="dropZone1">
+                            <input type="file" id="cvUpload" class="hidden" accept=".pdf,.doc,.docx">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-lg font-medium mb-2">Upload Resume/CV</p>
+                            <p class="text-sm text-gray-500 mb-4">PDF, DOC, or DOCX (Max 5MB)</p>
+                            <button class="btn-secondary" onclick="document.getElementById('cvUpload').click()">
+                                Choose File
+                            </button>
+                            <p class="mt-4 text-sm text-green-400 hidden" id="cvFileName"></p>
+                        </div>
+                        
+                        <div class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-orange-500 transition-colors" id="dropZone2">
+                            <input type="file" id="certUpload" class="hidden" accept=".pdf,.jpg,.jpeg,.png" multiple>
+                            <i class="fas fa-certificate text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-lg font-medium mb-2">Upload Certificates</p>
+                            <p class="text-sm text-gray-500 mb-4">Experience letters, Degree, Diplomas (Max 10MB)</p>
+                            <button class="btn-secondary" onclick="document.getElementById('certUpload').click()">
+                                Choose Files
+                            </button>
+                            <div class="mt-4 space-y-2" id="certFileList"></div>
+                        </div>
+                        
+                        <div class="glass-card rounded-xl p-4 bg-yellow-500/10 border border-yellow-500/30">
+                            <div class="flex items-start space-x-3">
+                                <i class="fas fa-info-circle text-yellow-400 mt-1"></i>
+                                <div class="text-sm text-gray-300">
+                                    <strong class="text-yellow-400">Document Check:</strong> 
+                                    Our AI system will verify your documents for authenticity. 
+                                    Ensure all documents are clear and legible.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between mt-8">
+                        <button class="btn-secondary" onclick="prevStep()">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button class="btn-primary" onclick="nextStep()">
+                            Proceed to Exam<i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 4: Entrance Exam -->
+            <div id="step4" class="max-w-4xl mx-auto hidden">
+                <div class="exam-container">
+                    <!-- Exam Intro -->
+                    <div id="examIntro" class="glass-card rounded-3xl p-8 text-center">
+                        <div class="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                            <i class="fas fa-shield-alt text-red-400 text-4xl"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold mb-4">Proctored Entrance Examination</h2>
+                        <div class="max-w-2xl mx-auto text-left space-y-4 mb-8 glass-card rounded-xl p-6">
+                            <h3 class="text-orange-400 font-bold mb-4"><i class="fas fa-exclamation-triangle mr-2"></i>Important Instructions:</h3>
+                            <ul class="space-y-3 text-gray-300">
+                                <li class="flex items-start"><i class="fas fa-check text-green-400 mr-3 mt-1"></i>20 multiple-choice questions specific to your selected department</li>
+                                <li class="flex items-start"><i class="fas fa-check text-green-400 mr-3 mt-1"></i>Duration: 30 minutes</li>
+                                <li class="flex items-start"><i class="fas fa-check text-green-400 mr-3 mt-1"></i>Webcam and screen recording is mandatory</li>
+                                <li class="flex items-start"><i class="fas fa-check text-green-400 mr-3 mt-1"></i>Switching tabs or applications will result in immediate disqualification</li>
+                                <li class="flex items-start"><i class="fas fa-check text-green-400 mr-3 mt-1"></i>No external help or reference materials allowed</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="flex items-center justify-center space-x-4 mb-8">
+                            <input type="checkbox" id="examConsent" class="w-5 h-5 rounded border-gray-600 text-orange-500 focus:ring-orange-500 bg-gray-800">
+                            <label for="examConsent" class="text-gray-300">
+                                I agree to the monitoring and understand the consequences of violations
+                            </label>
+                        </div>
+                        
+                        <button class="btn-primary text-lg" id="startExamBtn" onclick="initializeProctoring()" disabled>
+                            <i class="fas fa-play mr-2"></i>Start Examination
+                        </button>
+                    </div>
+                    
+                    <!-- Active Exam -->
+                    <div id="activeExam" class="hidden">
+                        <div class="glass-card rounded-2xl p-6 mb-6 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xl font-bold" id="examDeptTitle">Technical Department Exam</h3>
+                                <p class="text-gray-400 text-sm">Question <span id="currentQ">1</span> of <span id="totalQ">20</span></p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-3xl font-tech font-bold text-orange-400" id="timer">30:00</div>
+                                <div class="text-xs text-gray-500">Time Remaining</div>
+                            </div>
+                        </div>
+                        
+                        <div class="question-card" id="questionContainer">
+                            <!-- Questions populated by JS -->
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button class="btn-secondary" id="prevQBtn" onclick="prevQuestion()" disabled>
+                                <i class="fas fa-arrow-left mr-2"></i>Previous
+                            </button>
+                            <button class="btn-primary" id="nextQBtn" onclick="nextQuestion()">
+                                Next<i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                            <button class="btn-primary hidden" id="submitExamBtn" onclick="submitEntranceExam()">
+                                Submit Exam<i class="fas fa-check ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 5: IQ Test -->
+            <div id="step5" class="max-w-4xl mx-auto hidden">
+                <div class="glass-card rounded-3xl p-8 text-center" id="iqIntro">
+                    <div class="w-24 h-24 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-brain text-purple-400 text-4xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-4">Cognitive Assessment (IQ Test)</h2>
+                    <p class="text-gray-400 mb-8 max-w-2xl mx-auto">
+                        Congratulations on clearing the entrance exam! You now qualify for the IQ assessment. 
+                        This test measures logical reasoning, pattern recognition, and problem-solving abilities.
+                    </p>
+                    
+                    <div class="grid md:grid-cols-3 gap-6 mb-8 max-w-3xl mx-auto">
+                        <div class="glass-card rounded-xl p-4">
+                            <div class="text-2xl font-bold text-cyan-400 mb-1">15</div>
+                            <div class="text-sm text-gray-400">Questions</div>
+                        </div>
+                        <div class="glass-card rounded-xl p-4">
+                            <div class="text-2xl font-bold text-cyan-400 mb-1">20</div>
+                            <div class="text-sm text-gray-400">Minutes</div>
+                        </div>
+                        <div class="glass-card rounded-xl p-4">
+                            <div class="text-2xl font-bold text-cyan-400 mb-1">MCQ</div>
+                            <div class="text-sm text-gray-400">Format</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-primary text-lg" onclick="startIQTest()">
+                        <i class="fas fa-brain mr-2"></i>Start IQ Assessment
+                    </button>
+                </div>
+                
+                <div id="activeIQ" class="hidden">
+                    <div class="glass-card rounded-2xl p-6 mb-6 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold">Cognitive Assessment</h3>
+                            <p class="text-gray-400 text-sm">Question <span id="currentIQ">1</span> of <span id="totalIQ">15</span></p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-tech font-bold text-purple-400" id="iqTimer">20:00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="question-card" id="iqQuestionContainer">
+                        <!-- IQ Questions populated by JS -->
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button class="btn-secondary" id="prevIQBtn" onclick="prevIQQuestion()" disabled>
+                            <i class="fas fa-arrow-left mr-2"></i>Previous
+                        </button>
+                        <button class="btn-primary" id="nextIQBtn" onclick="nextIQQuestion()">
+                            Next<i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <button class="btn-primary hidden" id="submitIQBtn" onclick="submitIQTest()">
+                            Submit<i class="fas fa-check ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 6: Common Reasoning / Interview Prep -->
+            <div id="step6" class="max-w-4xl mx-auto hidden">
+                <div class="glass-card rounded-3xl p-8 text-center" id="interviewIntro">
+                    <div class="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-comments text-green-400 text-4xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-4">Final Assessment: Common Reasoning</h2>
+                    <p class="text-gray-400 mb-8 max-w-2xl mx-auto">
+                        Final stage! This assessment evaluates your communication skills, situational judgment, 
+                        and cultural fit through scenario-based questions.
+                    </p>
+                    
+                    <button class="btn-primary text-lg" onclick="startFinalAssessment()">
+                        <i class="fas fa-flag-checkered mr-2"></i>Start Final Assessment
+                    </button>
+                </div>
+                
+                <div id="activeFinal" class="hidden">
+                    <div class="glass-card rounded-2xl p-6 mb-6 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold">Situational Assessment</h3>
+                            <p class="text-gray-400 text-sm">Question <span id="currentFinal">1</span> of <span id="totalFinal">10</span></p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-tech font-bold text-green-400" id="finalTimer">15:00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="question-card" id="finalQuestionContainer">
+                        <!-- Final questions populated by JS -->
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button class="btn-secondary" onclick="prevFinalQuestion()" id="prevFinalBtn" disabled>
+                            <i class="fas fa-arrow-left mr-2"></i>Previous
+                        </button>
+                        <button class="btn-primary" onclick="nextFinalQuestion()" id="nextFinalBtn">
+                            Next<i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <button class="btn-primary hidden" id="submitFinalBtn" onclick="submitApplication()">
+                            Complete Application<i class="fas fa-check-circle ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Completion Message -->
+            <div id="completionMsg" class="max-w-2xl mx-auto hidden text-center py-12">
+                <div class="w-32 h-32 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check-circle text-green-400 text-6xl"></i>
+                </div>
+                <h2 class="text-4xl font-bold mb-4">Application Submitted!</h2>
+                <p class="text-gray-400 mb-8">
+                    Thank you for completing all assessments. Your application is under review. 
+                    You will receive an email notification regarding your interview schedule.
+                </p>
+                <div class="glass-card rounded-2xl p-6 max-w-md mx-auto">
+                    <p class="text-sm text-gray-400 mb-2">Application ID</p>
+                    <p class="text-2xl font-tech font-bold text-orange-400" id="applicationId">TECH-2024-XXXXX</p>
+                </div>
+                <button class="btn-primary mt-8" onclick="location.reload()">
+                    <i class="fas fa-home mr-2"></i>Return to Home
+                </button>
+            </div>
+        </section>
+
+        <!-- ADMIN SECTION -->
+        <section id="admin" class="hidden fade-in">
+            <!-- Admin Login -->
+            <div id="adminLogin" class="max-w-md mx-auto">
+                <div class="glass-card rounded-3xl p-8">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-lock text-orange-400 text-3xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold">Admin Portal</h2>
+                        <p class="text-gray-400">Secure access for HR personnel only</p>
+                    </div>
+                    
+                    <form id="adminLoginForm" class="space-y-6">
+                        <div>
+                            <label class="form-label">Admin ID</label>
+                            <input type="text" class="form-input" id="adminId" required placeholder="Enter Admin ID">
+                        </div>
+                        <div>
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" id="adminPass" required placeholder="••••••••">
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <label class="flex items-center text-gray-400">
+                                <input type="checkbox" class="mr-2 rounded bg-gray-800 border-gray-600"> Remember me
+                            </label>
+                            <a href="#" class="text-orange-400 hover:underline">Forgot password?</a>
+                        </div>
+                        <button type="submit" class="btn-primary w-full">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login to Dashboard
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 text-center text-xs text-gray-500">
+                        <i class="fas fa-shield-alt mr-1"></i>
+                        Secured with 256-bit SSL Encryption
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Dashboard -->
+            <div id="adminDashboard" class="hidden">
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Total Applications</p>
+                                <h3 class="text-3xl font-bold text-white" id="statTotal">0</h3>
+                            </div>
+                            <div class="stat-icon bg-blue-500/20 text-blue-400">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="text-xs text-blue-400">
+                            <i class="fas fa-arrow-up mr-1"></i>+12% this week
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Pending Review</p>
+                                <h3 class="text-3xl font-bold text-white" id="statPending">0</h3>
+                            </div>
+                            <div class="stat-icon bg-yellow-500/20 text-yellow-400">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="text-xs text-yellow-400">
+                            Requires attention
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Selected</p>
+                                <h3 class="text-3xl font-bold text-white" id="statSelected">0</h3>
+                            </div>
+                            <div class="stat-icon bg-green-500/20 text-green-400">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="text-xs text-green-400">
+                            Ready for interview
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Rejected</p>
+                                <h3 class="text-3xl font-bold text-white" id="statRejected">0</h3>
+                            </div>
+                            <div class="stat-icon bg-red-500/20 text-red-400">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                        </div>
+                        <div class="text-xs text-red-400">
+                            Process completed
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts & Filters -->
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div class="glass-card rounded-2xl p-6 md:col-span-2">
+                        <h3 class="text-lg font-bold mb-4">Department-wise Applications</h3>
+                        <canvas id="deptChart" height="200"></canvas>
+                    </div>
+                    
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-lg font-bold mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button class="w-full text-left px-4 py-3 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 transition-colors" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel mr-3 text-green-400"></i>Export to Excel
+                            </button>
+                            <button class="w-full text-left px-4 py-3 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 transition-colors">
+                                <i class="fas fa-envelope mr-3 text-blue-400"></i>Send Bulk Email
+                            </button>
+                            <button class="w-full text-left px-4 py-3 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-colors">
+                                <i class="fas fa-calendar mr-3 text-purple-400"></i>Schedule Interviews
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Candidates Table -->
+                <div class="glass-card rounded-2xl p-6 overflow-hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <h3 class="text-xl font-bold">Candidate Merit List</h3>
+                        <div class="flex gap-3">
+                            <select class="form-input w-auto" id="filterDept" onchange="filterCandidates()">
+                                <option value="all">All Departments</option>
+                                <option value="Technical">Technical</option>
+                                <option value="Sales">Sales</option>
+                                <option value="Production">Production</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Mechanical">Mechanical</option>
+                            </select>
+                            <select class="form-input w-auto" id="filterStatus" onchange="filterCandidates()">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="selected">Selected</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                            <input type="text" class="form-input w-auto" placeholder="Search..." id="searchCandidate" onkeyup="filterCandidates()">
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Candidate</th>
+                                    <th>Department</th>
+                                    <th>Entrance</th>
+                                    <th>IQ Score</th>
+                                    <th>Final Score</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="candidatesTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Candidate Detail Modal -->
+    <div class="modal" id="candidateModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div id="modalContent">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let currentStep = 1;
+        let candidateData = {
+            kyc: {},
+            career: {},
+            documents: {},
+            entranceExam: { answers: [], score: 0 },
+            iqTest: { answers: [], score: 0 },
+            finalAssessment: { answers: [], score: 0 },
+            totalScore: 0,
+            status: 'pending',
+            applicationId: ''
+        };
+        
+        let currentQuestion = 0;
+        let currentIQQuestion = 0;
+        let currentFinalQuestion = 0;
+        let examTimer, iqTimer, finalTimer;
+        let violations = 0;
+        let screenStream = null;
+        let webcamStream = null;
+        
+        // Department Questions Database
+        const questionBank = {
+            Technical: [
+                { q: "What does LED stand for?", options: ["Light Emitting Diode", "Light Energy Device", "Liquid Emitting Display", "Laser Emitting Diode"], correct: 0 },
+                { q: "Which protocol is commonly used for LED display control?", options: ["HTTP", "FTP", "DMX512", "SMTP"], correct: 2 },
+                { q: "What is the typical voltage for a single LED?", options: ["1.8-3.3V", "5V", "12V", "220V"], correct: 0 },
+                { q: "Which component controls brightness in LED displays?", options: ["Resistor", "PWM Controller", "Capacitor", "Transformer"], correct: 1 },
+                { q: "What does RGB stand for?", options: ["Red Green Blue", "Red Gold Black", "Random Generated Brightness", "None"], correct: 0 },
+                { q: "Which is NOT a type of LED display?", options: ["SMD", "DIP", "OLED", "LCD"], correct: 3 },
+                { q: "Refresh rate is measured in?", options: ["Volts", "Hertz", "Watts", "Ohms"], correct: 1 },
+                { q: "What is pixel pitch?", options: ["Distance between pixels", "Image resolution", "Color depth", "Brightness level"], correct: 0 },
+                { q: "Which software is used for LED content management?", options: ["Photoshop", "NovaStar", "Excel", "Word"], correct: 1 },
+                { q: "IP65 rating means?", options: ["Waterproof", "Dustproof", "Both", "None"], correct: 2 },
+                { q: "What causes LED degradation?", options: ["Heat", "Voltage", "Current", "All of above"], correct: 3 },
+                { q: "Maximum viewing angle for outdoor LEDs?", options: ["60°", "90°", "120°", "140°"], correct: 3 },
+                { q: "Which connection is used for data transfer?", options: ["HDMI", "Ethernet", "Both", "VGA"], correct: 2 },
+                { q: "Power consumption of LED vs LCD?", options: ["Higher", "Lower", "Same", "Variable"], correct: 1 },
+                { q: "What is lumen?", options: ["Unit of brightness", "Unit of power", "Unit of resistance", "Unit of current"], correct: 0 },
+                { q: "Color temperature is measured in?", options: ["Kelvin", "Celsius", "Fahrenheit", "Lux"], correct: 0 },
+                { q: "Which is better for outdoor use?", options: ["SMD", "DIP", "COB", "OLED"], correct: 1 },
+                { q: "What is grayscale?", options: ["Color levels", "Brightness levels", "Contrast ratio", "Refresh rate"], correct: 1 },
+                { q: "MTBF stands for?", options: ["Mean Time Between Failures", "Maximum Time Before Failure", "Minimum Time Between Fixes", "None"], correct: 0 },
+                { q: "Best practice for LED installation?", options: ["Waterproofing", "Ventilation", "Grounding", "All of above"], correct: 3 }
+            ],
+            Sales: [
+                { q: "What is the first step in sales process?", options: ["Closing", "Prospecting", "Presentation", "Follow-up"], correct: 1 },
+                { q: "B2B stands for?", options: ["Business to Business", "Back to Back", "Buy to Buy", "None"], correct: 0 },
+                { q: "CRM software is used for?", options: ["Customer Management", "Accounting", "Manufacturing", "HR"], correct: 0 },
+                { q: "What is a cold call?", options: ["Unsolicited call", "Angry customer", "Lost sale", "Follow-up"], correct: 0 },
+                { q: "USP means?", options: ["Unique Selling Proposition", "Universal Sales Process", "Unique Service Price", "None"], correct: 0 },
+                { q: "Which is NOT a sales technique?", options: ["SPIN", "BANT", "SWOT", "Challenger"], correct: 2 },
+                { q: "Lead qualification involves?", options: ["BANT", "SPAM", "JSON", "HTML"], correct: 0 },
+                { q: "Closing technique 'Assumptive' means?", options: ["Assume sale made", "Ask for sale", "Give discount", "Wait for customer"], correct: 0 },
+                { q: "What is upselling?", options: ["Higher value product", "Discount", "Free item", "Return"], correct: 0 },
+                { q: "Sales funnel stages are?", options: ["Awareness to Action", "Only Closing", "Just Prospecting", "None"], correct: 0 },
+                { q: "Objection handling first step?", options: ["Listen", "Argue", "Ignore", "Discount"], correct: 0 },
+                { q: "Quota means?", options: ["Sales target", "Product type", "Customer type", "Region"], correct: 0 },
+                { q: "BANT stands for?", options: ["Budget, Authority, Need, Timeline", "Buy, Ask, Need, Tell", "None", "Both"], correct: 0 },
+                { q: "Feature vs Benefit?", options: ["What it does vs Value", "Same thing", "Price vs Cost", "None"], correct: 0 },
+                { q: "Pipeline management is?", options: ["Tracking opportunities", "Manufacturing", "Shipping", "Accounting"], correct: 0 },
+                { q: "Cross-selling means?", options: ["Related products", "Same product", "Discount", "Return"], correct: 0 },
+                { q: "ROI stands for?", options: ["Return on Investment", "Rate of Interest", "Return on Inventory", "None"], correct: 0 },
+                { q: "Best follow-up time?", options: ["24-48 hours", "1 week", "1 month", "Never"], correct: 0 },
+                { q: "Value-based selling focuses on?", options: ["Customer value", "Product features", "Price", "Competition"], correct: 0 },
+                { q: "Key account management is for?", options: ["Major clients", "All clients", "New clients", "Lost clients"], correct: 0 }
+            ],
+            Production: [
+                { q: "Lean manufacturing focuses on?", options: ["Waste reduction", "Speed only", "Cost only", "Quality only"], correct: 0 },
+                { q: "6S methodology includes?", options: ["Sort, Set, Shine, Standardize, Sustain, Safety", "Only cleaning", "Only sorting", "None"], correct: 0 },
+                { q: "JIT stands for?", options: ["Just In Time", "Just In Transit", "Job Instruction Training", "None"], correct: 0 },
+                { q: "OEE measures?", options: ["Equipment effectiveness", "Employee efficiency", "Energy usage", "Output only"], correct: 0 },
+                { q: "Kaizen means?", options: ["Continuous improvement", "Quick fix", "Major change", "Stop production"], correct: 0 },
+                { q: "BOM stands for?", options: ["Bill of Materials", "Beginning of Month", "Base Operating Model", "None"], correct: 0 },
+                { q: "Quality control tool?", options: ["Pareto Chart", "Gantt Chart", "Pie Chart", "Bar Chart"], correct: 0 },
+                { q: "Takt time is?", options: ["Customer demand rate", "Break time", "Setup time", "Cycle time"], correct: 0 },
+                { q: "SMED is about?", options: ["Quick changeovers", "Safety", "Maintenance", "Design"], correct: 0 },
+                { q: "Poka-Yoke means?", options: ["Mistake-proofing", "Speed up", "Slow down", "Quality check"], correct: 0 },
+                { q: "FIFO stands for?", options: ["First In First Out", "Fast In Fast Out", "Final Inspection Final Output", "None"], correct: 0 },
+                { q: "5 Why technique is for?", options: ["Root cause analysis", "Counting defects", "Timing processes", "Measuring quality"], correct: 0 },
+                { q: "TPM focuses on?", options: ["Equipment maintenance", "Production only", "Quality only", "Safety only"], correct: 0 },
+                { q: "Kanban is a?", options: ["Pull system", "Push system", "Quality tool", "Safety tool"], correct: 0 },
+                { q: "Cycle time is?", options: ["Time to complete one unit", "Total shift time", "Break time", "Setup time"], correct: 0 },
+                { q: "Throughput means?", options: ["Output rate", "Input rate", "Defect rate", "Efficiency rate"], correct: 0 },
+                { q: "Work instruction purpose?", options: ["Standardize work", "Complicate process", "Slow down", "None"], correct: 0 },
+                { q: "Gemba refers to?", options: ["Actual workplace", "Office", "Warehouse", "Meeting room"], correct: 0 },
+                { q: "Andon system is?", options: ["Visual control", "Sound system", "Lighting system", "Security system"], correct: 0 },
+                { q: "Standard work includes?", options: ["Takt time, Work sequence, Standard inventory", "Only procedures", "Only targets", "None"], correct: 0 }
+            ],
+            Engineering: [
+                { q: "Ohm's Law states?", options: ["V=IR", "P=VI", "F=ma", "E=mc²"], correct: 0 },
+                { q: "CAD stands for?", options: ["Computer Aided Design", "Computer Aided Drafting", "Both", "None"], correct: 2 },
+                { q: "Which is a programming language?", options: ["Python", "HTML", "CSS", "XML"], correct: 0 },
+                { q: "PLC stands for?", options: ["Programmable Logic Controller", "Power Line Communication", "Both", "None"], correct: 0 },
+                { q: "Sensor for distance measurement?", options: ["Ultrasonic", "Temperature", "Humidity", "Pressure"], correct: 0 },
+                { q: "IP rating indicates?", options: ["Protection level", "Internet Protocol", "Input Power", "None"], correct: 0 },
+                { q: "3D printing is also called?", options: ["Additive manufacturing", "Subtractive manufacturing", "Forming", "Molding"], correct: 0 },
+                { q: "SCADA is for?", options: ["Industrial control", "Accounting", "Design", "Communication"], correct: 0 },
+                { q: "Which is NOT a manufacturing process?", options: ["Casting", "Forging", "Coding", "Machining"], correct: 2 },
+                { q: "HMI stands for?", options: ["Human Machine Interface", "Hardware Machine Interface", "High Memory Interface", "None"], correct: 0 },
+                { q: "Modbus is a?", options: ["Communication protocol", "Programming language", "Software", "Hardware"], correct: 0 },
+                { q: "Actuator converts?", options: ["Signal to motion", "Motion to signal", "Heat to electricity", "None"], correct: 0 },
+                { q: "Relay is used for?", options: ["Switching", "Amplifying", "Storing", "Computing"], correct: 0 },
+                { q: "Variable Frequency Drive controls?", options: ["Motor speed", "Temperature", "Pressure", "Light"], correct: 0 },
+                { q: "Ethernet uses?", options: ["TCP/IP", "HTTP only", "FTP only", "None"], correct: 0 },
+                { q: "Ladder logic is used in?", options: ["PLC programming", "Web development", "Database", "Graphics"], correct: 0 },
+                { q: "Thermocouple measures?", options: ["Temperature", "Pressure", "Flow", "Level"], correct: 0 },
+                { q: "PID controller stands for?", options: ["Proportional Integral Derivative", "Process Input Data", "Programmed Instruction Device", "None"], correct: 0 },
+                { q: "Fieldbus is?", options: ["Industrial network", "Power cable", "Safety device", "Software"], correct: 0 },
+                { q: "DCS stands for?", options: ["Distributed Control System", "Digital Control System", "Direct Control System", "None"], correct: 0 }
+            ],
+            Mechanical: [
+                { q: "Newton's First Law is about?", options: ["Inertia", "Acceleration", "Action-Reaction", "Gravity"], correct: 0 },
+                { q: "Stress is?", options: ["Force/Area", "Force×Area", "Force+Area", "None"], correct: 0 },
+                { q: "Gear ratio affects?", options: ["Torque and speed", "Only torque", "Only speed", "None"], correct: 0 },
+                { q: "CNC stands for?", options: ["Computer Numerical Control", "Computer Network Control", "Central Numerical Computer", "None"], correct: 0 },
+                { q: "Which is a thermodynamic cycle?", options: ["Carnot", "Newton", "Ohm", "Gauss"], correct: 0 },
+                { q: "Bearing reduces?", options: ["Friction", "Weight", "Speed", "Temperature"], correct: 0 },
+                { q: "Hydraulics use?", options: ["Fluid power", "Electric power", "Pneumatic power", "Solar power"], correct: 0 },
+                { q: "Tolerance is?", options: ["Permissible variation", "Exact measurement", "Maximum size", "Minimum size"], correct: 0 },
+                { q: "Spring constant unit?", options: ["N/m", "N/m²", "Nm", "N/m³"], correct: 0 },
+                { q: "Lathe machine is used for?", options: ["Rotating workpieces", "Flat surfaces", "Drilling only", "Grinding only"], correct: 0 },
+                { q: "Young's modulus measures?", options: ["Stiffness", "Strength", "Ductility", "Hardness"], correct: 0 },
+                { q: "Viscosity is?", options: ["Fluid resistance", "Fluid density", "Fluid pressure", "Fluid temperature"], correct: 0 },
+                { q: "Bernoulli's principle applies to?", options: ["Fluid flow", "Solid mechanics", "Heat transfer", "Electromagnetism"], correct: 0 },
+                { q: "Welding defect?", options: ["Porosity", "Strength", "Ductility", "Hardness"], correct: 0 },
+                { q: "CAD/CAM integration is for?", options: ["Design to manufacturing", "Only design", "Only manufacturing", "Inspection"], correct: 0 },
+                { q: "Factor of safety is?", options: ["Strength/Working stress", "Working stress/Strength", "Strength+Stress", "None"], correct: 0 },
+                { q: "Pneumatics use?", options: ["Compressed air", "Hydraulic oil", "Electricity", "Steam"], correct: 0 },
+                { q: "Shaft is a?", options: ["Rotating element", "Stationary element", "Fastening element", "Sealing element"], correct: 0 },
+                { q: "Brinell test measures?", options: ["Hardness", "Tensile strength", "Ductility", "Toughness"], correct: 0 },
+                { q: "Governor controls?", options: ["Engine speed", "Engine temperature", "Engine pressure", "Engine power"], correct: 0 }
+            ]
+        };
+        
+        // IQ Questions
+        const iqQuestions = [
+            { q: "Complete the series: 2, 6, 12, 20, 30, ?", options: ["42", "40", "36", "44"], correct: 0 },
+            { q: "If A=1, B=2, C=3, what is the value of WORD?", options: ["60", "58", "62", "64"], correct: 0 },
+            { q: "Which shape has the most sides?", options: ["Hexagon", "Pentagon", "Octagon", "Decagon"], correct: 3 },
+            { q: "Find the odd one out:", options: ["Mars", "Venus", "Sun", "Jupiter"], correct: 2 },
+            { q: "If all Bloops are Razzies and all Razzies are Lazzies, then:", options: ["All Bloops are Lazzies", "All Lazzies are Bloops", "No Lazzies are Bloops", "None"], correct: 0 },
+            { q: "Complete: 1, 1, 2, 3, 5, 8, ?", options: ["13", "12", "11", "14"], correct: 0 },
+            { q: "Which number is missing? 3, 9, 27, ?, 243", options: ["81", "64", "72", "90"], correct: 0 },
+            { q: "If 5 cats catch 5 mice in 5 minutes, how long for 100 cats to catch 100 mice?", options: ["5 minutes", "100 minutes", "20 minutes", "1 minute"], correct: 0 },
+            { q: "What comes next: O, T, T, F, F, S, S, ?", options: ["E", "N", "T", "O"], correct: 0 },
+            { q: "Cube root of 27 is?", options: ["3", "9", "6", "4"], correct: 0 },
+            { q: "Which is heavier: 1kg of feathers or 1kg of steel?", options: ["Same", "Steel", "Feathers", "Depends"], correct: 0 },
+            { q: "If you rearrange 'CIFAIPC' you get:", options: ["Pacific", "Atlantic", "Specific", "Traffic"], correct: 0 },
+            { q: "What is 15% of 200?", options: ["30", "25", "35", "20"], correct: 0 },
+            { q: "Complete: 121, 144, 169, 196, ?", options: ["225", "256", "200", "210"], correct: 0 },
+            { q: "Which is the odd number: 14, 21, 28, 33, 42?", options: ["33", "14", "21", "28"], correct: 0 }
+        ];
+        
+        // Final Assessment Questions
+        const finalQuestions = [
+            { q: "Describe a situation where you had to meet a tight deadline. How did you handle the pressure?", type: "text" },
+            { q: "Why do you want to join TECH ON specifically?", type: "text" },
+            { q: "Where do you see yourself in 5 years?", type: "text" },
+            { q: "How do you handle conflict with a team member?", type: "text" },
+            { q: "What motivates you to perform your best at work?", type: "text" },
+            { q: "Describe a time you failed and what you learned from it.", type: "text" },
+            { q: "How do you prioritize multiple urgent tasks?", type: "text" },
+            { q: "What is your approach to learning new technologies?", type: "text" },
+            { q: "How do you handle criticism or negative feedback?", type: "text" },
+            { q: "Why should we hire you over other candidates?", type: "text" }
+        ];
+        
+        // Job Listings
+        const jobs = [
+            { dept: "Technical", title: "LED Technician", exp: "0-2 years", loc: "Delhi/Ludhiana", desc: "Install, maintain, and repair LED display systems." },
+            { dept: "Technical", title: "Service Engineer", exp: "2-5 years", loc: "Pan India", desc: "Troubleshoot and service LED video walls and signage." },
+            { dept: "Sales", title: "Sales Executive", exp: "1-3 years", loc: "Delhi", desc: "B2B sales of LED display solutions to corporate clients." },
+            { dept: "Sales", title: "Business Development Manager", exp: "5+ years", loc: "Mumbai/Delhi", desc: "Strategic sales and key account management." },
+            { dept: "Production", title: "Production Supervisor", exp: "3-5 years", loc: "Ludhiana", desc: "Oversee LED board assembly and quality control." },
+            { dept: "Production", title: "Quality Inspector", exp: "1-2 years", loc: "Ludhiana", desc: "Inspect finished products and ensure ISO compliance." },
+            { dept: "Engineering", title: "Design Engineer", exp: "2-4 years", loc: "Delhi", desc: "CAD design and structural calculations for displays." },
+            { dept: "Engineering", title: "Project Engineer", exp: "3-6 years", loc: "Delhi", desc: "Manage large-scale LED installation projects." },
+            { dept: "Mechanical", title: "Fabrication Engineer", exp: "2-5 years", loc: "Ludhiana", desc: "Metal fabrication and cabinet design for LED modules." },
+            { dept: "Mechanical", title: "CNC Operator", exp: "1-3 years", loc: "Ludhiana", desc: "Operate CNC machines for precision components." }
+        ];
+        
+        // Mock Candidates Database
+        let candidates = JSON.parse(localStorage.getItem('candidates')) || [
+            { id: "TECH-2024-00001", name: "Rahul Sharma", dept: "Technical", entrance: 85, iq: 120, final: 88, total: 91, status: "selected", date: "2024-02-15" },
+            { id: "TECH-2024-00002", name: "Priya Patel", dept: "Sales", entrance: 78, iq: 115, final: 82, total: 85, status: "pending", date: "2024-02-16" },
+            { id: "TECH-2024-00003", name: "Amit Kumar", dept: "Engineering", entrance: 92, iq: 130, final: 90, total: 94, status: "selected", date: "2024-02-17" },
+            { id: "TECH-2024-00004", name: "Sneha Gupta", dept: "Production", entrance: 65, iq: 105, final: 70, total: 72, status: "rejected", date: "2024-02-17" },
+            { id: "TECH-2024-00005", name: "Vikram Singh", dept: "Mechanical", entrance: 88, iq: 125, final: 85, total: 89, status: "pending", date: "2024-02-18" }
+        ];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            populateJobs();
+            populateCareerOptions();
+            setupEventListeners();
+            updateStats();
+        });
+        
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            event.target.closest('.nav-link')?.classList.add('active');
+            
+            window.scrollTo(0, 0);
+        }
+        
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        }
+        
+        // Step Navigation
+        function nextStep() {
+            if (currentStep < 6) {
+                document.getElementById(`step${currentStep}`).classList.add('hidden');
+                currentStep++;
+                document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                updateStepIndicator();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step${currentStep}`).classList.add('hidden');
+                currentStep--;
+                document.getElementById(`step${currentStep}`).classList.remove('hidden');
+                updateStepIndicator();
+            }
+        }
+        
+        function updateStepIndicator() {
+            document.querySelectorAll('.step').forEach((step, idx) => {
+                step.classList.remove('active', 'completed');
+                if (idx + 1 < currentStep) step.classList.add('completed');
+                if (idx + 1 === currentStep) step.classList.add('active');
+            });
+        }
+        
+        // Populate Jobs
+        function populateJobs() {
+            const container = document.getElementById('jobListings');
+            jobs.forEach(job => {
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-2xl p-6 hover:border-orange-500/50 transition-all cursor-pointer';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-orange-400 mb-1">${job.title}</h3>
+                            <p class="text-gray-400 text-sm">${job.dept} Department</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-400">Open</span>
+                    </div>
+                    <p class="text-gray-300 text-sm mb-4">${job.desc}</p>
+                    <div class="flex items-center text-sm text-gray-400 space-x-4 mb-4">
+                        <span><i class="fas fa-briefcase mr-2"></i>${job.exp}</span>
+                        <span><i class="fas fa-map-marker-alt mr-2"></i>${job.loc}</span>
+                    </div>
+                    <button class="btn-primary w-full" onclick="showSection('newJoining')">Apply Now</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // Populate Career Options
+        function populateCareerOptions() {
+            const container = document.getElementById('careerOptions');
+            const depts = [...new Set(jobs.map(j => j.dept))];
+            
+            depts.forEach(dept => {
+                const deptJobs = jobs.filter(j => j.dept === dept);
+                const card = document.createElement('div');
+                card.className = 'glass-card rounded-xl p-6 cursor-pointer hover:border-orange-500 transition-all';
+                card.onclick = () => selectCareer(dept, deptJobs[0]);
+                card.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                            <i class="fas fa-${getDeptIcon(dept)} text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">${dept}</h3>
+                            <p class="text-sm text-gray-400">${deptJobs.length} positions</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-2">
+                        ${deptJobs.map(job => `
+                            <div class="text-sm text-gray-300 pl-16">• ${job.title}</div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        function getDeptIcon(dept) {
+            const icons = {
+                'Technical': 'tools',
+                'Sales': 'handshake',
+                'Production': 'industry',
+                'Engineering': 'cogs',
+                'Mechanical': 'wrench'
+            };
+            return icons[dept] || 'briefcase';
+        }
+        
+        function selectCareer(dept, job) {
+            candidateData.career = { department: dept, position: job.title, location: job.loc };
+            document.getElementById('selectedCareerDetails').classList.remove('hidden');
+            document.getElementById('careerInfo').innerHTML = `
+                <p class="text-lg mb-2"><strong>Department:</strong> ${dept}</p>
+                <p class="text-lg mb-2"><strong>Position:</strong> ${job.title}</p>
+                <p class="text-lg text-gray-400"><strong>Location:</strong> ${job.loc}</p>
+            `;
+            document.getElementById('careerNextBtn').disabled = false;
+            
+            // Visual feedback
+            document.querySelectorAll('#careerOptions > div').forEach(div => {
+                div.style.borderColor = 'rgba(255,255,255,0.1)';
+            });
+            event.currentTarget.style.borderColor = '#f97316';
+        }
+        
+        // KYC Form
+        document.getElementById('kycForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            candidateData.kyc = {
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                dob: document.getElementById('dob').value,
+                aadhaar: document.getElementById('aadhaar').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value
+            };
+            
+            // Simulate verification
+            showToast('KYC Verified Successfully');
+            nextStep();
+        });
+        
+        // File Upload Handling
+        document.getElementById('cvUpload')?.addEventListener('change', function(e) {
+            if (e.target.files[0]) {
+                document.getElementById('cvFileName').textContent = `✓ ${e.target.files[0].name}`;
+                document.getElementById('cvFileName').classList.remove('hidden');
+                candidateData.documents.cv = e.target.files[0].name;
+            }
+        });
+        
+        document.getElementById('certUpload')?.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            const list = document.getElementById('certFileList');
+            list.innerHTML = '';
+            candidateData.documents.certificates = [];
+            
+            files.forEach(file => {
+                const div = document.createElement('div');
+                div.className = 'text-sm text-green-400';
+                div.innerHTML = `✓ ${file.name}`;
+                list.appendChild(div);
+                candidateData.documents.certificates.push(file.name);
+            });
+        });
+        
+        // Proctoring System
+        document.getElementById('examConsent')?.addEventListener('change', function(e) {
+            document.getElementById('startExamBtn').disabled = !e.target.checked;
+        });
+        
+        async function initializeProctoring() {
+            try {
+                // Request webcam access
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                document.getElementById('webcamVideo').srcObject = webcamStream;
+                document.getElementById('webcamPreview').classList.remove('hidden');
+                
+                // Request screen sharing
+                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                
+                // Setup violation detection
+                setupViolationDetection();
+                
+                // Start exam
+                document.getElementById('examIntro').classList.add('hidden');
+                document.getElementById('activeExam').classList.remove('hidden');
+                document.getElementById('proctoringBar').classList.add('active');
+                
+                startExamTimer(30 * 60, 'timer');
+                showQuestion(0);
+                
+            } catch (err) {
+                showToast('Camera and Screen access required for examination', 'error');
+                console.error('Proctoring error:', err);
+            }
+        }
+        
+        function setupViolationDetection() {
+            // Tab visibility change
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && currentStep === 4) {
+                    violations++;
+                    if (violations >= 2) {
+                        terminateExam('Tab Switching');
+                    } else {
+                        showToast(`Warning: Tab switch detected (${violations}/2)`, 'error');
+                    }
+                }
+            });
+            
+            // Prevent right click
+            document.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                showToast('Right click disabled during exam', 'error');
+            });
+            
+            // Prevent copy paste
+            document.addEventListener('copy', e => e.preventDefault());
+            document.addEventListener('paste', e => e.preventDefault());
+            document.addEventListener('cut', e => e.preventDefault());
+            
+            // Prevent F12, Ctrl+Shift+I, etc
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key))) {
+                    e.preventDefault();
+                    showToast('Developer tools disabled', 'error');
+                }
+                if (e.altKey || e.metaKey) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Window blur
+            window.addEventListener('blur', function() {
+                if (currentStep === 4) {
+                    violations++;
+                    if (violations >= 2) {
+                        terminateExam('Window Focus Lost');
+                    }
+                }
+            });
+        }
+        
+        function terminateExam(reason) {
+            clearInterval(examTimer);
+            document.getElementById('securityOverlay').classList.add('active');
+            document.getElementById('violationType').textContent = reason;
+            document.getElementById('violationTime').textContent = new Date().toLocaleString();
+            
+            // Stop streams
+            if (webcamStream) webcamStream.getTracks().forEach(track => track.stop());
+            if (screenStream) screenStream.getTracks().forEach(track => track.stop());
+            
+            document.getElementById('webcamPreview').classList.add('hidden');
+            document.getElementById('proctoringBar').classList.remove('active');
+        }
+        
+        // Exam Functions
+        function showQuestion(idx) {
+            const dept = candidateData.career.department;
+            const questions = questionBank[dept] || questionBank['Technical'];
+            const q = questions[idx];
+            
+            document.getElementById('currentQ').textContent = idx + 1;
+            document.getElementById('totalQ').textContent = questions.length;
+            document.getElementById('examDeptTitle').textContent = `${dept} Department Exam`;
+            
+            const container = document.getElementById('questionContainer');
+            container.innerHTML = `
+                <h3 class="text-xl font-semibold mb-6">${idx + 1}. ${q.q}</h3>
+                <div class="space-y-3">
+                    ${q.options.map((opt, i) => `
+                        <div>
+                            <input type="radio" name="q${idx}" id="opt${i}" value="${i}" class="hidden option-input" 
+                                ${candidateData.entranceExam.answers[idx] === i ? 'checked' : ''}
+                                onchange="saveAnswer(${idx}, ${i})">
+                            <label for="opt${i}" class="option-label">
+                                <span class="font-semibold mr-3 text-orange-400">${String.fromCharCode(65 + i)}.</span>
+                                ${opt}
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Update buttons
+            document.getElementById('prevQBtn').disabled = idx === 0;
+            if (idx === questions.length - 1) {
+                document.getElementById('nextQBtn').classList.add('hidden');
+                document.getElementById('submitExamBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextQBtn').classList.remove('hidden');
+                document.getElementById('submitExamBtn').classList.add('hidden');
+            }
+        }
+        
+        function saveAnswer(qIdx, ansIdx) {
+            candidateData.entranceExam.answers[qIdx] = ansIdx;
+        }
+        
+        function nextQuestion() {
+            const dept = candidateData.career.department;
+            const questions = questionBank[dept] || questionBank['Technical'];
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            }
+        }
+        
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+            }
+        }
+        
+        function submitEntranceExam() {
+            clearInterval(examTimer);
+            
+            // Calculate score
+            const dept = candidateData.career.department;
+            const questions = questionBank[dept] || questionBank['Technical'];
+            let score = 0;
+            
+            candidateData.entranceExam.answers.forEach((ans, idx) => {
+                if (ans === questions[idx].correct) score++;
+            });
+            
+            candidateData.entranceExam.score = Math.round((score / questions.length) * 100);
+            
+            // Check pass criteria (60%)
+            if (candidateData.entranceExam.score >= 60) {
+                showToast(`Exam completed! Score: ${candidateData.entranceExam.score}%`);
+                nextStep();
+            } else {
+                showToast(`Score: ${candidateData.entranceExam.score}%. Minimum 60% required.`, 'error');
+                setTimeout(() => location.reload(), 3000);
+            }
+        }
+        
+        // IQ Test Functions
+        function startIQTest() {
+            document.getElementById('iqIntro').classList.add('hidden');
+            document.getElementById('activeIQ').classList.remove('hidden');
+            startExamTimer(20 * 60, 'iqTimer');
+            showIQQuestion(0);
+        }
+        
+        function showIQQuestion(idx) {
+            const q = iqQuestions[idx];
+            document.getElementById('currentIQ').textContent = idx + 1;
+            document.getElementById('totalIQ').textContent = iqQuestions.length;
+            
+            const container = document.getElementById('iqQuestionContainer');
+            container.innerHTML = `
+                <h3 class="text-xl font-semibold mb-6">${idx + 1}. ${q.q}</h3>
+                <div class="space-y-3">
+                    ${q.options.map((opt, i) => `
+                        <div>
+                            <input type="radio" name="iq${idx}" id="iqopt${i}" value="${i}" class="hidden option-input"
+                                ${candidateData.iqTest.answers[idx] === i ? 'checked' : ''}
+                                onchange="saveIQAnswer(${idx}, ${i})">
+                            <label for="iqopt${i}" class="option-label">
+                                <span class="font-semibold mr-3 text-purple-400">${String.fromCharCode(65 + i)}.</span>
+                                ${opt}
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('prevIQBtn').disabled = idx === 0;
+            if (idx === iqQuestions.length - 1) {
+                document.getElementById('nextIQBtn').classList.add('hidden');
+                document.getElementById('submitIQBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextIQBtn').classList.remove('hidden');
+                document.getElementById('submitIQBtn').classList.add('hidden');
+            }
+        }
+        
+        function saveIQAnswer(qIdx, ansIdx) {
+            candidateData.iqTest.answers[qIdx] = ansIdx;
+        }
+        
+        function nextIQQuestion() {
+            if (currentIQQuestion < iqQuestions.length - 1) {
+                currentIQQuestion++;
+                showIQQuestion(currentIQQuestion);
+            }
+        }
+        
+        function prevIQQuestion() {
+            if (currentIQQuestion > 0) {
+                currentIQQuestion--;
+                showIQQuestion(currentIQQuestion);
+            }
+        }
+        
+        function submitIQTest() {
+            clearInterval(iqTimer);
+            
+            let score = 0;
+            candidateData.iqTest.answers.forEach((ans, idx) => {
+                if (ans === iqQuestions[idx].correct) score++;
+            });
+            
+            candidateData.iqTest.score = Math.round((score / iqQuestions.length) * 100) + 100; // IQ score base 100
+            showToast(`IQ Assessment completed! Score: ${candidateData.iqTest.score}`);
+            nextStep();
+        }
+        
+        // Final Assessment
+        function startFinalAssessment() {
+            document.getElementById('interviewIntro').classList.add('hidden');
+            document.getElementById('activeFinal').classList.remove('hidden');
+            startExamTimer(15 * 60, 'finalTimer');
+            showFinalQuestion(0);
+        }
+        
+        function showFinalQuestion(idx) {
+            const q = finalQuestions[idx];
+            document.getElementById('currentFinal').textContent = idx + 1;
+            document.getElementById('totalFinal').textContent = finalQuestions.length;
+            
+            const container = document.getElementById('finalQuestionContainer');
+            container.innerHTML = `
+                <h3 class="text-xl font-semibold mb-6">${idx + 1}. ${q.q}</h3>
+                <textarea class="form-input" rows="6" placeholder="Type your answer here..." 
+                    onchange="saveFinalAnswer(${idx}, this.value)">${candidateData.finalAssessment.answers[idx] || ''}</textarea>
+                <p class="text-sm text-gray-500 mt-2">Minimum 50 words required</p>
+            `;
+            
+            document.getElementById('prevFinalBtn').disabled = idx === 0;
+            if (idx === finalQuestions.length - 1) {
+                document.getElementById('nextFinalBtn').classList.add('hidden');
+                document.getElementById('submitFinalBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextFinalBtn').classList.remove('hidden');
+                document.getElementById('submitFinalBtn').classList.add('hidden');
+            }
+        }
+        
+        function saveFinalAnswer(qIdx, ans) {
+            candidateData.finalAssessment.answers[qIdx] = ans;
+        }
+        
+        function nextFinalQuestion() {
+            if (currentFinalQuestion < finalQuestions.length - 1) {
+                currentFinalQuestion++;
+                showFinalQuestion(currentFinalQuestion);
+            }
+        }
+        
+        function prevFinalQuestion() {
+            if (currentFinalQuestion > 0) {
+                currentFinalQuestion--;
+                showFinalQuestion(currentFinalQuestion);
+            }
+        }
+        
+        function submitApplication() {
+            clearInterval(finalTimer);
+            
+            // Calculate final score (mock evaluation)
+            const wordCounts = candidateData.finalAssessment.answers.map(a => a ? a.split(' ').length : 0);
+            const avgWords = wordCounts.reduce((a, b) => a + b, 0) / wordCounts.length;
+            candidateData.finalAssessment.score = Math.min(100, Math.round(avgWords * 2));
+            
+            // Calculate total
+            candidateData.totalScore = Math.round(
+                (candidateData.entranceExam.score * 0.4) + 
+                ((candidateData.iqTest.score - 100) * 0.3) + 
+                (candidateData.finalAssessment.score * 0.3)
+            );
+            
+            // Generate ID
+            candidateData.applicationId = 'TECH-2024-' + String(Math.floor(Math.random() * 90000) + 10000);
+            
+            // Save to candidates
+            const newCandidate = {
+                id: candidateData.applicationId,
+                name: candidateData.kyc.fullName,
+                dept: candidateData.career.department,
+                entrance: candidateData.entranceExam.score,
+                iq: candidateData.iqTest.score,
+                final: candidateData.finalAssessment.score,
+                total: candidateData.totalScore,
+                status: 'pending',
+                date: new Date().toISOString().split('T')[0],
+                details: candidateData
+            };
+            
+            candidates.push(newCandidate);
+            localStorage.setItem('candidates', JSON.stringify(candidates));
+            
+            // Cleanup
+            if (webcamStream) webcamStream.getTracks().forEach(track => track.stop());
+            if (screenStream) screenStream.getTracks().forEach(track => track.stop());
+            document.getElementById('webcamPreview').classList.add('hidden');
+            document.getElementById('proctoringBar').classList.remove('active');
+            
+            // Show completion
+            document.getElementById('step6').classList.add('hidden');
+            document.getElementById('completionMsg').classList.remove('hidden');
+            document.getElementById('applicationId').textContent = candidateData.applicationId;
+            
+            updateStats();
+        }
+        
+        // Timer Function
+        function startExamTimer(seconds, elementId) {
+            let remaining = seconds;
+            const timerEl = document.getElementById(elementId);
+            
+            examTimer = setInterval(() => {
+                const mins = Math.floor(remaining / 60);
+                const secs = remaining % 60;
+                timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (remaining <= 300) timerEl.classList.add('text-red-500');
+                
+                if (remaining <= 0) {
+                    clearInterval(examTimer);
+                    if (elementId === 'timer') submitEntranceExam();
+                    else if (elementId === 'iqTimer') submitIQTest();
+                    else submitApplication();
+                }
+                remaining--;
+            }, 1000);
+        }
+        
+        // Admin Functions
+        document.getElementById('adminLoginForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('adminId').value;
+            const pass = document.getElementById('adminPass').value;
+            
+            if (id === 'admin' && pass === 'techon2024') {
+                document.getElementById('adminLogin').classList.add('hidden');
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                showToast('Welcome, Admin');
+                renderCandidatesTable();
+                initChart();
+            } else {
+                showToast('Invalid credentials', 'error');
+            }
+        });
+        
+        function updateStats() {
+            document.getElementById('statTotal').textContent = candidates.length;
+            document.getElementById('statPending').textContent = candidates.filter(c => c.status === 'pending').length;
+            document.getElementById('statSelected').textContent = candidates.filter(c => c.status === 'selected').length;
+            document.getElementById('statRejected').textContent = candidates.filter(c => c.status === 'rejected').length;
+        }
+        
+        function renderCandidatesTable(data = candidates) {
+            const tbody = document.getElementById('candidatesTableBody');
+            tbody.innerHTML = '';
+            
+            // Sort by total score descending
+            const sorted = [...data].sort((a, b) => b.total - a.total);
+            
+            sorted.forEach((c, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="font-bold text-orange-400">#${idx + 1}</td>
+                    <td>
+                        <div class="font-semibold">${c.name}</div>
+                        <div class="text-xs text-gray-500">${c.id}</div>
+                    </td>
+                    <td><span class="px-2 py-1 rounded bg-blue-500/20 text-blue-400 text-xs">${c.dept}</span></td>
+                    <td>${c.entrance}%</td>
+                    <td>${c.iq}</td>
+                    <td class="font-bold text-lg">${c.total}</td>
+                    <td><span class="status-badge status-${c.status}">${c.status.toUpperCase()}</span></td>
+                    <td>
+                        <button class="text-orange-400 hover:text-orange-300 mr-3" onclick="viewCandidate('${c.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="text-green-400 hover:text-green-300 mr-3" onclick="updateStatus('${c.id}', 'selected')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="text-red-400 hover:text-red-300" onclick="updateStatus('${c.id}', 'rejected')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function filterCandidates() {
+            const dept = document.getElementById('filterDept').value;
+            const status = document.getElementById('filterStatus').value;
+            const search = document.getElementById('searchCandidate').value.toLowerCase();
+            
+            let filtered = candidates;
+            
+            if (dept !== 'all') filtered = filtered.filter(c => c.dept === dept);
+            if (status !== 'all') filtered = filtered.filter(c => c.status === status);
+            if (search) filtered = filtered.filter(c => c.name.toLowerCase().includes(search) || c.id.toLowerCase().includes(search));
+            
+            renderCandidatesTable(filtered);
+        }
+        
+        function viewCandidate(id) {
+            const c = candidates.find(x => x.id === id);
+            if (!c) return;
+            
+            const modal = document.getElementById('candidateModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <h2 class="text-2xl font-bold mb-6 text-orange-400">${c.name}</h2>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Application ID</p>
+                        <p class="font-semibold">${c.id}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Department</p>
+                        <p class="font-semibold">${c.dept}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Applied Date</p>
+                        <p class="font-semibold">${c.date}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Current Status</p>
+                        <span class="status-badge status-${c.status}">${c.status.toUpperCase()}</span>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-4 mb-6">
+                    <h3 class="font-bold mb-4">Test Scores</h3>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold text-blue-400">${c.entrance}%</div>
+                            <div class="text-xs text-gray-400">Entrance</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-purple-400">${c.iq}</div>
+                            <div class="text-xs text-gray-400">IQ Score</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-400">${c.final}%</div>
+                            <div class="text-xs text-gray-400">Final</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-700 text-center">
+                        <div class="text-3xl font-bold text-orange-400">${c.total}</div>
+                        <div class="text-sm text-gray-400">Overall Score</div>
+                    </div>
+                </div>
+                
+                ${c.details ? `
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-bold mb-2">Contact Information</h4>
+                        <p class="text-sm text-gray-300">Email: ${c.details.kyc?.email || 'N/A'}</p>
+                        <p class="text-sm text-gray-300">Phone: ${c.details.kyc?.phone || 'N/A'}</p>
+                        <p class="text-sm text-gray-300">Location: ${c.details.kyc?.city || 'N/A'}, ${c.details.kyc?.state || 'N/A'}</p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold mb-2">Documents</h4>
+                        <div class="flex gap-2">
+                            ${c.details.documents?.cv ? `<span class="px-3 py-1 rounded bg-blue-500/20 text-blue-400 text-xs">CV Uploaded</span>` : ''}
+                            ${c.details.documents?.certificates?.length ? `<span class="px-3 py-1 rounded bg-green-500/20 text-green-400 text-xs">${c.details.documents.certificates.length} Certificates</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                ` : '<p class="text-gray-500 italic">Detailed information not available for legacy records.</p>'}
+                
+                <div class="flex gap-4 mt-8">
+                    <button class="btn-primary flex-1" onclick="updateStatus('${c.id}', 'selected'); closeModal();">
+                        <i class="fas fa-check mr-2"></i>Select Candidate
+                    </button>
+                    <button class="btn-secondary flex-1 border-red-500 text-red-500 hover:bg-red-500/10" onclick="updateStatus('${c.id}', 'rejected'); closeModal();">
+                        <i class="fas fa-times mr-2"></i>Reject
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('candidateModal').classList.remove('active');
+        }
+        
+        function updateStatus(id, status) {
+            const c = candidates.find(x => x.id === id);
+            if (c) {
+                c.status = status;
+                localStorage.setItem('candidates', JSON.stringify(candidates));
+                updateStats();
+                renderCandidatesTable();
+                showToast(`Candidate ${status === 'selected' ? 'selected' : 'rejected'} successfully`);
+            }
+        }
+        
+        function exportToExcel() {
+            const data = candidates.map(c => ({
+                'Application ID': c.id,
+                'Name': c.name,
+                'Department': c.dept,
+                'Entrance Score': c.entrance,
+                'IQ Score': c.iq,
+                'Final Score': c.final,
+                'Total Score': c.total,
+                'Status': c.status.toUpperCase(),
+                'Date': c.date
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Candidates");
+            XLSX.writeFile(wb, `TECH_ON_Candidates_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast('Excel file downloaded');
+        }
+        
+        function initChart() {
+            const ctx = document.getElementById('deptChart').getContext('2d');
+            const deptCounts = {};
+            candidates.forEach(c => {
+                deptCounts[c.dept] = (deptCounts[c.dept] || 0) + 1;
+            });
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(deptCounts),
+                    datasets: [{
+                        label: 'Applications',
+                        data: Object.values(deptCounts),
+                        backgroundColor: 'rgba(249, 115, 22, 0.6)',
+                        borderColor: 'rgba(249, 115, 22, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Utility Functions
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.borderColor = type === 'error' ? '#ef4444' : '#f97316';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        function setupEventListeners() {
+            // Close modal on outside click
+            document.getElementById('candidateModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        }
+        
+        // Prevent back button during exam
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() {
+            if (currentStep >= 4 && currentStep <= 6) {
+                history.go(1);
+                showToast('Navigation disabled during assessment', 'error');
+            }
+        };
+    </script>
+</body>
+</html>
