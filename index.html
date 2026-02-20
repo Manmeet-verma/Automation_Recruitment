@@ -102,12 +102,230 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        /* Document Upload Styles */
+        .document-card {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .document-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .doc-preview {
+            height: 140px;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .doc-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .doc-icon {
+            font-size: 3rem;
+            opacity: 0.8;
+        }
+
+        .doc-info {
+            padding: 1rem;
+        }
+
+        .doc-info h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #f3f4f6;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .doc-meta {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .doc-type {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .doc-size {
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+
+        .doc-date {
+            color: #6b7280;
+            font-size: 0.75rem;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 1rem 1rem;
+        }
+
+        .btn-view-doc, .btn-delete-doc {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .btn-view-doc {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .btn-view-doc:hover {
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-delete-doc {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .btn-delete-doc:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(75, 85, 99, 0.5);
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: rgba(31, 41, 55, 0.5);
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            border-radius: 16px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+
+        .delete-confirm-modal {
+            background: rgba(17, 24, 39, 0.98);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        .image-preview-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
     
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="hidden modal-overlay">
+        <div class="modal-content delete-confirm-modal max-w-md">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-red-900/50 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Confirm Deletion</h3>
+                        <p class="text-gray-400 text-sm mt-1">This action cannot be undone</p>
+                    </div>
+                </div>
+                <p class="text-gray-300 mb-6">Are you sure you want to delete candidate <strong id="delete-candidate-name" class="text-white"></strong> with ID <span id="delete-candidate-id" class="font-mono text-red-400"></span>?</p>
+                <div class="flex space-x-3">
+                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-gray-300">Cancel</button>
+                    <button onclick="confirmDelete()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition text-white font-semibold">
+                        <i class="fas fa-trash mr-2"></i>Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Preview Modal -->
+    <div id="doc-preview-modal" class="hidden modal-overlay">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold" id="preview-doc-name">Document Preview</h3>
+                <button onclick="closeDocPreview()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4 flex items-center justify-center bg-gray-950" id="preview-container">
+                <!-- Preview content injected here -->
+            </div>
+            <div class="p-4 border-t border-gray-700 flex justify-between items-center bg-gray-900">
+                <div class="text-sm text-gray-400">
+                    <span id="preview-doc-type" class="text-indigo-400 font-medium"></span> • 
+                    <span id="preview-doc-size"></span>
+                </div>
+                <a id="preview-download" href="#" download class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center">
+                    <i class="fas fa-download mr-2"></i>Download
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- Navigation -->
     <nav class="fixed w-full z-50 glass-effect border-b border-gray-800">
@@ -738,67 +956,120 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Document Upload -->
+                <!-- Step 3: Document Upload (ENHANCED WITH PREVIEW) -->
                 <div id="step-3" class="hidden glass-effect rounded-2xl p-8 border border-gray-800">
                     <h2 class="text-2xl font-bold gradient-text mb-6">Document Verification</h2>
                     
+                    <!-- Document Upload Grid with Previews -->
                     <div class="space-y-6">
-                        <!-- Regular Documents -->
+                        <!-- Regular Documents Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('photo').click()">
-                                <input type="file" id="photo" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'photo-preview', 'photo-data')">
-                                <div id="photo-placeholder">
-                                    <i class="fas fa-user-circle text-4xl text-gray-600 mb-3"></i>
-                                    <div class="font-medium mb-1">Passport Size Photo *</div>
-                                    <div class="text-sm text-gray-500 mb-3">JPG/PNG, Max 2MB</div>
+                            <!-- Photo Upload -->
+                            <div class="document-card" id="photo-card">
+                                <div class="doc-preview" id="photo-preview-area">
+                                    <i class="fas fa-user-circle doc-icon text-gray-600"></i>
                                 </div>
-                                <div id="photo-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
-                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
-                                    <div class="text-sm text-green-400 font-medium">Photo Uploaded</div>
-                                    <div class="text-xs text-gray-400 mt-1" id="photo-name"></div>
+                                <div class="doc-info">
+                                    <h4>Passport Size Photo *</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">JPG/PNG</span>
+                                        <span class="doc-size">Max 2MB</span>
+                                    </div>
+                                    <div class="doc-date" id="photo-status">Not uploaded</div>
                                 </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="photo-view-btn" onclick="previewDocument('photo')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="photo-delete-btn" onclick="removeDocument('photo')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="photo-upload-btn" onclick="document.getElementById('photo').click()">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </div>
+                                <input type="file" id="photo" accept="image/*" class="hidden" onchange="handleEnhancedUpload(this, 'photo', 'image')">
                             </div>
-                            
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('aadhar').click()">
-                                <input type="file" id="aadhar" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'aadhar-preview', 'aadhar-data')">
-                                <div id="aadhar-placeholder">
-                                    <i class="fas fa-id-card text-4xl text-gray-600 mb-3"></i>
-                                    <div class="font-medium mb-1">Aadhar Card *</div>
-                                    <div class="text-sm text-gray-500 mb-3">PDF/JPG, Max 2MB</div>
+
+                            <!-- Aadhar Upload -->
+                            <div class="document-card" id="aadhar-card">
+                                <div class="doc-preview" id="aadhar-preview-area">
+                                    <i class="fas fa-id-card doc-icon text-gray-600"></i>
                                 </div>
-                                <div id="aadhar-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
-                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
-                                    <div class="text-sm text-green-400 font-medium">Aadhar Uploaded</div>
-                                    <div class="text-xs text-gray-400 mt-1" id="aadhar-name"></div>
+                                <div class="doc-info">
+                                    <h4>Aadhar Card *</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">PDF/Image</span>
+                                        <span class="doc-size">Max 2MB</span>
+                                    </div>
+                                    <div class="doc-date" id="aadhar-status">Not uploaded</div>
                                 </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="aadhar-view-btn" onclick="previewDocument('aadhar')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="aadhar-delete-btn" onclick="removeDocument('aadhar')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="aadhar-upload-btn" onclick="document.getElementById('aadhar').click()">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </div>
+                                <input type="file" id="aadhar" accept=".pdf,image/*" class="hidden" onchange="handleEnhancedUpload(this, 'aadhar', 'mixed')">
                             </div>
-                            
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('pan').click()">
-                                <input type="file" id="pan" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'pan-preview', 'pan-data')">
-                                <div id="pan-placeholder">
-                                    <i class="fas fa-credit-card text-4xl text-gray-600 mb-3"></i>
-                                    <div class="font-medium mb-1">PAN Card</div>
-                                    <div class="text-sm text-gray-500 mb-3">PDF/JPG, Max 2MB</div>
+
+                            <!-- PAN Upload -->
+                            <div class="document-card" id="pan-card">
+                                <div class="doc-preview" id="pan-preview-area">
+                                    <i class="fas fa-credit-card doc-icon text-gray-600"></i>
                                 </div>
-                                <div id="pan-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
-                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
-                                    <div class="text-sm text-green-400 font-medium">PAN Uploaded</div>
-                                    <div class="text-xs text-gray-400 mt-1" id="pan-name"></div>
+                                <div class="doc-info">
+                                    <h4>PAN Card</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">PDF/Image</span>
+                                        <span class="doc-size">Max 2MB</span>
+                                    </div>
+                                    <div class="doc-date" id="pan-status">Optional</div>
                                 </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="pan-view-btn" onclick="previewDocument('pan')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="pan-delete-btn" onclick="removeDocument('pan')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="pan-upload-btn" onclick="document.getElementById('pan').click()">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </div>
+                                <input type="file" id="pan" accept=".pdf,image/*" class="hidden" onchange="handleEnhancedUpload(this, 'pan', 'mixed')">
                             </div>
-                            
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('cv').click()">
-                                <input type="file" id="cv" accept=".pdf" class="hidden" onchange="handleFileUpload(this, 'cv-preview', 'cv-data')">
-                                <div id="cv-placeholder">
-                                    <i class="fas fa-file-alt text-4xl text-gray-600 mb-3"></i>
-                                    <div class="font-medium mb-1">Resume/CV *</div>
-                                    <div class="text-sm text-gray-500 mb-3">PDF, Max 5MB</div>
+
+                            <!-- CV Upload -->
+                            <div class="document-card" id="cv-card">
+                                <div class="doc-preview" id="cv-preview-area">
+                                    <i class="fas fa-file-alt doc-icon text-gray-600"></i>
                                 </div>
-                                <div id="cv-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
-                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
-                                    <div class="text-sm text-green-400 font-medium">CV Uploaded</div>
-                                    <div class="text-xs text-gray-400 mt-1" id="cv-name"></div>
+                                <div class="doc-info">
+                                    <h4>Resume/CV *</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">PDF</span>
+                                        <span class="doc-size">Max 5MB</span>
+                                    </div>
+                                    <div class="doc-date" id="cv-status">Not uploaded</div>
                                 </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="cv-view-btn" onclick="previewDocument('cv')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="cv-delete-btn" onclick="removeDocument('cv')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="cv-upload-btn" onclick="document.getElementById('cv').click()">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </div>
+                                <input type="file" id="cv" accept=".pdf" class="hidden" onchange="handleEnhancedUpload(this, 'cv', 'pdf')">
                             </div>
                         </div>
 
@@ -806,30 +1077,56 @@
                         <div id="special-docs" class="hidden border-t border-gray-700 pt-6">
                             <h3 class="text-lg font-semibold mb-4 text-yellow-400">Special Category Documents</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="border-2 border-dashed border-yellow-900/50 rounded-xl p-6 text-center hover:border-yellow-500 transition cursor-pointer relative bg-yellow-900/10" onclick="document.getElementById('disability').click()">
-                                    <input type="file" id="disability" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'disability-preview', 'disability-data')">
-                                    <div id="disability-placeholder">
-                                        <i class="fas fa-wheelchair text-4xl text-yellow-600 mb-3"></i>
-                                        <div class="font-medium mb-1">Disability Certificate</div>
-                                        <div class="text-sm text-gray-500">Medical Authority</div>
+                                <div class="document-card border-yellow-900/30" id="disability-card">
+                                    <div class="doc-preview bg-yellow-900/10" id="disability-preview-area">
+                                        <i class="fas fa-wheelchair doc-icon text-yellow-600"></i>
                                     </div>
-                                    <div id="disability-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
-                                        <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
-                                        <div class="text-sm text-green-400 font-medium">Certificate Uploaded</div>
+                                    <div class="doc-info">
+                                        <h4>Disability Certificate</h4>
+                                        <div class="doc-meta">
+                                            <span class="doc-type bg-yellow-900/30 text-yellow-400">Medical</span>
+                                            <span class="doc-size">Max 2MB</span>
+                                        </div>
+                                        <div class="doc-date" id="disability-status">Not uploaded</div>
                                     </div>
+                                    <div class="doc-actions">
+                                        <button type="button" class="btn-view-doc hidden" id="disability-view-btn" onclick="previewDocument('disability')">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                        <button type="button" class="btn-delete-doc hidden" id="disability-delete-btn" onclick="removeDocument('disability')">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                        <button type="button" class="btn-view-doc w-full bg-yellow-900/20 text-yellow-500" id="disability-upload-btn" onclick="document.getElementById('disability').click()">
+                                            <i class="fas fa-upload"></i> Upload
+                                        </button>
+                                    </div>
+                                    <input type="file" id="disability" accept=".pdf,image/*" class="hidden" onchange="handleEnhancedUpload(this, 'disability', 'mixed')">
                                 </div>
                                 
-                                <div class="border-2 border-dashed border-yellow-900/50 rounded-xl p-6 text-center hover:border-yellow-500 transition cursor-pointer relative bg-yellow-900/10" onclick="document.getElementById('service').click()">
-                                    <input type="file" id="service" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'service-preview', 'service-data')">
-                                    <div id="service-placeholder">
-                                        <i class="fas fa-medal text-4xl text-yellow-600 mb-3"></i>
-                                        <div class="font-medium mb-1">Service Certificate</div>
-                                        <div class="text-sm text-gray-500">Army/Police Discharge</div>
+                                <div class="document-card border-yellow-900/30" id="service-card">
+                                    <div class="doc-preview bg-yellow-900/10" id="service-preview-area">
+                                        <i class="fas fa-medal doc-icon text-yellow-600"></i>
                                     </div>
-                                    <div id="service-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
-                                        <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
-                                        <div class="text-sm text-green-400 font-medium">Certificate Uploaded</div>
+                                    <div class="doc-info">
+                                        <h4>Service Certificate</h4>
+                                        <div class="doc-meta">
+                                            <span class="doc-type bg-yellow-900/30 text-yellow-400">Defense</span>
+                                            <span class="doc-size">Max 2MB</span>
+                                        </div>
+                                        <div class="doc-date" id="service-status">Not uploaded</div>
                                     </div>
+                                    <div class="doc-actions">
+                                        <button type="button" class="btn-view-doc hidden" id="service-view-btn" onclick="previewDocument('service')">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                        <button type="button" class="btn-delete-doc hidden" id="service-delete-btn" onclick="removeDocument('service')">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                        <button type="button" class="btn-view-doc w-full bg-yellow-900/20 text-yellow-500" id="service-upload-btn" onclick="document.getElementById('service').click()">
+                                            <i class="fas fa-upload"></i> Upload
+                                        </button>
+                                    </div>
+                                    <input type="file" id="service" accept=".pdf,image/*" class="hidden" onchange="handleEnhancedUpload(this, 'service', 'mixed')">
                                 </div>
                             </div>
                         </div>
@@ -837,19 +1134,34 @@
                         <!-- Experience Certificates -->
                         <div class="border-t border-gray-700 pt-6">
                             <h3 class="text-lg font-semibold mb-4 text-indigo-400">Experience & Certifications (Optional)</h3>
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('experience').click()">
-                                <input type="file" id="experience" multiple accept=".pdf,image/*" class="hidden" onchange="handleMultipleFiles(this, 'experience-preview')">
-                                <div id="experience-placeholder">
-                                    <i class="fas fa-certificate text-4xl text-gray-600 mb-3"></i>
-                                    <div class="font-medium mb-1">Experience Certificates</div>
-                                    <div class="text-sm text-gray-500">Multiple files allowed</div>
+                            <div class="document-card" id="experience-card">
+                                <div class="doc-preview" id="experience-preview-area">
+                                    <i class="fas fa-certificate doc-icon text-gray-600"></i>
                                 </div>
-                                <div id="experience-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center p-4">
-                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
-                                    <div class="text-sm text-green-400 font-medium">Files Uploaded</div>
-                                    <div class="text-xs text-gray-400 mt-1" id="experience-count"></div>
+                                <div class="doc-info">
+                                    <h4>Experience Certificates</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">Multiple</span>
+                                        <span class="doc-size">Max 5MB each</span>
+                                    </div>
+                                    <div class="doc-date" id="experience-status">No files selected</div>
                                 </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="experience-view-btn" onclick="previewMultipleDocs('experience')">
+                                        <i class="fas fa-eye"></i> View All
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="experience-delete-btn" onclick="removeDocument('experience')">
+                                        <i class="fas fa-trash"></i> Clear All
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="experience-upload-btn" onclick="document.getElementById('experience').click()">
+                                        <i class="fas fa-upload"></i> Upload Files
+                                    </button>
+                                </div>
+                                <input type="file" id="experience" multiple accept=".pdf,image/*" class="hidden" onchange="handleMultipleEnhancedUpload(this, 'experience')">
                             </div>
+                            
+                            <!-- Multiple files preview grid -->
+                            <div id="experience-files-grid" class="hidden grid grid-cols-2 md:grid-cols-4 gap-4 mt-4"></div>
                         </div>
                     </div>
 
@@ -1048,8 +1360,7 @@
                         <i class="fas fa-lock mr-2"></i>Secure Login
                     </button>
                 </form>
-
-                
+            </div>
         </section>
 
         <!-- Admin Dashboard -->
@@ -1278,6 +1589,10 @@
         let itemsPerPage = 10;
         let currentSort = { field: 'appliedDate', direction: 'desc' };
         let selectedCandidates = new Set();
+        let deleteCandidateId = null;
+        
+        // Document Storage
+        const uploadedDocuments = {};
         
         // Data Storage Keys
         const STORAGE_KEYS = {
@@ -1452,11 +1767,13 @@
             return false;
         }
 
-        // Delete candidate
+        // Delete candidate - FIXED VERSION
         function deleteCandidate(id) {
             const candidates = getCandidates();
             const filtered = candidates.filter(c => c.id !== id);
             saveCandidates(filtered);
+            loadCandidates();
+            showToast('Candidate deleted successfully');
         }
 
         // Update statistics
@@ -1499,6 +1816,243 @@
             setTimeout(() => {
                 toast.remove();
             }, 3000);
+        }
+
+        // Enhanced Document Upload Functions
+        function handleEnhancedUpload(input, docType, fileType) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const maxSize = docType === 'cv' ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
+                
+                // Validate file size
+                if (file.size > maxSize) {
+                    showToast(`File too large. Max size: ${maxSize / 1024 / 1024}MB`, 'error');
+                    input.value = '';
+                    return;
+                }
+                
+                // Validate file type
+                const allowedTypes = fileType === 'image' ? ['image/jpeg', 'image/png', 'image/jpg'] :
+                                   fileType === 'pdf' ? ['application/pdf'] :
+                                   ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+                
+                if (!allowedTypes.includes(file.type)) {
+                    showToast('Invalid file type', 'error');
+                    input.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Store document data
+                    uploadedDocuments[docType] = {
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        data: e.target.result,
+                        uploadDate: new Date().toLocaleDateString()
+                    };
+                    
+                    // Update UI
+                    updateDocumentCard(docType, file, e.target.result);
+                    showToast(`${docType.charAt(0).toUpperCase() + docType.slice(1)} uploaded successfully`);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleMultipleEnhancedUpload(input, docType) {
+            if (input.files && input.files.length > 0) {
+                const files = Array.from(input.files);
+                const maxSize = 5 * 1024 * 1024;
+                
+                uploadedDocuments[docType] = [];
+                const grid = document.getElementById(`${docType}-files-grid`);
+                grid.innerHTML = '';
+                grid.classList.remove('hidden');
+                
+                files.forEach((file, index) => {
+                    if (file.size > maxSize) {
+                        showToast(`${file.name} too large`, 'error');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedDocuments[docType].push({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            data: e.target.result
+                        });
+                        
+                        // Add thumbnail to grid
+                        const thumb = document.createElement('div');
+                        thumb.className = 'relative aspect-square bg-gray-800 rounded-lg overflow-hidden border border-gray-700';
+                        
+                        if (file.type.startsWith('image/')) {
+                            thumb.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                        } else {
+                            thumb.innerHTML = `<div class="w-full h-full flex items-center justify-center"><i class="fas fa-file-pdf text-3xl text-red-400"></i></div>`;
+                        }
+                        
+                        grid.appendChild(thumb);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                
+                // Update main card
+                document.getElementById(`${docType}-status`).textContent = `${files.length} files selected`;
+                document.getElementById(`${docType}-upload-btn`).classList.add('hidden');
+                document.getElementById(`${docType}-view-btn`).classList.remove('hidden');
+                document.getElementById(`${docType}-delete-btn`).classList.remove('hidden');
+                
+                showToast(`${files.length} files uploaded`);
+            }
+        }
+
+        function updateDocumentCard(docType, file, dataUrl) {
+            const previewArea = document.getElementById(`${docType}-preview-area`);
+            const status = document.getElementById(`${docType}-status`);
+            
+            // Clear preview area
+            previewArea.innerHTML = '';
+            
+            // Show preview based on file type
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = dataUrl;
+                img.className = 'image-preview-thumb';
+                previewArea.appendChild(img);
+            } else {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-file-pdf doc-icon text-red-400';
+                previewArea.appendChild(icon);
+            }
+            
+            // Update status
+            status.textContent = `Uploaded: ${new Date().toLocaleDateString()}`;
+            status.className = 'doc-date text-green-400';
+            
+            // Toggle buttons
+            document.getElementById(`${docType}-upload-btn`).classList.add('hidden');
+            document.getElementById(`${docType}-view-btn`).classList.remove('hidden');
+            document.getElementById(`${docType}-delete-btn`).classList.remove('hidden');
+        }
+
+        function removeDocument(docType) {
+            delete uploadedDocuments[docType];
+            
+            // Reset UI
+            const previewArea = document.getElementById(`${docType}-preview-area`);
+            previewArea.innerHTML = `<i class="fas ${getDocIcon(docType)} doc-icon text-gray-600"></i>`;
+            
+            document.getElementById(`${docType}-status`).textContent = docType === 'pan' ? 'Optional' : 'Not uploaded';
+            document.getElementById(`${docType}-status`).className = 'doc-date';
+            
+            document.getElementById(`${docType}-upload-btn`).classList.remove('hidden');
+            document.getElementById(`${docType}-view-btn`).classList.add('hidden');
+            document.getElementById(`${docType}-delete-btn`).classList.add('hidden');
+            
+            // Clear input
+            const input = document.getElementById(docType);
+            if (input) input.value = '';
+            
+            // Hide grid for multiple files
+            if (docType === 'experience') {
+                document.getElementById(`${docType}-files-grid`).classList.add('hidden');
+                document.getElementById(`${docType}-files-grid`).innerHTML = '';
+            }
+            
+            showToast('Document removed');
+        }
+
+        function getDocIcon(docType) {
+            const icons = {
+                'photo': 'fa-user-circle',
+                'aadhar': 'fa-id-card',
+                'pan': 'fa-credit-card',
+                'cv': 'fa-file-alt',
+                'disability': 'fa-wheelchair',
+                'service': 'fa-medal',
+                'experience': 'fa-certificate'
+            };
+            return icons[docType] || 'fa-file';
+        }
+
+        function previewDocument(docType) {
+            const doc = uploadedDocuments[docType];
+            if (!doc) return;
+            
+            const modal = document.getElementById('doc-preview-modal');
+            const container = document.getElementById('preview-container');
+            const nameEl = document.getElementById('preview-doc-name');
+            const typeEl = document.getElementById('preview-doc-type');
+            const sizeEl = document.getElementById('preview-doc-size');
+            const downloadEl = document.getElementById('preview-download');
+            
+            nameEl.textContent = doc.name;
+            typeEl.textContent = doc.type.toUpperCase().split('/')[1];
+            sizeEl.textContent = formatFileSize(doc.size);
+            downloadEl.href = doc.data;
+            downloadEl.download = doc.name;
+            
+            container.innerHTML = '';
+            
+            if (doc.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = doc.data;
+                img.className = 'preview-image';
+                container.appendChild(img);
+            } else {
+                const embed = document.createElement('embed');
+                embed.src = doc.data;
+                embed.type = 'application/pdf';
+                embed.className = 'w-full h-[70vh]';
+                container.appendChild(embed);
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function previewMultipleDocs(docType) {
+            const docs = uploadedDocuments[docType];
+            if (!docs || docs.length === 0) return;
+            
+            // Show first document for now (can be enhanced to show gallery)
+            previewDocument(docType);
+        }
+
+        function closeDocPreview() {
+            document.getElementById('doc-preview-modal').classList.add('hidden');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Delete Confirmation Modal Functions
+        function showDeleteConfirmation(id, name) {
+            deleteCandidateId = id;
+            document.getElementById('delete-candidate-name').textContent = name;
+            document.getElementById('delete-candidate-id').textContent = id;
+            document.getElementById('delete-confirm-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-confirm-modal').classList.add('hidden');
+            deleteCandidateId = null;
+        }
+
+        function confirmDelete() {
+            if (deleteCandidateId) {
+                deleteCandidate(deleteCandidateId);
+                closeDeleteModal();
+            }
         }
 
         // Sample Questions Database
@@ -1626,41 +2180,13 @@
             }
         }
 
-        function handleFileUpload(input, previewId, dataKey) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    // Store file data in sessionStorage (in production, upload to server)
-                    sessionStorage.setItem(dataKey, e.target.result);
-                    sessionStorage.setItem(dataKey + '_name', file.name);
-                    
-                    // Show preview
-                    document.getElementById(previewId.replace('-preview', '-placeholder')).classList.add('hidden');
-                    document.getElementById(previewId).classList.remove('hidden');
-                    document.getElementById(previewId.replace('-preview', '-name')).textContent = file.name;
-                };
-                
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function handleMultipleFiles(input, previewId) {
-            if (input.files && input.files.length > 0) {
-                document.getElementById('experience-placeholder').classList.add('hidden');
-                document.getElementById(previewId).classList.remove('hidden');
-                document.getElementById('experience-count').textContent = `${input.files.length} files selected`;
-            }
-        }
-
         function validateAndProceed() {
-            const photo = document.getElementById('photo').files.length > 0;
-            const aadhar = document.getElementById('aadhar').files.length > 0;
-            const cv = document.getElementById('cv').files.length > 0;
+            // Check required documents
+            const required = ['photo', 'aadhar', 'cv'];
+            const missing = required.filter(doc => !uploadedDocuments[doc]);
             
-            if (!photo || !aadhar || !cv) {
-                showToast('Please upload all required documents (Photo, Aadhar, CV)', 'error');
+            if (missing.length > 0) {
+                showToast(`Please upload: ${missing.join(', ')}`, 'error');
                 return;
             }
             
@@ -1926,6 +2452,17 @@
             
             const finalScore = Math.min(100, examScore + bonus);
             
+            // Build documents object from uploaded documents
+            const documents = {
+                photo: !!uploadedDocuments.photo,
+                aadhar: !!uploadedDocuments.aadhar,
+                pan: !!uploadedDocuments.pan,
+                cv: !!uploadedDocuments.cv,
+                disability: !!uploadedDocuments.disability,
+                service: !!uploadedDocuments.service,
+                experience: !!uploadedDocuments.experience
+            };
+            
             const candidate = {
                 name: kycData.name,
                 email: kycData.email,
@@ -1944,14 +2481,7 @@
                 special: specialText,
                 specialCategories: kycData.specialCategories || [],
                 status: finalScore >= 60 ? 'review' : 'rejected',
-                documents: {
-                    photo: !!sessionStorage.getItem('photo-data'),
-                    aadhar: !!sessionStorage.getItem('aadhar-data'),
-                    pan: !!sessionStorage.getItem('pan-data'),
-                    cv: !!sessionStorage.getItem('cv-data'),
-                    disability: !!sessionStorage.getItem('disability-data'),
-                    service: !!sessionStorage.getItem('service-data')
-                },
+                documents: documents,
                 examAnswers: examAnswers,
                 iqAnswers: iqAnswers,
                 reasoningAnswers: reasoningAnswers,
@@ -1965,8 +2495,9 @@
             document.getElementById('step-6').classList.add('hidden');
             document.getElementById('success-message').classList.remove('hidden');
             
-            // Clear session storage
+            // Clear session storage and uploaded documents
             sessionStorage.clear();
+            Object.keys(uploadedDocuments).forEach(key => delete uploadedDocuments[key]);
             
             showToast('Application submitted successfully!');
         }
@@ -2140,7 +2671,7 @@
                 const isSelected = selectedCandidates.has(c.id);
                 
                 const row = `
-                    <tr class="hover:bg-gray-800/30 transition">
+                    <tr class="hover:bg-gray-800/30 transition" data-id="${c.id}">
                         <td class="px-4 py-4">
                             <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection('${c.id}')" class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded">
                         </td>
@@ -2180,7 +2711,7 @@
                                     <i class="fas fa-times"></i>
                                 </button>
                             ` : ''}
-                            <button onclick="deleteCandidate('${c.id}')" class="text-gray-500 hover:text-red-400 ml-2" title="Delete">
+                            <button onclick="showDeleteConfirmation('${c.id}', '${c.name}')" class="text-gray-500 hover:text-red-400 ml-2" title="Delete">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -2244,6 +2775,38 @@
             
             const modal = document.getElementById('candidate-modal');
             const content = document.getElementById('modal-content');
+            
+            // Build documents list
+            const docList = Object.entries(c.documents).map(([key, value]) => {
+                const icons = {
+                    photo: 'fa-user-circle',
+                    aadhar: 'fa-id-card',
+                    pan: 'fa-credit-card',
+                    cv: 'fa-file-alt',
+                    disability: 'fa-wheelchair',
+                    service: 'fa-medal',
+                    experience: 'fa-certificate'
+                };
+                const labels = {
+                    photo: 'Passport Photo',
+                    aadhar: 'Aadhar Card',
+                    pan: 'PAN Card',
+                    cv: 'Resume/CV',
+                    disability: 'Disability Certificate',
+                    service: 'Service Certificate',
+                    experience: 'Experience Certificates'
+                };
+                
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg ${value ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-600'}">
+                        <div class="flex items-center">
+                            <i class="fas ${icons[key] || 'fa-file'} ${value ? 'text-green-400' : 'text-gray-600'} mr-3"></i>
+                            <span class="text-sm capitalize">${labels[key] || key}</span>
+                        </div>
+                        ${value ? '<span class="text-xs text-green-400"><i class="fas fa-check mr-1"></i>Uploaded</span>' : '<span class="text-xs text-gray-500">Not Required</span>'}
+                    </div>
+                `;
+            }).join('');
             
             content.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2328,15 +2891,7 @@
                     <div>
                         <h4 class="text-lg font-bold mb-4 text-indigo-400">Documents Uploaded</h4>
                         <div class="space-y-2">
-                            ${Object.entries(c.documents).map(([key, value]) => `
-                                <div class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg ${value ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-600'}">
-                                    <div class="flex items-center">
-                                        <i class="fas ${value ? 'fa-check-circle text-green-400' : 'fa-times-circle text-gray-600'} mr-3"></i>
-                                        <span class="text-sm capitalize">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                    </div>
-                                    ${value ? '<span class="text-xs text-green-400">Verified</span>' : '<span class="text-xs text-gray-500">Not Uploaded</span>'}
-                                </div>
-                            `).join('')}
+                            ${docList}
                         </div>
                     </div>
                     
@@ -2472,6 +3027,15 @@
             initializeStorage();
             updateStats();
             showSection('home');
+            
+            // Close modals on outside click
+            document.getElementById('delete-confirm-modal').addEventListener('click', function(e) {
+                if (e.target === this) closeDeleteModal();
+            });
+            
+            document.getElementById('doc-preview-modal').addEventListener('click', function(e) {
+                if (e.target === this) closeDocPreview();
+            });
         });
     </script>
 </body>
