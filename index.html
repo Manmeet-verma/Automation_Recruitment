@@ -6,6 +6,7 @@
     <title>NexusRecruit - Automated Recruitment System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -16,7 +17,7 @@
         
         .gradient-text {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-           background-clip:text;
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -92,10 +93,22 @@
             0%, 100% { border-color: #ef4444; }
             50% { border-color: #f87171; }
         }
+
+        .toast {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
     
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
     <!-- Navigation -->
     <nav class="fixed w-full z-50 glass-effect border-b border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -169,16 +182,16 @@
                 <!-- Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
                     <div class="glass-effect p-6 rounded-2xl text-center hover-lift">
-                        <div class="text-3xl font-bold text-indigo-400 mb-2">50K+</div>
-                        <div class="text-gray-400">Active Jobs</div>
+                        <div class="text-3xl font-bold text-indigo-400 mb-2" id="stat-total">0</div>
+                        <div class="text-gray-400">Active Applications</div>
                     </div>
                     <div class="glass-effect p-6 rounded-2xl text-center hover-lift">
-                        <div class="text-3xl font-bold text-purple-400 mb-2">200+</div>
-                        <div class="text-gray-400">Companies</div>
+                        <div class="text-3xl font-bold text-purple-400 mb-2" id="stat-pending">0</div>
+                        <div class="text-gray-400">Pending Review</div>
                     </div>
                     <div class="glass-effect p-6 rounded-2xl text-center hover-lift">
-                        <div class="text-3xl font-bold text-pink-400 mb-2">15+</div>
-                        <div class="text-gray-400">Cities</div>
+                        <div class="text-3xl font-bold text-pink-400 mb-2" id="stat-selected">0</div>
+                        <div class="text-gray-400">Selected Candidates</div>
                     </div>
                     <div class="glass-effect p-6 rounded-2xl text-center hover-lift">
                         <div class="text-3xl font-bold text-green-400 mb-2">98%</div>
@@ -345,7 +358,7 @@
                                 </div>
                                 <div class="flex items-center text-gray-300">
                                     <i class="fas fa-briefcase w-5 text-indigo-400"></i>
-                                    1,240 Open Positions
+                                    <span id="ludhiana-jobs">1,240</span> Open Positions
                                 </div>
                                 <div class="flex items-center text-gray-300">
                                     <i class="fas fa-phone w-5 text-indigo-400"></i>
@@ -515,28 +528,50 @@
                         <!-- Personal Information -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Full Name (as per Aadhar)</label>
-                                <input type="text" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="Enter full name">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Full Name (as per Aadhar) *</label>
+                                <input type="text" id="kyc-name" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="Enter full name">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Date of Birth</label>
-                                <input type="date" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Date of Birth *</label>
+                                <input type="date" id="kyc-dob" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Aadhar Number</label>
-                                <input type="text" pattern="[0-9]{12}" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="XXXX XXXX XXXX">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Aadhar Number *</label>
+                                <input type="text" id="kyc-aadhar" pattern="[0-9]{12}" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="XXXX XXXX XXXX">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">PAN Card Number</label>
-                                <input type="text" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="ABCDE1234F">
+                                <input type="text" id="kyc-pan" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="ABCDE1234F">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                                <input type="email" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="email@example.com">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
+                                <input type="email" id="kyc-email" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="email@example.com">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
-                                <input type="tel" pattern="[0-9]{10}" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="9876543210">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
+                                <input type="tel" id="kyc-phone" pattern="[0-9]{10}" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="9876543210">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">City *</label>
+                                <select id="kyc-city" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                    <option value="">Select City</option>
+                                    <option value="Ludhiana">Ludhiana</option>
+                                    <option value="Chandigarh">Chandigarh</option>
+                                    <option value="Amritsar">Amritsar</option>
+                                    <option value="Jalandhar">Jalandhar</option>
+                                    <option value="Patiala">Patiala</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">State *</label>
+                                <select id="kyc-state" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                    <option value="">Select State</option>
+                                    <option value="Punjab">Punjab</option>
+                                    <option value="Haryana">Haryana</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                         </div>
 
@@ -589,7 +624,7 @@
                                 <p><strong>5. Selection:</strong> Final selection is based on merit list and company requirements. Can be rejected without reason.</p>
                             </div>
                             <label class="flex items-center">
-                                <input type="checkbox" required class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500">
+                                <input type="checkbox" id="terms-agree" required class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500">
                                 <span class="ml-2 text-sm text-gray-300">I agree to the Terms & Conditions and Privacy Policy</span>
                             </label>
                         </div>
@@ -710,36 +745,60 @@
                     <div class="space-y-6">
                         <!-- Regular Documents -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('photo').click()">
-                                <i class="fas fa-user-circle text-4xl text-gray-600 mb-3"></i>
-                                <div class="font-medium mb-1">Passport Size Photo</div>
-                                <div class="text-sm text-gray-500 mb-3">JPG/PNG, Max 2MB</div>
-                                <input type="file" id="photo" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'photo-preview')">
-                                <div id="photo-preview" class="hidden mt-2 text-green-400 text-sm"><i class="fas fa-check mr-1"></i>Uploaded</div>
+                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('photo').click()">
+                                <input type="file" id="photo" accept="image/*" class="hidden" onchange="handleFileUpload(this, 'photo-preview', 'photo-data')">
+                                <div id="photo-placeholder">
+                                    <i class="fas fa-user-circle text-4xl text-gray-600 mb-3"></i>
+                                    <div class="font-medium mb-1">Passport Size Photo *</div>
+                                    <div class="text-sm text-gray-500 mb-3">JPG/PNG, Max 2MB</div>
+                                </div>
+                                <div id="photo-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
+                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
+                                    <div class="text-sm text-green-400 font-medium">Photo Uploaded</div>
+                                    <div class="text-xs text-gray-400 mt-1" id="photo-name"></div>
+                                </div>
                             </div>
                             
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('aadhar').click()">
-                                <i class="fas fa-id-card text-4xl text-gray-600 mb-3"></i>
-                                <div class="font-medium mb-1">Aadhar Card</div>
-                                <div class="text-sm text-gray-500 mb-3">PDF/JPG, Max 2MB</div>
-                                <input type="file" id="aadhar" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'aadhar-preview')">
-                                <div id="aadhar-preview" class="hidden mt-2 text-green-400 text-sm"><i class="fas fa-check mr-1"></i>Uploaded</div>
+                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('aadhar').click()">
+                                <input type="file" id="aadhar" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'aadhar-preview', 'aadhar-data')">
+                                <div id="aadhar-placeholder">
+                                    <i class="fas fa-id-card text-4xl text-gray-600 mb-3"></i>
+                                    <div class="font-medium mb-1">Aadhar Card *</div>
+                                    <div class="text-sm text-gray-500 mb-3">PDF/JPG, Max 2MB</div>
+                                </div>
+                                <div id="aadhar-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
+                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
+                                    <div class="text-sm text-green-400 font-medium">Aadhar Uploaded</div>
+                                    <div class="text-xs text-gray-400 mt-1" id="aadhar-name"></div>
+                                </div>
                             </div>
                             
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('pan').click()">
-                                <i class="fas fa-credit-card text-4xl text-gray-600 mb-3"></i>
-                                <div class="font-medium mb-1">PAN Card</div>
-                                <div class="text-sm text-gray-500 mb-3">PDF/JPG, Max 2MB</div>
-                                <input type="file" id="pan" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'pan-preview')">
-                                <div id="pan-preview" class="hidden mt-2 text-green-400 text-sm"><i class="fas fa-check mr-1"></i>Uploaded</div>
+                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('pan').click()">
+                                <input type="file" id="pan" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'pan-preview', 'pan-data')">
+                                <div id="pan-placeholder">
+                                    <i class="fas fa-credit-card text-4xl text-gray-600 mb-3"></i>
+                                    <div class="font-medium mb-1">PAN Card</div>
+                                    <div class="text-sm text-gray-500 mb-3">PDF/JPG, Max 2MB</div>
+                                </div>
+                                <div id="pan-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
+                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
+                                    <div class="text-sm text-green-400 font-medium">PAN Uploaded</div>
+                                    <div class="text-xs text-gray-400 mt-1" id="pan-name"></div>
+                                </div>
                             </div>
                             
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('cv').click()">
-                                <i class="fas fa-file-alt text-4xl text-gray-600 mb-3"></i>
-                                <div class="font-medium mb-1">Resume/CV</div>
-                                <div class="text-sm text-gray-500 mb-3">PDF, Max 5MB</div>
-                                <input type="file" id="cv" accept=".pdf" class="hidden" onchange="handleFileUpload(this, 'cv-preview')">
-                                <div id="cv-preview" class="hidden mt-2 text-green-400 text-sm"><i class="fas fa-check mr-1"></i>Uploaded</div>
+                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('cv').click()">
+                                <input type="file" id="cv" accept=".pdf" class="hidden" onchange="handleFileUpload(this, 'cv-preview', 'cv-data')">
+                                <div id="cv-placeholder">
+                                    <i class="fas fa-file-alt text-4xl text-gray-600 mb-3"></i>
+                                    <div class="font-medium mb-1">Resume/CV *</div>
+                                    <div class="text-sm text-gray-500 mb-3">PDF, Max 5MB</div>
+                                </div>
+                                <div id="cv-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
+                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
+                                    <div class="text-sm text-green-400 font-medium">CV Uploaded</div>
+                                    <div class="text-xs text-gray-400 mt-1" id="cv-name"></div>
+                                </div>
                             </div>
                         </div>
 
@@ -747,18 +806,30 @@
                         <div id="special-docs" class="hidden border-t border-gray-700 pt-6">
                             <h3 class="text-lg font-semibold mb-4 text-yellow-400">Special Category Documents</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="border-2 border-dashed border-yellow-900/50 rounded-xl p-6 text-center hover:border-yellow-500 transition cursor-pointer bg-yellow-900/10" onclick="document.getElementById('disability').click()">
-                                    <i class="fas fa-wheelchair text-4xl text-yellow-600 mb-3"></i>
-                                    <div class="font-medium mb-1">Disability Certificate</div>
-                                    <div class="text-sm text-gray-500">Medical Authority</div>
-                                    <input type="file" id="disability" accept=".pdf,image/*" class="hidden">
+                                <div class="border-2 border-dashed border-yellow-900/50 rounded-xl p-6 text-center hover:border-yellow-500 transition cursor-pointer relative bg-yellow-900/10" onclick="document.getElementById('disability').click()">
+                                    <input type="file" id="disability" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'disability-preview', 'disability-data')">
+                                    <div id="disability-placeholder">
+                                        <i class="fas fa-wheelchair text-4xl text-yellow-600 mb-3"></i>
+                                        <div class="font-medium mb-1">Disability Certificate</div>
+                                        <div class="text-sm text-gray-500">Medical Authority</div>
+                                    </div>
+                                    <div id="disability-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
+                                        <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
+                                        <div class="text-sm text-green-400 font-medium">Certificate Uploaded</div>
+                                    </div>
                                 </div>
                                 
-                                <div class="border-2 border-dashed border-yellow-900/50 rounded-xl p-6 text-center hover:border-yellow-500 transition cursor-pointer bg-yellow-900/10" onclick="document.getElementById('service').click()">
-                                    <i class="fas fa-medal text-4xl text-yellow-600 mb-3"></i>
-                                    <div class="font-medium mb-1">Service Certificate</div>
-                                    <div class="text-sm text-gray-500">Army/Police Discharge</div>
-                                    <input type="file" id="service" accept=".pdf,image/*" class="hidden">
+                                <div class="border-2 border-dashed border-yellow-900/50 rounded-xl p-6 text-center hover:border-yellow-500 transition cursor-pointer relative bg-yellow-900/10" onclick="document.getElementById('service').click()">
+                                    <input type="file" id="service" accept=".pdf,image/*" class="hidden" onchange="handleFileUpload(this, 'service-preview', 'service-data')">
+                                    <div id="service-placeholder">
+                                        <i class="fas fa-medal text-4xl text-yellow-600 mb-3"></i>
+                                        <div class="font-medium mb-1">Service Certificate</div>
+                                        <div class="text-sm text-gray-500">Army/Police Discharge</div>
+                                    </div>
+                                    <div id="service-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center">
+                                        <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
+                                        <div class="text-sm text-green-400 font-medium">Certificate Uploaded</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -766,11 +837,18 @@
                         <!-- Experience Certificates -->
                         <div class="border-t border-gray-700 pt-6">
                             <h3 class="text-lg font-semibold mb-4 text-indigo-400">Experience & Certifications (Optional)</h3>
-                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('experience').click()">
-                                <i class="fas fa-certificate text-4xl text-gray-600 mb-3"></i>
-                                <div class="font-medium mb-1">Experience Certificates</div>
-                                <div class="text-sm text-gray-500">Multiple files allowed</div>
-                                <input type="file" id="experience" multiple accept=".pdf,image/*" class="hidden">
+                            <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-indigo-500 transition cursor-pointer relative" onclick="document.getElementById('experience').click()">
+                                <input type="file" id="experience" multiple accept=".pdf,image/*" class="hidden" onchange="handleMultipleFiles(this, 'experience-preview')">
+                                <div id="experience-placeholder">
+                                    <i class="fas fa-certificate text-4xl text-gray-600 mb-3"></i>
+                                    <div class="font-medium mb-1">Experience Certificates</div>
+                                    <div class="text-sm text-gray-500">Multiple files allowed</div>
+                                </div>
+                                <div id="experience-preview" class="hidden absolute inset-0 bg-gray-800 rounded-xl flex flex-col items-center justify-center p-4">
+                                    <i class="fas fa-check-circle text-4xl text-green-400 mb-2"></i>
+                                    <div class="text-sm text-green-400 font-medium">Files Uploaded</div>
+                                    <div class="text-xs text-gray-400 mt-1" id="experience-count"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -779,7 +857,7 @@
                         <button onclick="prevStep(2)" class="text-gray-400 hover:text-white px-6 py-3 transition">
                             <i class="fas fa-arrow-left mr-2"></i>Back
                         </button>
-                        <button onclick="nextStep(4)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition transform hover:scale-105">
+                        <button onclick="validateAndProceed()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition transform hover:scale-105">
                             Proceed to Examination <i class="fas fa-arrow-right ml-2"></i>
                         </button>
                     </div>
@@ -932,7 +1010,7 @@
                         <i class="fas fa-check text-4xl text-green-400"></i>
                     </div>
                     <h2 class="text-3xl font-bold mb-4">Application Submitted!</h2>
-                    <p class="text-gray-400 mb-6">Your application ID: <span class="text-indigo-400 font-mono">NRX-2026-78432</span></p>
+                    <p class="text-gray-400 mb-6">Your application ID: <span class="text-indigo-400 font-mono text-xl" id="application-id">NRX-2026-78432</span></p>
                     <p class="text-gray-300 mb-8">Check your email for further instructions. Results will be declared within 7 working days.</p>
                     <button onclick="showSection('home')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl transition">
                         Return to Home
@@ -988,8 +1066,11 @@
                         <p class="text-gray-400">Recruitment Management System</p>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-sm">
-                            <i class="fas fa-file-excel mr-2"></i>Export Excel
+                        <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-sm flex items-center">
+                            <i class="fas fa-file-excel mr-2"></i>Export to Excel
+                        </button>
+                        <button onclick="exportSelectedExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm flex items-center">
+                            <i class="fas fa-file-export mr-2"></i>Export Selected
                         </button>
                         <button onclick="logout()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg transition text-sm border border-red-600/30">
                             <i class="fas fa-sign-out-alt mr-2"></i>Logout
@@ -1003,7 +1084,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-400 text-sm">Total Applications</p>
-                                <p class="text-3xl font-bold text-white mt-1">1,247</p>
+                                <p class="text-3xl font-bold text-white mt-1" id="admin-total">0</p>
                             </div>
                             <div class="w-12 h-12 bg-indigo-900/50 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-users text-indigo-400"></i>
@@ -1011,7 +1092,7 @@
                         </div>
                         <div class="mt-4 flex items-center text-sm text-green-400">
                             <i class="fas fa-arrow-up mr-1"></i>
-                            <span>12% from last month</span>
+                            <span>Real-time data</span>
                         </div>
                     </div>
 
@@ -1019,7 +1100,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-400 text-sm">Pending Review</p>
-                                <p class="text-3xl font-bold text-yellow-400 mt-1">48</p>
+                                <p class="text-3xl font-bold text-yellow-400 mt-1" id="admin-pending">0</p>
                             </div>
                             <div class="w-12 h-12 bg-yellow-900/50 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-clock text-yellow-400"></i>
@@ -1034,22 +1115,20 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-400 text-sm">Exams Completed</p>
-                                <p class="text-3xl font-bold text-green-400 mt-1">892</p>
+                                <p class="text-3xl font-bold text-green-400 mt-1" id="admin-completed">0</p>
                             </div>
                             <div class="w-12 h-12 bg-green-900/50 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-check-circle text-green-400"></i>
                             </div>
                         </div>
-                        <div class="mt-4 text-sm text-gray-500">
-                            71.5% completion rate
-                        </div>
+                        <div class="mt-4 text-sm text-gray-500" id="completion-rate">0% completion rate</div>
                     </div>
 
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-400 text-sm">Selected Candidates</p>
-                                <p class="text-3xl font-bold text-purple-400 mt-1">156</p>
+                                <p class="text-3xl font-bold text-purple-400 mt-1" id="admin-selected">0</p>
                             </div>
                             <div class="w-12 h-12 bg-purple-900/50 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-user-check text-purple-400"></i>
@@ -1064,7 +1143,7 @@
                 <!-- Charts -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
-                        <h3 class="text-lg font-bold mb-4">Application Trends</h3>
+                        <h3 class="text-lg font-bold mb-4">Application Trends (Last 7 Days)</h3>
                         <canvas id="trendsChart" height="200"></canvas>
                     </div>
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
@@ -1073,12 +1152,12 @@
                     </div>
                 </div>
 
-                <!-- Candidates Table -->
-                <div class="glass-effect rounded-2xl border border-gray-800 overflow-hidden">
-                    <div class="p-6 border-b border-gray-800 flex items-center justify-between">
-                        <h3 class="text-lg font-bold">Recent Applications</h3>
-                        <div class="flex space-x-2">
-                            <select id="status-filter" onchange="filterCandidates()" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white">
+                <!-- Filters -->
+                <div class="glass-effect rounded-2xl p-6 border border-gray-800 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Status Filter</label>
+                            <select id="status-filter" onchange="filterCandidates()" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm">
                                 <option value="all">All Status</option>
                                 <option value="pending">Pending</option>
                                 <option value="exam">In Exam</option>
@@ -1087,18 +1166,65 @@
                                 <option value="rejected">Rejected</option>
                             </select>
                         </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Job Role</label>
+                            <select id="role-filter" onchange="filterCandidates()" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm">
+                                <option value="all">All Roles</option>
+                                <option value="Data Entry">Data Entry</option>
+                                <option value="Gate Keeper">Gate Keeper</option>
+                                <option value="Site Engineer">Site Engineer</option>
+                                <option value="Project Manager">Project Manager</option>
+                                <option value="Customer Care">Customer Care</option>
+                                <option value="Technician">Technician</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Special Category</label>
+                            <select id="special-filter" onchange="filterCandidates()" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm">
+                                <option value="all">All Categories</option>
+                                <option value="pwd">PwD</option>
+                                <option value="ex-serviceman">Ex-Serviceman</option>
+                                <option value="widow">Widow</option>
+                                <option value="experienced">Experienced</option>
+                                <option value="none">None</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Search</label>
+                            <div class="relative">
+                                <input type="text" id="search-input" onkeyup="filterCandidates()" placeholder="Name, ID, or Email..." class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm pl-10">
+                                <i class="fas fa-search absolute left-3 top-2.5 text-gray-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Candidates Table -->
+                <div class="glass-effect rounded-2xl border border-gray-800 overflow-hidden">
+                    <div class="p-6 border-b border-gray-800 flex items-center justify-between">
+                        <h3 class="text-lg font-bold">Candidate Applications</h3>
+                        <div class="flex items-center space-x-2 text-sm text-gray-400">
+                            <span id="showing-count">Showing all</span>
+                            <button onclick="refreshData()" class="text-indigo-400 hover:text-indigo-300 ml-4">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-gray-800/50 text-gray-400 text-sm uppercase">
                                 <tr>
-                                    <th class="px-6 py-4">ID</th>
-                                    <th class="px-6 py-4">Candidate</th>
-                                    <th class="px-6 py-4">Job Role</th>
-                                    <th class="px-6 py-4">Exam Score</th>
+                                    <th class="px-4 py-4 w-10">
+                                        <input type="checkbox" id="select-all" onchange="toggleSelectAll()" class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded">
+                                    </th>
+                                    <th class="px-6 py-4 cursor-pointer hover:text-white" onclick="sortTable('id')">ID <i class="fas fa-sort ml-1"></i></th>
+                                    <th class="px-6 py-4 cursor-pointer hover:text-white" onclick="sortTable('name')">Candidate <i class="fas fa-sort ml-1"></i></th>
+                                    <th class="px-6 py-4 cursor-pointer hover:text-white" onclick="sortTable('role')">Job Role <i class="fas fa-sort ml-1"></i></th>
+                                    <th class="px-6 py-4 cursor-pointer hover:text-white" onclick="sortTable('score')">Exam Score <i class="fas fa-sort ml-1"></i></th>
                                     <th class="px-6 py-4">Special Category</th>
-                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 cursor-pointer hover:text-white" onclick="sortTable('status')">Status <i class="fas fa-sort ml-1"></i></th>
+                                    <th class="px-6 py-4">Applied Date</th>
                                     <th class="px-6 py-4">Actions</th>
                                 </tr>
                             </thead>
@@ -1107,6 +1233,18 @@
                             </tbody>
                         </table>
                     </div>
+                    
+                    <!-- Pagination -->
+                    <div class="p-4 border-t border-gray-800 flex items-center justify-between">
+                        <div class="text-sm text-gray-400">
+                            Showing <span id="page-start">1</span> to <span id="page-end">10</span> of <span id="total-entries">0</span> entries
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="changePage(-1)" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded text-sm transition">Previous</button>
+                            <span id="page-number" class="px-3 py-1 bg-indigo-600 rounded text-sm">1</span>
+                            <button onclick="changePage(1)" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded text-sm transition">Next</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1114,7 +1252,7 @@
         <!-- Candidate Detail Modal -->
         <div id="candidate-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
             <div class="glass-effect rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
-                <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+                <div class="p-6 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-gray-900/95 backdrop-blur">
                     <h3 class="text-2xl font-bold">Candidate Details</h3>
                     <button onclick="closeModal()" class="text-gray-400 hover:text-white">
                         <i class="fas fa-times text-2xl"></i>
@@ -1140,7 +1278,233 @@
         let webcamStream = null;
         let examTimer = null;
         let timeLeft = 1200; // 20 minutes
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let currentSort = { field: 'appliedDate', direction: 'desc' };
+        let selectedCandidates = new Set();
         
+        // Data Storage Keys
+        const STORAGE_KEYS = {
+            CANDIDATES: 'nexusrecruit_candidates',
+            CURRENT_ID: 'nexusrecruit_current_id',
+            STATS: 'nexusrecruit_stats'
+        };
+
+        // Initialize Storage with sample data if empty
+        function initializeStorage() {
+            if (!localStorage.getItem(STORAGE_KEYS.CANDIDATES)) {
+                const sampleCandidates = [
+                    {
+                        id: 'NRX-2026-00001',
+                        name: 'Rajesh Kumar',
+                        email: 'rajesh.kumar@email.com',
+                        phone: '9876543210',
+                        aadhar: '123456789012',
+                        pan: 'ABCDE1234F',
+                        dob: '1990-05-15',
+                        city: 'Ludhiana',
+                        state: 'Punjab',
+                        role: 'Data Entry',
+                        roleType: 'data-entry',
+                        score: 85,
+                        iqScore: 80,
+                        special: 'None',
+                        specialCategories: [],
+                        status: 'selected',
+                        appliedDate: '2026-02-15T10:30:00',
+                        documents: { photo: true, aadhar: true, pan: true, cv: true },
+                        examAnswers: {},
+                        reasoningAnswers: {},
+                        violations: 0,
+                        notes: 'Strong candidate, good communication skills'
+                    },
+                    {
+                        id: 'NRX-2026-00002',
+                        name: 'Priya Singh',
+                        email: 'priya.singh@email.com',
+                        phone: '9876543211',
+                        aadhar: '123456789013',
+                        pan: 'ABCDE1235F',
+                        dob: '1988-08-20',
+                        city: 'Chandigarh',
+                        state: 'Punjab',
+                        role: 'Site Engineer',
+                        roleType: 'site-engineer',
+                        score: 78,
+                        iqScore: 75,
+                        special: 'Ex-Serviceman +20%',
+                        specialCategories: ['ex-serviceman'],
+                        status: 'review',
+                        appliedDate: '2026-02-16T14:20:00',
+                        documents: { photo: true, aadhar: true, pan: true, cv: true, service: true },
+                        examAnswers: {},
+                        reasoningAnswers: {},
+                        violations: 0,
+                        notes: 'Army veteran, excellent discipline'
+                    },
+                    {
+                        id: 'NRX-2026-00003',
+                        name: 'Amit Sharma',
+                        email: 'amit.sharma@email.com',
+                        phone: '9876543212',
+                        aadhar: '123456789014',
+                        pan: 'ABCDE1236F',
+                        dob: '1995-03-10',
+                        city: 'Ludhiana',
+                        state: 'Punjab',
+                        role: 'Gate Keeper',
+                        roleType: 'gate-keeper',
+                        score: 45,
+                        iqScore: 50,
+                        special: 'None',
+                        specialCategories: [],
+                        status: 'rejected',
+                        appliedDate: '2026-02-17T09:15:00',
+                        documents: { photo: true, aadhar: true, cv: true },
+                        examAnswers: {},
+                        reasoningAnswers: {},
+                        violations: 2,
+                        notes: 'Failed technical assessment'
+                    },
+                    {
+                        id: 'NRX-2026-00004',
+                        name: 'Sunita Devi',
+                        email: 'sunita.devi@email.com',
+                        phone: '9876543213',
+                        aadhar: '123456789015',
+                        pan: 'ABCDE1237F',
+                        dob: '1992-11-25',
+                        city: 'Amritsar',
+                        state: 'Punjab',
+                        role: 'Customer Care',
+                        roleType: 'caller',
+                        score: 92,
+                        iqScore: 88,
+                        special: 'PwD +20%',
+                        specialCategories: ['pwd'],
+                        status: 'selected',
+                        appliedDate: '2026-02-18T11:45:00',
+                        documents: { photo: true, aadhar: true, pan: true, cv: true, disability: true },
+                        examAnswers: {},
+                        reasoningAnswers: {},
+                        violations: 0,
+                        notes: 'Excellent performance, visually impaired but highly capable'
+                    },
+                    {
+                        id: 'NRX-2026-00005',
+                        name: 'Vikram Patel',
+                        email: 'vikram.patel@email.com',
+                        phone: '9876543214',
+                        aadhar: '123456789016',
+                        pan: 'ABCDE1238F',
+                        dob: '1985-07-30',
+                        city: 'Ludhiana',
+                        state: 'Punjab',
+                        role: 'Project Manager',
+                        roleType: 'project-manager',
+                        score: 88,
+                        iqScore: 85,
+                        special: 'Experienced +10%',
+                        specialCategories: ['experienced'],
+                        status: 'exam',
+                        appliedDate: '2026-02-19T08:00:00',
+                        documents: { photo: true, aadhar: true, pan: true, cv: true, experience: true },
+                        examAnswers: {},
+                        reasoningAnswers: {},
+                        violations: 0,
+                        notes: '10 years experience, pending final interview'
+                    }
+                ];
+                localStorage.setItem(STORAGE_KEYS.CANDIDATES, JSON.stringify(sampleCandidates));
+                localStorage.setItem(STORAGE_KEYS.CURRENT_ID, 6);
+            }
+        }
+
+        // Get all candidates from storage
+        function getCandidates() {
+            const data = localStorage.getItem(STORAGE_KEYS.CANDIDATES);
+            return data ? JSON.parse(data) : [];
+        }
+
+        // Save candidates to storage
+        function saveCandidates(candidates) {
+            localStorage.setItem(STORAGE_KEYS.CANDIDATES, JSON.stringify(candidates));
+            updateStats();
+        }
+
+        // Add new candidate
+        function addCandidate(candidate) {
+            const candidates = getCandidates();
+            const currentId = parseInt(localStorage.getItem(STORAGE_KEYS.CURRENT_ID) || 1);
+            candidate.id = `NRX-2026-${String(currentId).padStart(5, '0')}`;
+            candidate.appliedDate = new Date().toISOString();
+            candidates.push(candidate);
+            localStorage.setItem(STORAGE_KEYS.CURRENT_ID, currentId + 1);
+            saveCandidates(candidates);
+            return candidate.id;
+        }
+
+        // Update candidate
+        function updateCandidate(id, updates) {
+            const candidates = getCandidates();
+            const index = candidates.findIndex(c => c.id === id);
+            if (index !== -1) {
+                candidates[index] = { ...candidates[index], ...updates };
+                saveCandidates(candidates);
+                return true;
+            }
+            return false;
+        }
+
+        // Delete candidate
+        function deleteCandidate(id) {
+            const candidates = getCandidates();
+            const filtered = candidates.filter(c => c.id !== id);
+            saveCandidates(filtered);
+        }
+
+        // Update statistics
+        function updateStats() {
+            const candidates = getCandidates();
+            const total = candidates.length;
+            const pending = candidates.filter(c => c.status === 'pending').length;
+            const selected = candidates.filter(c => c.status === 'selected').length;
+            const completed = candidates.filter(c => ['selected', 'rejected', 'review'].includes(c.status)).length;
+            
+            // Update home page stats
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-selected').textContent = selected;
+            
+            // Update admin stats
+            const adminTotal = document.getElementById('admin-total');
+            const adminPending = document.getElementById('admin-pending');
+            const adminSelected = document.getElementById('admin-selected');
+            const adminCompleted = document.getElementById('admin-completed');
+            const completionRate = document.getElementById('completion-rate');
+            
+            if (adminTotal) adminTotal.textContent = total;
+            if (adminPending) adminPending.textContent = pending;
+            if (adminSelected) adminSelected.textContent = selected;
+            if (adminCompleted) adminCompleted.textContent = completed;
+            if (completionRate) completionRate.textContent = total > 0 ? Math.round((completed/total)*100) + '% completion rate' : '0% completion rate';
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3 ${type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-indigo-600'} text-white`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
         // Sample Questions Database
         const questionBanks = {
             'data-entry': [
@@ -1197,22 +1561,15 @@
 
         // Navigation Functions
         function showSection(sectionId) {
-            // Hide all sections
             document.querySelectorAll('section').forEach(section => {
                 section.classList.add('hidden');
             });
-            
-            // Show target section
             document.getElementById(sectionId).classList.remove('hidden');
-            
-            // Update nav active state
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('text-white');
-                link.classList.add('text-gray-300');
-            });
-            
-            // Scroll to top
             window.scrollTo(0, 0);
+            
+            if (sectionId === 'home') {
+                updateStats();
+            }
         }
 
         function toggleMobileMenu() {
@@ -1245,6 +1602,21 @@
         // Form Handling
         document.getElementById('kyc-form').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Store KYC data
+            const kycData = {
+                name: document.getElementById('kyc-name').value,
+                dob: document.getElementById('kyc-dob').value,
+                aadhar: document.getElementById('kyc-aadhar').value,
+                pan: document.getElementById('kyc-pan').value,
+                email: document.getElementById('kyc-email').value,
+                phone: document.getElementById('kyc-phone').value,
+                city: document.getElementById('kyc-city').value,
+                state: document.getElementById('kyc-state').value,
+                specialCategories: Array.from(document.querySelectorAll('input[name="special-category"]:checked')).map(cb => cb.value)
+            };
+            
+            sessionStorage.setItem('kycData', JSON.stringify(kycData));
             nextStep(2);
         });
 
@@ -1258,16 +1630,50 @@
             }
         }
 
-        function handleFileUpload(input, previewId) {
+        function handleFileUpload(input, previewId, dataKey) {
             if (input.files && input.files[0]) {
-                document.getElementById(previewId).classList.remove('hidden');
+                const file = input.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    // Store file data in sessionStorage (in production, upload to server)
+                    sessionStorage.setItem(dataKey, e.target.result);
+                    sessionStorage.setItem(dataKey + '_name', file.name);
+                    
+                    // Show preview
+                    document.getElementById(previewId.replace('-preview', '-placeholder')).classList.add('hidden');
+                    document.getElementById(previewId).classList.remove('hidden');
+                    document.getElementById(previewId.replace('-preview', '-name')).textContent = file.name;
+                };
+                
+                reader.readAsDataURL(file);
             }
+        }
+
+        function handleMultipleFiles(input, previewId) {
+            if (input.files && input.files.length > 0) {
+                document.getElementById('experience-placeholder').classList.add('hidden');
+                document.getElementById(previewId).classList.remove('hidden');
+                document.getElementById('experience-count').textContent = `${input.files.length} files selected`;
+            }
+        }
+
+        function validateAndProceed() {
+            const photo = document.getElementById('photo').files.length > 0;
+            const aadhar = document.getElementById('aadhar').files.length > 0;
+            const cv = document.getElementById('cv').files.length > 0;
+            
+            if (!photo || !aadhar || !cv) {
+                showToast('Please upload all required documents (Photo, Aadhar, CV)', 'error');
+                return;
+            }
+            
+            nextStep(4);
         }
 
         // Proctoring System
         async function startProctoring() {
             try {
-                // Request webcam
                 webcamStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { width: 1280, height: 720 }, 
                     audio: false 
@@ -1277,7 +1683,6 @@
                 document.getElementById('cam-status').classList.remove('bg-red-500');
                 document.getElementById('cam-status').classList.add('bg-green-500');
                 
-                // Request screen share
                 screenStream = await navigator.mediaDevices.getDisplayMedia({ 
                     video: { cursor: "always" }, 
                     audio: false 
@@ -1285,10 +1690,8 @@
                 document.getElementById('screen-status').classList.remove('bg-red-500');
                 document.getElementById('screen-status').classList.add('bg-green-500');
                 
-                // Monitor tab visibility
                 document.addEventListener('visibilitychange', handleTabSwitch);
                 
-                // Start exam
                 document.getElementById('proctoring-setup').classList.add('hidden');
                 document.getElementById('exam-interface').classList.remove('hidden');
                 document.getElementById('proctoring-panel').classList.remove('hidden');
@@ -1296,8 +1699,7 @@
                 startTimer();
                 
             } catch (err) {
-                alert('Camera and screen access are mandatory for the examination. Please allow access to proceed.');
-                console.error('Proctoring error:', err);
+                showToast('Camera and screen access are mandatory for the examination', 'error');
             }
         }
 
@@ -1307,10 +1709,10 @@
                 document.getElementById('violation-count').textContent = `Violations: ${violations}`;
                 
                 if (violations >= 3) {
-                    alert('You have switched tabs multiple times. Your exam has been terminated due to suspicious activity.');
+                    showToast('Exam terminated due to multiple tab switches', 'error');
                     submitExam(true);
                 } else {
-                    alert(`Warning: Tab switching detected! Violation ${violations}/3. Further violations will result in disqualification.`);
+                    showToast(`Warning: Tab switching detected! Violation ${violations}/3`, 'error');
                 }
             }
         }
@@ -1336,8 +1738,6 @@
             
             renderQuestion(questions[0], 0, questions.length);
             renderQuestionNav(questions.length);
-            
-            // Store questions globally for navigation
             window.currentQuestions = questions;
         }
 
@@ -1408,24 +1808,25 @@
         function submitExam(force = false) {
             clearInterval(examTimer);
             
-            // Calculate score
             let score = 0;
             window.currentQuestions.forEach((q, i) => {
                 if (examAnswers[i] === q.correct) score++;
             });
             
-            const percentage = (score / window.currentQuestions.length) * 100;
+            const percentage = Math.round((score / window.currentQuestions.length) * 100);
             
             if (!force) {
-                alert(`Exam submitted! Your score: ${score}/${window.currentQuestions.length} (${percentage}%)`);
+                showToast(`Exam completed! Score: ${percentage}%`);
             }
             
-            // Stop proctoring
             if (webcamStream) webcamStream.getTracks().forEach(track => track.stop());
             if (screenStream) screenStream.getTracks().forEach(track => track.stop());
             document.removeEventListener('visibilitychange', handleTabSwitch);
             
-            // Move to IQ test
+            sessionStorage.setItem('examScore', percentage);
+            sessionStorage.setItem('examAnswers', JSON.stringify(examAnswers));
+            sessionStorage.setItem('violations', violations);
+            
             document.getElementById('step-4').classList.add('hidden');
             document.getElementById('step-5').classList.remove('hidden');
             document.getElementById('step-4-indicator').classList.remove('bg-indigo-600');
@@ -1437,7 +1838,6 @@
             initializeIQTest();
         }
 
-        // IQ Test
         function initializeIQTest() {
             const container = document.getElementById('iq-container');
             let html = '';
@@ -1498,32 +1898,81 @@
         }
 
         function finalizeApplication() {
-            // Calculate final merit
-            let examScore = Object.keys(examAnswers).length;
-            let iqScore = Object.keys(iqAnswers).length;
+            const kycData = JSON.parse(sessionStorage.getItem('kycData') || '{}');
+            const examScore = parseInt(sessionStorage.getItem('examScore') || 0);
+            const jobCategory = document.querySelector('input[name="job-category"]:checked');
             
-            // Check for special categories
-            const specialCats = document.querySelectorAll('input[name="special-category"]:checked');
-            let bonus = 0;
-            specialCats.forEach(cat => {
-                if (['pwd', 'widow', 'ex-serviceman'].includes(cat.value)) bonus += 20;
-                if (cat.value === 'experienced') bonus += 10;
+            // Calculate IQ score
+            let iqScore = 0;
+            iqQuestions.forEach((q, i) => {
+                if (iqAnswers[i] === q.correct) iqScore++;
             });
+            iqScore = Math.round((iqScore / iqQuestions.length) * 100);
             
-            const totalScore = examScore + iqScore + bonus;
+            // Calculate bonus
+            let bonus = 0;
+            let specialText = 'None';
+            if (kycData.specialCategories) {
+                if (kycData.specialCategories.some(c => ['pwd', 'widow', 'ex-serviceman'].includes(c))) {
+                    bonus += 20;
+                    specialText = kycData.specialCategories.map(c => {
+                        if (c === 'pwd') return 'PwD';
+                        if (c === 'widow') return 'Widow';
+                        if (c === 'ex-serviceman') return 'Ex-Serviceman';
+                        return c;
+                    }).join(', ') + ' +20%';
+                }
+                if (kycData.specialCategories.includes('experienced')) {
+                    bonus += 10;
+                    specialText = specialText === 'None' ? 'Experienced +10%' : specialText + ', Experienced +10%';
+                }
+            }
             
-            // Show success
+            const finalScore = Math.min(100, examScore + bonus);
+            
+            const candidate = {
+                name: kycData.name,
+                email: kycData.email,
+                phone: kycData.phone,
+                aadhar: kycData.aadhar,
+                pan: kycData.pan,
+                dob: kycData.dob,
+                city: kycData.city,
+                state: kycData.state,
+                role: jobCategory ? jobCategory.parentElement.querySelector('.font-medium').textContent : 'Unknown',
+                roleType: jobCategory ? jobCategory.value : 'unknown',
+                score: finalScore,
+                baseScore: examScore,
+                iqScore: iqScore,
+                bonus: bonus,
+                special: specialText,
+                specialCategories: kycData.specialCategories || [],
+                status: finalScore >= 60 ? 'review' : 'rejected',
+                documents: {
+                    photo: !!sessionStorage.getItem('photo-data'),
+                    aadhar: !!sessionStorage.getItem('aadhar-data'),
+                    pan: !!sessionStorage.getItem('pan-data'),
+                    cv: !!sessionStorage.getItem('cv-data'),
+                    disability: !!sessionStorage.getItem('disability-data'),
+                    service: !!sessionStorage.getItem('service-data')
+                },
+                examAnswers: examAnswers,
+                iqAnswers: iqAnswers,
+                reasoningAnswers: reasoningAnswers,
+                violations: parseInt(sessionStorage.getItem('violations') || 0),
+                notes: ''
+            };
+            
+            const applicationId = addCandidate(candidate);
+            
+            document.getElementById('application-id').textContent = applicationId;
             document.getElementById('step-6').classList.add('hidden');
             document.getElementById('success-message').classList.remove('hidden');
             
-            // In real app, send to backend here
-            console.log('Application submitted:', {
-                score: totalScore,
-                bonus: bonus,
-                examAnswers,
-                iqAnswers,
-                reasoningAnswers
-            });
+            // Clear session storage
+            sessionStorage.clear();
+            
+            showToast('Application submitted successfully!');
         }
 
         // Admin Functions
@@ -1538,8 +1987,9 @@
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 initializeCharts();
                 loadCandidates();
+                showToast('Welcome back, Admin!');
             } else {
-                alert('Invalid credentials! Try: admin / admin123 / 123456');
+                showToast('Invalid credentials', 'error');
             }
         }
 
@@ -1547,18 +1997,35 @@
             document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('admin-login').classList.remove('hidden');
             document.getElementById('admin-form').reset();
+            showToast('Logged out successfully');
         }
 
         function initializeCharts() {
-            // Trends Chart
+            const candidates = getCandidates();
+            const last7Days = [];
+            const counts = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                last7Days.push(dateStr);
+                
+                const count = candidates.filter(c => {
+                    const cDate = new Date(c.appliedDate);
+                    return cDate.toDateString() === date.toDateString();
+                }).length;
+                counts.push(count);
+            }
+            
             const ctx1 = document.getElementById('trendsChart').getContext('2d');
             new Chart(ctx1, {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    labels: last7Days,
                     datasets: [{
                         label: 'Applications',
-                        data: [65, 78, 90, 85, 102, 124],
+                        data: counts,
                         borderColor: '#6366f1',
                         backgroundColor: 'rgba(99, 102, 241, 0.1)',
                         tension: 0.4,
@@ -1575,15 +2042,20 @@
                 }
             });
 
-            // Department Chart
+            // Department distribution
+            const roles = {};
+            candidates.forEach(c => {
+                roles[c.role] = (roles[c.role] || 0) + 1;
+            });
+            
             const ctx2 = document.getElementById('deptChart').getContext('2d');
             new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Data Entry', 'Security', 'Technical', 'Management', 'Sales'],
+                    labels: Object.keys(roles),
                     datasets: [{
-                        data: [30, 25, 20, 15, 10],
-                        backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b']
+                        data: Object.values(roles),
+                        backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#3b82f6']
                     }]
                 },
                 options: {
@@ -1595,21 +2067,72 @@
             });
         }
 
-        // Sample candidates data
-        const candidates = [
-            { id: 'NRX-001', name: 'Rajesh Kumar', role: 'Data Entry', score: 85, special: 'None', status: 'selected', docs: true },
-            { id: 'NRX-002', name: 'Priya Singh', role: 'Site Engineer', score: 78, special: 'Ex-Serviceman +20%', status: 'review', docs: true },
-            { id: 'NRX-003', name: 'Amit Sharma', role: 'Gate Keeper', score: 45, special: 'None', status: 'rejected', docs: false },
-            { id: 'NRX-004', name: 'Sunita Devi', role: 'Customer Care', score: 92, special: 'PwD +20%', status: 'selected', docs: true },
-            { id: 'NRX-005', name: 'Vikram Patel', role: 'Project Manager', score: 88, special: 'Experienced +10%', status: 'exam', docs: true },
-            { id: 'NRX-006', name: 'Neha Gupta', role: 'Technician', score: 76, special: 'None', status: 'pending', docs: false }
-        ];
+        let filteredCandidates = [];
 
         function loadCandidates() {
+            const candidates = getCandidates();
+            applyFilters(candidates);
+        }
+
+        function applyFilters(candidates) {
+            const statusFilter = document.getElementById('status-filter').value;
+            const roleFilter = document.getElementById('role-filter').value;
+            const specialFilter = document.getElementById('special-filter').value;
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            filteredCandidates = candidates.filter(c => {
+                if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+                if (roleFilter !== 'all' && c.role !== roleFilter) return false;
+                if (specialFilter !== 'all') {
+                    if (specialFilter === 'none') {
+                        if (c.specialCategories && c.specialCategories.length > 0) return false;
+                    } else {
+                        if (!c.specialCategories || !c.specialCategories.includes(specialFilter)) return false;
+                    }
+                }
+                if (searchTerm) {
+                    const searchable = `${c.name} ${c.id} ${c.email}`.toLowerCase();
+                    if (!searchable.includes(searchTerm)) return false;
+                }
+                return true;
+            });
+            
+            // Sort
+            filteredCandidates.sort((a, b) => {
+                let aVal = a[currentSort.field];
+                let bVal = b[currentSort.field];
+                
+                if (currentSort.field === 'appliedDate') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                }
+                
+                if (currentSort.direction === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            
+            renderTable();
+            updateStats();
+        }
+
+        function renderTable() {
             const tbody = document.getElementById('candidates-table');
             tbody.innerHTML = '';
             
-            candidates.forEach(c => {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredCandidates.slice(start, end);
+            
+            document.getElementById('page-start').textContent = filteredCandidates.length > 0 ? start + 1 : 0;
+            document.getElementById('page-end').textContent = Math.min(end, filteredCandidates.length);
+            document.getElementById('total-entries').textContent = filteredCandidates.length;
+            document.getElementById('page-number').textContent = currentPage;
+            document.getElementById('showing-count').textContent = `Showing ${filteredCandidates.length} entries`;
+            
+            pageData.forEach(c => {
                 const statusColors = {
                     'selected': 'bg-green-900/30 text-green-400 border-green-600/30',
                     'rejected': 'bg-red-900/30 text-red-400 border-red-600/30',
@@ -1618,10 +2141,18 @@
                     'exam': 'bg-blue-900/30 text-blue-400 border-blue-600/30'
                 };
                 
+                const isSelected = selectedCandidates.has(c.id);
+                
                 const row = `
                     <tr class="hover:bg-gray-800/30 transition">
+                        <td class="px-4 py-4">
+                            <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection('${c.id}')" class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded">
+                        </td>
                         <td class="px-6 py-4 font-mono text-sm">${c.id}</td>
-                        <td class="px-6 py-4 font-medium">${c.name}</td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium">${c.name}</div>
+                            <div class="text-xs text-gray-500">${c.email}</div>
+                        </td>
                         <td class="px-6 py-4 text-gray-400">${c.role}</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center">
@@ -1629,6 +2160,7 @@
                                     <div class="bg-indigo-500 h-2 rounded-full" style="width: ${c.score}%"></div>
                                 </div>
                                 <span class="text-sm">${c.score}%</span>
+                                ${c.bonus > 0 ? `<span class="ml-2 text-xs text-green-400">+${c.bonus}%</span>` : ''}
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-400">${c.special}</td>
@@ -1637,18 +2169,24 @@
                                 ${c.status}
                             </span>
                         </td>
+                        <td class="px-6 py-4 text-sm text-gray-400">
+                            ${new Date(c.appliedDate).toLocaleDateString()}
+                        </td>
                         <td class="px-6 py-4">
-                            <button onclick="viewCandidate('${c.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3">
+                            <button onclick="viewCandidate('${c.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </button>
                             ${c.status === 'review' ? `
-                                <button onclick="updateStatus('${c.id}', 'selected')" class="text-green-400 hover:text-green-300 mr-2">
+                                <button onclick="updateStatus('${c.id}', 'selected')" class="text-green-400 hover:text-green-300 mr-2" title="Select">
                                     <i class="fas fa-check"></i>
                                 </button>
-                                <button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-400 hover:text-red-300">
+                                <button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-400 hover:text-red-300" title="Reject">
                                     <i class="fas fa-times"></i>
                                 </button>
                             ` : ''}
+                            <button onclick="deleteCandidate('${c.id}')" class="text-gray-500 hover:text-red-400 ml-2" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -1656,8 +2194,58 @@
             });
         }
 
+        function filterCandidates() {
+            currentPage = 1;
+            loadCandidates();
+        }
+
+        function sortTable(field) {
+            if (currentSort.field === field) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.field = field;
+                currentSort.direction = 'desc';
+            }
+            loadCandidates();
+        }
+
+        function changePage(direction) {
+            const maxPage = Math.ceil(filteredCandidates.length / itemsPerPage);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= maxPage) {
+                currentPage = newPage;
+                renderTable();
+            }
+        }
+
+        function toggleSelection(id) {
+            if (selectedCandidates.has(id)) {
+                selectedCandidates.delete(id);
+            } else {
+                selectedCandidates.add(id);
+            }
+        }
+
+        function toggleSelectAll() {
+            const checkbox = document.getElementById('select-all');
+            if (checkbox.checked) {
+                filteredCandidates.forEach(c => selectedCandidates.add(c.id));
+            } else {
+                selectedCandidates.clear();
+            }
+            renderTable();
+        }
+
+        function refreshData() {
+            loadCandidates();
+            showToast('Data refreshed');
+        }
+
         function viewCandidate(id) {
-            const c = candidates.find(x => x.id === id);
+            const c = getCandidates().find(x => x.id === id);
+            if (!c) return;
+            
             const modal = document.getElementById('candidate-modal');
             const content = document.getElementById('modal-content');
             
@@ -1668,86 +2256,123 @@
                         <div class="space-y-3 text-sm">
                             <div class="flex justify-between border-b border-gray-800 pb-2">
                                 <span class="text-gray-400">Full Name</span>
-                                <span>${c.name}</span>
+                                <span class="font-medium">${c.name}</span>
                             </div>
                             <div class="flex justify-between border-b border-gray-800 pb-2">
                                 <span class="text-gray-400">Application ID</span>
-                                <span class="font-mono">${c.id}</span>
+                                <span class="font-mono text-indigo-400">${c.id}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-800 pb-2">
+                                <span class="text-gray-400">Email</span>
+                                <span>${c.email}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-800 pb-2">
+                                <span class="text-gray-400">Phone</span>
+                                <span>${c.phone}</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-800 pb-2">
+                                <span class="text-gray-400">Location</span>
+                                <span>${c.city}, ${c.state}</span>
                             </div>
                             <div class="flex justify-between border-b border-gray-800 pb-2">
                                 <span class="text-gray-400">Applied For</span>
-                                <span>${c.role}</span>
+                                <span class="font-medium">${c.role}</span>
                             </div>
                             <div class="flex justify-between border-b border-gray-800 pb-2">
-                                <span class="text-gray-400">Exam Score</span>
-                                <span class="text-green-400 font-bold">${c.score}%</span>
-                            </div>
-                            <div class="flex justify-between border-b border-gray-800 pb-2">
-                                <span class="text-gray-400">Special Category</span>
-                                <span>${c.special}</span>
+                                <span class="text-gray-400">Applied Date</span>
+                                <span>${new Date(c.appliedDate).toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
                     
                     <div>
-                        <h4 class="text-lg font-bold mb-4 text-indigo-400">Documents</h4>
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                                <div class="flex items-center">
-                                    <i class="fas fa-id-card text-indigo-400 mr-3"></i>
-                                    <span class="text-sm">Aadhar Card</span>
+                        <h4 class="text-lg font-bold mb-4 text-indigo-400">Examination Results</h4>
+                        <div class="space-y-4">
+                            <div class="bg-gray-800/30 p-4 rounded-xl">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-400">Technical Score</span>
+                                    <span class="text-2xl font-bold text-indigo-400">${c.baseScore || c.score}%</span>
                                 </div>
-                                <button class="text-indigo-400 hover:text-indigo-300 text-sm">View</button>
-                            </div>
-                            <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                                <div class="flex items-center">
-                                    <i class="fas fa-credit-card text-indigo-400 mr-3"></i>
-                                    <span class="text-sm">PAN Card</span>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-indigo-500 h-2 rounded-full" style="width: ${c.baseScore || c.score}%"></div>
                                 </div>
-                                <button class="text-indigo-400 hover:text-indigo-300 text-sm">View</button>
                             </div>
-                            <div class="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                                <div class="flex items-center">
-                                    <i class="fas fa-file-alt text-indigo-400 mr-3"></i>
-                                    <span class="text-sm">Resume/CV</span>
+                            
+                            <div class="bg-gray-800/30 p-4 rounded-xl">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-400">IQ Test Score</span>
+                                    <span class="text-2xl font-bold text-purple-400">${c.iqScore || 0}%</span>
                                 </div>
-                                <button class="text-indigo-400 hover:text-indigo-300 text-sm">Download</button>
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-purple-500 h-2 rounded-full" style="width: ${c.iqScore || 0}%"></div>
+                                </div>
                             </div>
-                            ${c.special !== 'None' ? `
-                                <div class="flex items-center justify-between p-3 bg-yellow-900/20 border border-yellow-700/30 rounded-lg">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-certificate text-yellow-400 mr-3"></i>
-                                        <span class="text-sm">Special Category Proof</span>
+                            
+                            ${c.bonus > 0 ? `
+                                <div class="bg-green-900/20 border border-green-700/30 p-4 rounded-xl">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-green-400">Special Category Bonus</span>
+                                        <span class="text-2xl font-bold text-green-400">+${c.bonus}%</span>
                                     </div>
-                                    <button class="text-yellow-400 hover:text-yellow-300 text-sm">Verify</button>
+                                    <div class="text-sm text-gray-400 mt-1">${c.special}</div>
                                 </div>
                             ` : ''}
+                            
+                            <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-300">Final Score</span>
+                                    <span class="text-3xl font-bold text-white">${c.score}%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="mt-6 pt-6 border-t border-gray-800">
-                    <h4 class="text-lg font-bold mb-4 text-indigo-400">Examination Details</h4>
-                    <div class="grid grid-cols-3 gap-4 text-center">
-                        <div class="bg-gray-800/30 p-4 rounded-xl">
-                            <div class="text-2xl font-bold text-indigo-400">18/20</div>
-                            <div class="text-xs text-gray-500 mt-1">Technical Score</div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-lg font-bold mb-4 text-indigo-400">Documents Uploaded</h4>
+                        <div class="space-y-2">
+                            ${Object.entries(c.documents).map(([key, value]) => `
+                                <div class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg ${value ? 'border-l-4 border-green-500' : 'border-l-4 border-gray-600'}">
+                                    <div class="flex items-center">
+                                        <i class="fas ${value ? 'fa-check-circle text-green-400' : 'fa-times-circle text-gray-600'} mr-3"></i>
+                                        <span class="text-sm capitalize">${key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                    </div>
+                                    ${value ? '<span class="text-xs text-green-400">Verified</span>' : '<span class="text-xs text-gray-500">Not Uploaded</span>'}
+                                </div>
+                            `).join('')}
                         </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-lg font-bold mb-4 text-indigo-400">Proctoring Report</h4>
                         <div class="bg-gray-800/30 p-4 rounded-xl">
-                            <div class="text-2xl font-bold text-purple-400">4/5</div>
-                            <div class="text-xs text-gray-500 mt-1">IQ Test</div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-gray-400">Tab Violations</span>
+                                <span class="${c.violations > 0 ? 'text-red-400' : 'text-green-400'} font-bold">${c.violations}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-400">Exam Status</span>
+                                <span class="${c.violations >= 3 ? 'text-red-400' : 'text-green-400'}">
+                                    ${c.violations >= 3 ? 'Terminated' : 'Completed'}
+                                </span>
+                            </div>
                         </div>
-                        <div class="bg-gray-800/30 p-4 rounded-xl">
-                            <div class="text-2xl font-bold text-green-400">Pass</div>
-                            <div class="text-xs text-gray-500 mt-1">Proctoring</div>
+                        
+                        <div class="mt-4">
+                            <label class="block text-sm text-gray-400 mb-2">Admin Notes</label>
+                            <textarea id="admin-notes-${c.id}" class="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white text-sm" rows="3" placeholder="Add notes...">${c.notes || ''}</textarea>
+                            <button onclick="saveNotes('${c.id}')" class="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition">Save Notes</button>
                         </div>
                     </div>
                 </div>
                 
-                <div class="mt-6 flex justify-end space-x-4">
+                <div class="mt-6 pt-6 border-t border-gray-800 flex justify-end space-x-4">
                     <button onclick="closeModal()" class="px-6 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition">Close</button>
-                    ${c.status !== 'selected' && c.status !== 'rejected' ? `
+                    ${c.status !== 'selected' ? `
                         <button onclick="updateStatus('${c.id}', 'selected'); closeModal();" class="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">Select Candidate</button>
+                    ` : ''}
+                    ${c.status !== 'rejected' ? `
                         <button onclick="updateStatus('${c.id}', 'rejected'); closeModal();" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">Reject</button>
                     ` : ''}
                 </div>
@@ -1761,25 +2386,95 @@
         }
 
         function updateStatus(id, status) {
-            const c = candidates.find(x => x.id === id);
-            if (c) {
-                c.status = status;
+            if (updateCandidate(id, { status })) {
+                showToast(`Candidate ${status === 'selected' ? 'selected' : 'rejected'} successfully`);
                 loadCandidates();
             }
         }
 
-        function filterCandidates() {
-            const filter = document.getElementById('status-filter').value;
-            // In real app, filter logic here
-            loadCandidates();
+        function saveNotes(id) {
+            const notes = document.getElementById(`admin-notes-${id}`).value;
+            if (updateCandidate(id, { notes })) {
+                showToast('Notes saved successfully');
+            }
         }
 
+        // Excel Export Functions
         function exportToExcel() {
-            alert('Exporting to Excel... (In production, this would generate a .xlsx file)');
+            const candidates = getCandidates();
+            exportCandidatesToExcel(candidates, 'All_Candidates.xlsx');
+        }
+
+        function exportSelectedExcel() {
+            if (selectedCandidates.size === 0) {
+                showToast('Please select at least one candidate', 'error');
+                return;
+            }
+            
+            const allCandidates = getCandidates();
+            const selected = allCandidates.filter(c => selectedCandidates.has(c.id));
+            exportCandidatesToExcel(selected, 'Selected_Candidates.xlsx');
+        }
+
+        function exportCandidatesToExcel(candidates, filename) {
+            // Prepare data for Excel
+            const data = candidates.map(c => ({
+                'Application ID': c.id,
+                'Full Name': c.name,
+                'Email': c.email,
+                'Phone': c.phone,
+                'Aadhar Number': c.aadhar,
+                'PAN Card': c.pan || 'N/A',
+                'Date of Birth': c.dob,
+                'City': c.city,
+                'State': c.state,
+                'Job Role': c.role,
+                'Technical Score (%)': c.baseScore || c.score,
+                'IQ Score (%)': c.iqScore || 0,
+                'Bonus Marks (%)': c.bonus || 0,
+                'Final Score (%)': c.score,
+                'Special Category': c.special,
+                'Status': c.status.toUpperCase(),
+                'Application Date': new Date(c.appliedDate).toLocaleString(),
+                'Photo Uploaded': c.documents.photo ? 'Yes' : 'No',
+                'Aadhar Uploaded': c.documents.aadhar ? 'Yes' : 'No',
+                'PAN Uploaded': c.documents.pan ? 'Yes' : 'No',
+                'CV Uploaded': c.documents.cv ? 'Yes' : 'No',
+                'Disability Cert': c.documents.disability ? 'Yes' : 'N/A',
+                'Service Cert': c.documents.service ? 'Yes' : 'N/A',
+                'Proctoring Violations': c.violations,
+                'Admin Notes': c.notes || ''
+            }));
+
+            // Create worksheet
+            const ws = XLSX.utils.json_to_sheet(data);
+            
+            // Set column widths
+            const colWidths = [
+                { wch: 15 }, { wch: 20 }, { wch: 25 }, { wch: 12 },
+                { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
+                { wch: 12 }, { wch: 20 }, { wch: 12 }, { wch: 12 },
+                { wch: 12 }, { wch: 12 }, { wch: 25 }, { wch: 12 },
+                { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
+                { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
+                { wch: 30 }
+            ];
+            ws['!cols'] = colWidths;
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Candidates");
+
+            // Generate Excel file
+            XLSX.writeFile(wb, filename);
+            
+            showToast(`Exported ${candidates.length} candidates to Excel`);
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            initializeStorage();
+            updateStats();
             showSection('home');
         });
     </script>
