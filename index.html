@@ -272,12 +272,252 @@
             object-fit: cover;
             border-radius: 8px;
         }
+
+        /* Admin Document Gallery Styles */
+        .admin-doc-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .admin-doc-card {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .admin-doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        .admin-doc-preview {
+            height: 160px;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-doc-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .admin-doc-icon {
+            font-size: 3.5rem;
+            opacity: 0.7;
+        }
+
+        .admin-doc-info {
+            padding: 1rem;
+        }
+
+        .admin-doc-info h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #f3f4f6;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .admin-doc-type {
+            font-size: 0.7rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .admin-doc-actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 1rem 1rem;
+        }
+
+        .btn-admin-view, .btn-admin-download {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .btn-admin-view {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+        }
+
+        .btn-admin-view:hover {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-admin-download {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .btn-admin-download:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .doc-verified-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(16, 185, 129, 0.9);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .doc-missing-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .fullscreen-preview {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .fullscreen-preview.active {
+            display: flex;
+        }
+
+        .fullscreen-preview img {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .fullscreen-preview iframe {
+            width: 90%;
+            height: 90vh;
+            border: none;
+        }
+
+        .fullscreen-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1.25rem;
+        }
+
+        .fullscreen-close:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(99, 102, 241, 0.9);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1.25rem;
+        }
+
+        .fullscreen-nav:hover {
+            background: rgba(99, 102, 241, 1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .fullscreen-prev {
+            left: 2rem;
+        }
+
+        .fullscreen-next {
+            right: 2rem;
+        }
+
+        .fullscreen-counter {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
     
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
+    <!-- Fullscreen Preview -->
+    <div id="fullscreen-preview" class="fullscreen-preview">
+        <button class="fullscreen-close" onclick="closeFullscreenPreview()">
+            <i class="fas fa-times"></i>
+        </button>
+        <button class="fullscreen-nav fullscreen-prev" onclick="navigateFullscreen(-1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <div id="fullscreen-content"></div>
+        <button class="fullscreen-nav fullscreen-next" onclick="navigateFullscreen(1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        <div class="fullscreen-counter" id="fullscreen-counter">1 / 5</div>
+    </div>
 
     <!-- Delete Confirmation Modal -->
     <div id="delete-confirm-modal" class="hidden modal-overlay">
@@ -323,6 +563,77 @@
                 <a id="preview-download" href="#" download class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center">
                     <i class="fas fa-download mr-2"></i>Download
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Document Gallery Modal -->
+    <div id="admin-doc-gallery-modal" class="hidden modal-overlay">
+        <div class="modal-content max-w-6xl">
+            <div class="p-6 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-gray-900/95 backdrop-blur z-10">
+                <div>
+                    <h3 class="text-2xl font-bold gradient-text">Document Gallery</h3>
+                    <p class="text-gray-400 text-sm mt-1" id="gallery-candidate-info">Candidate: John Doe • ID: NRX-2026-00001</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="downloadAllDocuments()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-sm flex items-center">
+                        <i class="fas fa-download mr-2"></i>Download All
+                    </button>
+                    <button onclick="closeAdminDocGallery()" class="text-gray-400 hover:text-white w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <!-- Document Stats -->
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                        <div class="text-2xl font-bold text-indigo-400" id="gallery-total-docs">0</div>
+                        <div class="text-xs text-gray-400 mt-1">Total Documents</div>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                        <div class="text-2xl font-bold text-green-400" id="gallery-verified-docs">0</div>
+                        <div class="text-xs text-gray-400 mt-1">Verified</div>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                        <div class="text-2xl font-bold text-yellow-400" id="gallery-pending-docs">0</div>
+                        <div class="text-xs text-gray-400 mt-1">Pending</div>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                        <div class="text-2xl font-bold text-red-400" id="gallery-missing-docs">0</div>
+                        <div class="text-xs text-gray-400 mt-1">Missing</div>
+                    </div>
+                </div>
+
+                <!-- Document Filter Tabs -->
+                <div class="flex space-x-2 mb-6 border-b border-gray-800 pb-4">
+                    <button onclick="filterGalleryDocs('all')" class="gallery-tab active px-4 py-2 rounded-lg text-sm font-medium transition bg-indigo-600 text-white" data-filter="all">
+                        All Documents
+                    </button>
+                    <button onclick="filterGalleryDocs('verified')" class="gallery-tab px-4 py-2 rounded-lg text-sm font-medium transition bg-gray-800 text-gray-400 hover:text-white" data-filter="verified">
+                        <i class="fas fa-check-circle mr-2"></i>Verified
+                    </button>
+                    <button onclick="filterGalleryDocs('pending')" class="gallery-tab px-4 py-2 rounded-lg text-sm font-medium transition bg-gray-800 text-gray-400 hover:text-white" data-filter="pending">
+                        <i class="fas fa-clock mr-2"></i>Pending
+                    </button>
+                    <button onclick="filterGalleryDocs('missing')" class="gallery-tab px-4 py-2 rounded-lg text-sm font-medium transition bg-gray-800 text-gray-400 hover:text-white" data-filter="missing">
+                        <i class="fas fa-exclamation-circle mr-2"></i>Missing
+                    </button>
+                </div>
+
+                <!-- Document Grid -->
+                <div id="admin-doc-gallery-grid" class="admin-doc-gallery">
+                    <!-- Documents injected here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="gallery-empty-state" class="hidden text-center py-12">
+                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-folder-open text-2xl text-gray-600"></i>
+                    </div>
+                    <p class="text-gray-500">No documents found in this category</p>
+                </div>
             </div>
         </div>
     </div>
@@ -1590,6 +1901,9 @@
         let currentSort = { field: 'appliedDate', direction: 'desc' };
         let selectedCandidates = new Set();
         let deleteCandidateId = null;
+        let currentGalleryCandidate = null;
+        let currentGalleryDocs = [];
+        let currentFullscreenIndex = 0;
         
         // Document Storage
         const uploadedDocuments = {};
@@ -2053,6 +2367,273 @@
                 deleteCandidate(deleteCandidateId);
                 closeDeleteModal();
             }
+        }
+
+        // Admin Document Gallery Functions
+        function openAdminDocGallery(candidateId) {
+            const candidate = getCandidates().find(c => c.id === candidateId);
+            if (!candidate) return;
+            
+            currentGalleryCandidate = candidate;
+            
+            // Update header info
+            document.getElementById('gallery-candidate-info').textContent = 
+                `Candidate: ${candidate.name} • ID: ${candidate.id} • ${candidate.role}`;
+            
+            // Build document list
+            currentGalleryDocs = buildDocumentList(candidate);
+            
+            // Update stats
+            updateGalleryStats();
+            
+            // Render gallery
+            renderGalleryDocs('all');
+            
+            // Show modal
+            document.getElementById('admin-doc-gallery-modal').classList.remove('hidden');
+        }
+
+        function buildDocumentList(candidate) {
+            const docs = [];
+            const docTypes = [
+                { key: 'photo', label: 'Passport Photo', icon: 'fa-user-circle', required: true },
+                { key: 'aadhar', label: 'Aadhar Card', icon: 'fa-id-card', required: true },
+                { key: 'pan', label: 'PAN Card', icon: 'fa-credit-card', required: false },
+                { key: 'cv', label: 'Resume/CV', icon: 'fa-file-alt', required: true },
+                { key: 'disability', label: 'Disability Certificate', icon: 'fa-wheelchair', required: false, special: true },
+                { key: 'service', label: 'Service Certificate', icon: 'fa-medal', required: false, special: true },
+                { key: 'experience', label: 'Experience Certificates', icon: 'fa-certificate', required: false }
+            ];
+            
+            docTypes.forEach(docType => {
+                const hasDoc = candidate.documents && candidate.documents[docType.key];
+                const isRequired = docType.required && !docType.special;
+                const isSpecialRequired = docType.special && 
+                    ((docType.key === 'disability' && candidate.specialCategories && candidate.specialCategories.includes('pwd')) ||
+                     (docType.key === 'service' && candidate.specialCategories && 
+                      (candidate.specialCategories.includes('ex-serviceman') || candidate.specialCategories.includes('experienced'))));
+                
+                let status = 'missing';
+                if (hasDoc) {
+                    status = 'verified';
+                } else if (isRequired || isSpecialRequired) {
+                    status = 'pending';
+                }
+                
+                // Only include if required or has document
+                if (isRequired || isSpecialRequired || hasDoc) {
+                    docs.push({
+                        ...docType,
+                        status: status,
+                        data: hasDoc ? generateMockDocData(docType.key, docType.label) : null
+                    });
+                }
+            });
+            
+            return docs;
+        }
+
+        function generateMockDocData(key, label) {
+            // Generate mock document data for demo purposes
+            // In real implementation, this would come from the server
+            const mockData = {
+                name: `${label}_${key}.pdf`,
+                type: key === 'photo' ? 'image/jpeg' : 'application/pdf',
+                size: Math.floor(Math.random() * 2000000) + 500000,
+                uploadDate: new Date().toLocaleDateString(),
+                url: key === 'photo' ? 
+                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop' :
+                    null // PDFs would have blob URLs in real implementation
+            };
+            return mockData;
+        }
+
+        function updateGalleryStats() {
+            const total = currentGalleryDocs.length;
+            const verified = currentGalleryDocs.filter(d => d.status === 'verified').length;
+            const pending = currentGalleryDocs.filter(d => d.status === 'pending').length;
+            const missing = currentGalleryDocs.filter(d => d.status === 'missing').length;
+            
+            document.getElementById('gallery-total-docs').textContent = total;
+            document.getElementById('gallery-verified-docs').textContent = verified;
+            document.getElementById('gallery-pending-docs').textContent = pending;
+            document.getElementById('gallery-missing-docs').textContent = missing;
+        }
+
+        function renderGalleryDocs(filter) {
+            const grid = document.getElementById('admin-doc-gallery-grid');
+            const emptyState = document.getElementById('gallery-empty-state');
+            
+            grid.innerHTML = '';
+            
+            const filteredDocs = filter === 'all' ? currentGalleryDocs : 
+                                currentGalleryDocs.filter(d => d.status === filter);
+            
+            if (filteredDocs.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            
+            filteredDocs.forEach((doc, index) => {
+                const card = document.createElement('div');
+                card.className = 'admin-doc-card';
+                
+                const statusBadge = doc.status === 'verified' ? 
+                    '<div class="doc-verified-badge"><i class="fas fa-check"></i></div>' :
+                    doc.status === 'missing' ?
+                    '<div class="doc-missing-badge"><i class="fas fa-times"></i></div>' : '';
+                
+                const previewContent = doc.status === 'verified' && doc.data ?
+                    (doc.key === 'photo' && doc.data.url ? 
+                        `<img src="${doc.data.url}" alt="${doc.label}">` :
+                        `<i class="fas fa-file-pdf admin-doc-icon text-red-400"></i>`) :
+                    `<i class="fas ${doc.icon} admin-doc-icon text-gray-600"></i>`;
+                
+                const actions = doc.status === 'verified' && doc.data ? `
+                    <button class="btn-admin-view" onclick="viewGalleryDoc(${index})">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="btn-admin-download" onclick="downloadGalleryDoc(${index})">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                ` : `
+                    <button class="btn-admin-view opacity-50 cursor-not-allowed" disabled>
+                        <i class="fas fa-eye"></i> Not Available
+                    </button>
+                `;
+                
+                card.innerHTML = `
+                    <div class="admin-doc-preview">
+                        ${statusBadge}
+                        ${previewContent}
+                    </div>
+                    <div class="admin-doc-info">
+                        <h4>${doc.label}</h4>
+                        <div class="admin-doc-type">${doc.status.toUpperCase()}</div>
+                        ${doc.data ? `<div class="text-xs text-gray-500 mt-1">${formatFileSize(doc.data.size)}</div>` : ''}
+                    </div>
+                    <div class="admin-doc-actions">
+                        ${actions}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function filterGalleryDocs(filter) {
+            // Update tab styles
+            document.querySelectorAll('.gallery-tab').forEach(tab => {
+                if (tab.dataset.filter === filter) {
+                    tab.classList.add('bg-indigo-600', 'text-white');
+                    tab.classList.remove('bg-gray-800', 'text-gray-400');
+                } else {
+                    tab.classList.remove('bg-indigo-600', 'text-white');
+                    tab.classList.add('bg-gray-800', 'text-gray-400');
+                }
+            });
+            
+            renderGalleryDocs(filter);
+        }
+
+        function viewGalleryDoc(index) {
+            const doc = currentGalleryDocs[index];
+            if (!doc || !doc.data) return;
+            
+            currentFullscreenIndex = index;
+            const preview = document.getElementById('fullscreen-preview');
+            const content = document.getElementById('fullscreen-content');
+            const counter = document.getElementById('fullscreen-counter');
+            
+            content.innerHTML = '';
+            
+            if (doc.key === 'photo' && doc.data.url) {
+                const img = document.createElement('img');
+                img.src = doc.data.url;
+                img.alt = doc.label;
+                content.appendChild(img);
+            } else {
+                // For PDFs, show icon with message
+                const div = document.createElement('div');
+                div.className = 'text-center text-white';
+                div.innerHTML = `
+                    <i class="fas fa-file-pdf text-6xl text-red-400 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">${doc.label}</h3>
+                    <p class="text-gray-400 mb-4">${doc.data.name}</p>
+                    <button onclick="downloadGalleryDoc(${index})" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition">
+                        <i class="fas fa-download mr-2"></i>Download PDF
+                    </button>
+                `;
+                content.appendChild(div);
+            }
+            
+            counter.textContent = `${index + 1} / ${currentGalleryDocs.filter(d => d.status === 'verified').length}`;
+            preview.classList.add('active');
+        }
+
+        function closeFullscreenPreview() {
+            document.getElementById('fullscreen-preview').classList.remove('active');
+        }
+
+        function navigateFullscreen(direction) {
+            const verifiedDocs = currentGalleryDocs.filter(d => d.status === 'verified');
+            if (verifiedDocs.length === 0) return;
+            
+            let newIndex = currentFullscreenIndex + direction;
+            if (newIndex < 0) newIndex = verifiedDocs.length - 1;
+            if (newIndex >= verifiedDocs.length) newIndex = 0;
+            
+            // Find actual index in currentGalleryDocs
+            const actualIndex = currentGalleryDocs.findIndex(d => d === verifiedDocs[newIndex]);
+            viewGalleryDoc(actualIndex);
+        }
+
+        function downloadGalleryDoc(index) {
+            const doc = currentGalleryDocs[index];
+            if (!doc || !doc.data) return;
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = doc.data.name;
+            
+            if (doc.key === 'photo' && doc.data.url) {
+                link.href = doc.data.url;
+            } else {
+                // For demo, create a dummy blob
+                const blob = new Blob(['Dummy PDF content'], { type: 'application/pdf' });
+                link.href = URL.createObjectURL(blob);
+            }
+            
+            link.click();
+            showToast(`Downloading ${doc.label}...`);
+        }
+
+        function downloadAllDocuments() {
+            const verifiedDocs = currentGalleryDocs.filter(d => d.status === 'verified');
+            if (verifiedDocs.length === 0) {
+                showToast('No documents available to download', 'error');
+                return;
+            }
+            
+            showToast(`Preparing ${verifiedDocs.length} documents for download...`);
+            
+            // In real implementation, this would zip all files
+            verifiedDocs.forEach((doc, index) => {
+                setTimeout(() => {
+                    const docIndex = currentGalleryDocs.indexOf(doc);
+                    downloadGalleryDoc(docIndex);
+                }, index * 500);
+            });
+        }
+
+        function closeAdminDocGallery() {
+            document.getElementById('admin-doc-gallery-modal').classList.add('hidden');
+            currentGalleryCandidate = null;
+            currentGalleryDocs = [];
         }
 
         // Sample Questions Database
@@ -2703,6 +3284,9 @@
                             <button onclick="viewCandidate('${c.id}')" class="text-indigo-400 hover:text-indigo-300 mr-3" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </button>
+                            <button onclick="openAdminDocGallery('${c.id}')" class="text-green-400 hover:text-green-300 mr-3" title="View Documents">
+                                <i class="fas fa-folder-open"></i>
+                            </button>
                             ${c.status === 'review' ? `
                                 <button onclick="updateStatus('${c.id}', 'selected')" class="text-green-400 hover:text-green-300 mr-2" title="Select">
                                     <i class="fas fa-check"></i>
@@ -3035,6 +3619,19 @@
             
             document.getElementById('doc-preview-modal').addEventListener('click', function(e) {
                 if (e.target === this) closeDocPreview();
+            });
+
+            document.getElementById('admin-doc-gallery-modal').addEventListener('click', function(e) {
+                if (e.target === this) closeAdminDocGallery();
+            });
+
+            // Keyboard navigation for fullscreen preview
+            document.addEventListener('keydown', function(e) {
+                if (document.getElementById('fullscreen-preview').classList.contains('active')) {
+                    if (e.key === 'Escape') closeFullscreenPreview();
+                    if (e.key === 'ArrowLeft') navigateFullscreen(-1);
+                    if (e.key === 'ArrowRight') navigateFullscreen(1);
+                }
             });
         });
     </script>
