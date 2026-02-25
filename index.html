@@ -2434,19 +2434,27 @@
         }
 
         function generateMockDocData(key, label) {
-            // Generate mock document data for demo purposes
-            // In real implementation, this would come from the server
-            const mockData = {
-                name: `${label}_${key}.pdf`,
-                type: key === 'photo' ? 'image/jpeg' : 'application/pdf',
-                size: Math.floor(Math.random() * 2000000) + 500000,
-                uploadDate: new Date().toLocaleDateString(),
-                url: key === 'photo' ? 
-                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop' :
-                    null // PDFs would have blob URLs in real implementation
-            };
-            return mockData;
-        }
+
+    let fileUrl = null;
+
+    if (key === 'photo') {
+        fileUrl = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop';
+    } else {
+        const blob = new Blob(
+            ['This is a mock PDF document for demo purposes.'],
+            { type: 'application/pdf' }
+        );
+        fileUrl = URL.createObjectURL(blob);
+    }
+
+    return {
+        name: `${label}_${key}.${key === 'photo' ? 'jpg' : 'pdf'}`,
+        type: key === 'photo' ? 'image/jpeg' : 'application/pdf',
+        size: Math.floor(Math.random() * 2000000) + 500000,
+        uploadDate: new Date().toLocaleDateString(),
+        url: fileUrl
+    };
+}
 
         function updateGalleryStats() {
             const total = currentGalleryDocs.length;
@@ -2594,6 +2602,8 @@
 
         function downloadGalleryDoc(index) {
             const doc = currentGalleryDocs[index];
+            console.log(doc);
+            // return;
             if (!doc || !doc.data) return;
             
             // Create download link
@@ -2700,6 +2710,18 @@
             
             if (sectionId === 'home') {
                 updateStats();
+            }
+            if(sectionId == 'admin-login'){
+                if(localStorage.getItem('isAdminLoggedIn') && localStorage.getItem('adminId')){
+                            document.getElementById('admin-login').classList.add('hidden');
+
+                    document.getElementById('admin-dashboard').classList.remove('hidden');
+
+        initializeCharts();
+        loadCandidates();
+        showToast('Welcome back, Admin!');
+                }
+
             }
         }
 
@@ -3084,24 +3106,35 @@
         }
 
         // Admin Functions
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const id = document.getElementById('admin-id').value;
-            const pass = document.getElementById('admin-password').value;
-            const key = document.getElementById('admin-key').value;
-            
-            if (id === 'admin' && pass === 'admin123' && key === '123456') {
-                document.getElementById('admin-login').classList.add('hidden');
-                document.getElementById('admin-dashboard').classList.remove('hidden');
-                initializeCharts();
-                loadCandidates();
-                showToast('Welcome back, Admin!');
-            } else {
-                showToast('Invalid credentials', 'error');
-            }
-        }
+        // Admin Functions
+function handleAdminLogin(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('admin-id').value;
+    const pass = document.getElementById('admin-password').value;
+    const key = document.getElementById('admin-key').value;
+
+    if (id === 'admin' && pass === 'admin123' && key === '123456') {
+
+        // Store login state in localStorage
+        localStorage.setItem('isAdminLoggedIn', 'true');
+        localStorage.setItem('adminId', id);
+
+        document.getElementById('admin-login').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+
+        initializeCharts();
+        loadCandidates();
+        showToast('Welcome back, Admin!');
+
+    } else {
+        showToast('Invalid credentials', 'error');
+    }
+}
 
         function logout() {
+            localStorage.removeItem('adminId');
+            localStorage.removeItem('isAdminLoggedIn')
             document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('admin-login').classList.remove('hidden');
             document.getElementById('admin-form').reset();
