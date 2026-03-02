@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branches - NexusRecruit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glass-effect {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        .nav-link.active {
+            color: white !important;
+            border-bottom: 2px solid #6366f1;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-effect border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center" onclick="window.location.href='index.html'">
+                    <i class="fas fa-network-wired text-indigo-500 text-2xl mr-2"></i>
+                    <span class="text-2xl font-bold gradient-text">NexusRecruit</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="nav-link text-gray-300 hover:text-white transition">Home</a>
+                    <a href="about.html" class="nav-link text-gray-300 hover:text-white transition">About Us</a>
+                    <a href="branches.html" class="nav-link text-gray-300 hover:text-white transition">Branches</a>
+                    <a href="join.html" class="nav-link bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition neon-glow">
+                        <i class="fas fa-user-plus mr-2"></i>New Joining
+                    </a>
+                    <a href="admin.html" class="nav-link text-gray-300 hover:text-white transition">
+                        <i class="fas fa-lock mr-2"></i>Admin
+                    </a>
+                </div>
+                
+                <button class="md:hidden text-gray-300" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t border-gray-800">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="index.html" class="block w-full text-left py-2 text-gray-300">Home</a>
+                <a href="about.html" class="block w-full text-left py-2 text-gray-300">About Us</a>
+                <a href="branches.html" class="block w-full text-left py-2 text-gray-300">Branches</a>
+                <a href="join.html" class="block w-full text-left py-2 text-indigo-400">New Joining</a>
+                <a href="admin.html" class="block w-full text-left py-2 text-gray-300">Admin Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-16">
+        <section class="min-h-screen bg-gray-900 py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold mb-4">Our <span class="gradient-text">Branches</span></h2>
+                    <p class="text-gray-400">Expanding across India with current focus on Punjab region</p>
+                </div>
+
+                <!-- Map Visualization -->
+                <div class="glass-effect rounded-3xl p-8 mb-12 border border-gray-800 relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-10">
+                        <svg viewBox="0 0 800 600" class="w-full h-full">
+                            <path d="M 400 300 Q 450 250 500 300 T 600 300" stroke="#6366f1" stroke-width="2" fill="none"/>
+                            <circle cx="400" cy="300" r="8" fill="#ef4444" class="pulse-ring"/>
+                            <circle cx="500" cy="280" r="6" fill="#6366f1"/>
+                            <circle cx="600" cy="300" r="6" fill="#6366f1"/>
+                            <text x="400" y="330" fill="white" font-size="12" text-anchor="middle">Ludhiana (HQ)</text>
+                        </svg>
+                    </div>
+                    
+                    <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Punjab Branches -->
+                        <div class="bg-gray-800/50 p-6 rounded-2xl border border-indigo-500/30 hover:border-indigo-500 transition">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="bg-green-900/50 text-green-400 px-3 py-1 rounded-full text-xs font-bold">ACTIVE</span>
+                                <i class="fas fa-building text-indigo-400"></i>
+                            </div>
+                            <h3 class-lg mb-2="font-bold text">Ludhiana</h3>
+                            <p class="text-gray-400 text-sm mb-3">Headquarters</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-map-marker-alt w-5 text-indigo-400"></i>
+                                    Industrial Area, Phase 1
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-briefcase w-5 text-indigo-400"></i>
+                                    <span id="ludhiana-jobs">1,240</span> Open Positions
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-phone w-5 text-indigo-400"></i>
+                                    +91 161 123 4567
+                                </div>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-700">
+                                <div class="text-xs text-gray-500 mb-2">Hot Categories:</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-indigo-900/30 text-indigo-300 px-2 py-1 rounded text-xs">Manufacturing</span>
+                                    <span class="bg-indigo-900/30 text-indigo-300 px-2 py-1 rounded text-xs">Textile</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 hover:border-indigo-500 transition">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="bg-green-900/50 text-green-400 px-3 py-1 rounded-full text-xs font-bold">ACTIVE</span>
+                                <i class="fas fa-building text-indigo-400"></i>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">Chandigarh</h3>
+                            <p class="text-gray-400 text-sm mb-3">Regional Office</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-map-marker-alt w-5 text-indigo-400"></i>
+                                    Sector 17, IT Park
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-briefcase w-5 text-indigo-400"></i>
+                                    856 Open Positions
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-phone w-5 text-indigo-400"></i>
+                                    +91 172 123 4567
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 hover:border-indigo-500 transition">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="bg-yellow-900/50 text-yellow-400 px-3 py-1 rounded-full text-xs font-bold">UPCOMING</span>
+                                <i class="fas fa-building text-gray-400"></i>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">Amritsar</h3>
+                            <p class="text-gray-400 text-sm mb-3">Opening Q2 2026</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
+                                    Golden Temple Road
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-clock w-5 text-gray-400"></i>
+                                    Launching Soon
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 hover:border-indigo-500 transition">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="bg-blue-900/50 text-blue-400 px-3 py-1 rounded-full text-xs font-bold">PLANNED</span>
+                                <i class="fas fa-building text-gray-400"></i>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">Jalandhar</h3>
+                            <p class="text-gray-400 text-sm mb-3">Planned 2026</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
+                                    Model Town
+                                </div>
+                                <div class="flex items-center text-gray-300">
+                                    <i class="fas fa-clock w-5 text-gray-400"></i>
+                                    Under Construction
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All India Presence -->
+                <div class="glass-effect rounded-2xl p-8 border border-gray-800">
+                    <h3 class="text-2xl font-bold mb-6">Pan India Expansion Plan</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div class="text-center p-4 bg-gray-800/30 rounded-xl">
+                            <div class="text-indigo-400 font-bold">Delhi NCR</div>
+                            <div class="text-xs text-gray-500 mt-1">Coming Soon</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-800/30 rounded-xl">
+                            <div class="text-indigo-400 font-bold">Mumbai</div>
+                            <div class="text-xs text-gray-500 mt-1">Q3 2026</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-800/30 rounded-xl">
+                            <div class="text-indigo-400 font-bold">Bangalore</div>
+                            <div class="text-xs text-gray-500 mt-1">Q4 2026</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-800/30 rounded-xl">
+                            <div class="text-indigo-400 font-bold">Hyderabad</div>
+                            <div class="text-xs text-gray-500 mt-1">2027</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-800/30 rounded-xl">
+                            <div class="text-indigo-400 font-bold">Chennai</div>
+                            <div class="text-xs text-gray-500 mt-1">2027</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-800/30 rounded-xl">
+                            <div class="text-indigo-400 font-bold">Kolkata</div>
+                            <div class="text-xs text-gray-500 mt-1">2027</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

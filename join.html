@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Joining - NexusRecruit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * { font-family: 'Inter', sans-serif; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glass-effect {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .neon-glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+        
+        .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        
+        .exam-timer { font-variant-numeric: tabular-nums; }
+        
+        .proctoring-active { border: 2px solid #ef4444; animation: border-pulse 2s infinite; }
+        
+        @keyframes border-pulse {
+            0%, 100% { border-color: #ef4444; }
+            50% { border-color: #f87171; }
+        }
+        
+        .scan-line {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            animation: scan 2s linear infinite;
+        }
+        
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        
+        .toast { animation: slideIn 0.3s ease-out; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .document-card {
+            background: rgba(31, 41, 55, 0.8);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .document-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+        
+        .doc-preview {
+            height: 140px;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .doc-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .doc-icon { font-size: 3rem; opacity: 0.8; }
+        
+        .doc-info { padding: 1rem; }
+        .doc-info h4 { font-size: 0.9rem; font-weight: 600; color: #f3f4f6; margin-bottom: 0.5rem; }
+        
+        .doc-meta { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+        
+        .doc-type {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .doc-size { color: #9ca3af; font-size: 0.75rem; }
+        .doc-date { color: #6b7280; font-size: 0.75rem; }
+        
+        .doc-actions { display: flex; gap: 0.5rem; padding: 0 1rem 1rem; }
+        
+        .btn-view-doc, .btn-delete-doc {
+            flex: 1; padding: 0.5rem; border: none; border-radius: 6px;
+            font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 0.25rem;
+        }
+        
+        .btn-view-doc { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .btn-view-doc:hover { background: rgba(59, 130, 246, 0.3); }
+        
+        .btn-delete-doc { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .btn-delete-doc:hover { background: rgba(239, 68, 68, 0.3); }
+        
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; padding: 1rem;
+        }
+        
+        .modal-content {
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            border-radius: 16px;
+            max-width: 900px; width: 100%; max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .preview-image { max-width: 100%; max-height: 70vh; object-fit: contain; }
+        
+        .nav-link.active { color: white !important; border-bottom: 2px solid #6366f1; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
+    
+    <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+    
+    <div id="doc-preview-modal" class="hidden modal-overlay">
+        <div class="modal-content">
+            <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold" id="preview-doc-name">Document Preview</h3>
+                <button onclick="closeDocPreview()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4 flex items-center justify-center bg-gray-950" id="preview-container"></div>
+            <div class="p-4 border-t border-gray-700 flex justify-between items-center bg-gray-900">
+                <div class="text-sm text-gray-400">
+                    <span id="preview-doc-type" class="text-indigo-400 font-medium"></span> • 
+                    <span id="preview-doc-size"></span>
+                </div>
+                <a id="preview-download" href="#" download class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center">
+                    <i class="fas fa-download mr-2"></i>Download
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="fixed w-full z-50 glass-effect border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center" onclick="window.location.href='index.html'">
+                    <i class="fas fa-network-wired text-indigo-500 text-2xl mr-2"></i>
+                    <span class="text-2xl font-bold gradient-text">NexusRecruit</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="nav-link text-gray-300 hover:text-white transition">Home</a>
+                    <a href="about.html" class="nav-link text-gray-300 hover:text-white transition">About Us</a>
+                    <a href="branches.html" class="nav-link text-gray-300 hover:text-white transition">Branches</a>
+                    <a href="join.html" class="nav-link bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition neon-glow">
+                        <i class="fas fa-user-plus mr-2"></i>New Joining
+                    </a>
+                    <a href="admin.html" class="nav-link text-gray-300 hover:text-white transition">
+                        <i class="fas fa-lock mr-2"></i>Admin
+                    </a>
+                </div>
+                
+                <button class="md:hidden text-gray-300" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t border-gray-800">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="index.html" class="block w-full text-left py-2 text-gray-300">Home</a>
+                <a href="about.html" class="block w-full text-left py-2 text-gray-300">About Us</a>
+                <a href="branches.html" class="block w-full text-left py-2 text-gray-300">Branches</a>
+                <a href="join.html" class="block w-full text-left py-2 text-indigo-400">New Joining</a>
+                <a href="admin.html" class="block w-full text-left py-2 text-gray-300">Admin Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-16">
+        <section class="min-h-screen bg-gray-900 py-8">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="mb-8">
+                    <div class="flex items-center justify-between relative">
+                        <div class="absolute left-0 right-0 top-1/2 h-1 bg-gray-800 -z-10"></div>
+                        <div class="flex flex-col items-center">
+                            <div id="step-1-indicator" class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">1</div>
+                            <span class="text-xs mt-2 text-gray-400">KYC</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="step-2-indicator" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-500">2</div>
+                            <span class="text-xs mt-2 text-gray-400">Category</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="step-3-indicator" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-500">3</div>
+                            <span class="text-xs mt-2 text-gray-400">Documents</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="step-4-indicator" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-500">4</div>
+                            <span class="text-xs mt-2 text-gray-400">Exam</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div id="step-5-indicator" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-500">5</div>
+                            <span class="text-xs mt-2 text-gray-400">Review</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 1: KYC -->
+                <div id="step-1" class="glass-effect rounded-2xl p-8 border border-gray-800">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold gradient-text">KYC Verification & Special Categories</h2>
+                        <div class="bg-indigo-900/50 px-4 py-2 rounded-lg border border-indigo-500/30">
+                            <i class="fas fa-shield-alt text-indigo-400 mr-2"></i>
+                            <span class="text-sm text-indigo-300">Secure Verification</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-900/20 border border-yellow-700/50 rounded-xl p-4 mb-6 flex items-start">
+                        <i class="fas fa-info-circle text-yellow-500 mt-1 mr-3"></i>
+                        <div>
+                            <p class="text-yellow-200 text-sm font-semibold">Special Benefits Available</p>
+                            <p class="text-yellow-200/80 text-sm mt-1">
+                                Candidates with disabilities, widows, or retired defense personnel (Army/Police) 
+                                are eligible for <span class="font-bold text-yellow-400">20% additional marks</span>. 
+                                Ex-servicemen and candidates with extra certifications get 
+                                <span class="font-bold text-yellow-400">10% additional marks</span>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form id="kyc-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Full Name (as per Aadhar) *</label>
+                                <input type="text" id="kyc-name" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="Enter full name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Date of Birth *</label>
+                                <input type="date" id="kyc-dob" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Aadhar Number *</label>
+                                <input type="text" id="kyc-aadhar" pattern="[0-9]{12}" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="XXXX XXXX XXXX">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">PAN Card Number</label>
+                                <input type="text" id="kyc-pan" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="ABCDE1234F">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Email Address *</label>
+                                <input type="email" id="kyc-email" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="email@example.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Phone Number *</label>
+                                <input type="tel" id="kyc-phone" pattern="[0-9]{10}" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="9876543210">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">City *</label>
+                                <select id="kyc-city" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                    <option value="">Select City</option>
+                                    <option value="Ludhiana">Ludhiana</option>
+                                    <option value="Chandigarh">Chandigarh</option>
+                                    <option value="Amritsar">Amritsar</option>
+                                    <option value="Jalandhar">Jalandhar</option>
+                                    <option value="Patiala">Patiala</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">State *</label>
+                                <select id="kyc-state" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                    <option value="">Select State</option>
+                                    <option value="Punjab">Punjab</option>
+                                    <option value="Haryana">Haryana</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-700 pt-6">
+                            <h3 class="text-lg font-semibold mb-4 text-indigo-400">Special Category (if applicable)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label class="flex items-center p-4 bg-gray-800/50 rounded-xl border border-gray-700 cursor-pointer hover:border-indigo-500 transition">
+                                    <input type="checkbox" name="special-category" value="pwd" class="w-5 h-5 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500" onchange="toggleSpecialDocs()">
+                                    <div class="ml-3">
+                                        <div class="font-medium">Person with Disability (PwD)</div>
+                                        <div class="text-sm text-gray-400">+20% marks benefit</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-4 bg-gray-800/50 rounded-xl border border-gray-700 cursor-pointer hover:border-indigo-500 transition">
+                                    <input type="checkbox" name="special-category" value="widow" class="w-5 h-5 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500" onchange="toggleSpecialDocs()">
+                                    <div class="ml-3">
+                                        <div class="font-medium">Widow Candidate</div>
+                                        <div class="text-sm text-gray-400">+20% marks benefit</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-4 bg-gray-800/50 rounded-xl border border-gray-700 cursor-pointer hover:border-indigo-500 transition">
+                                    <input type="checkbox" name="special-category" value="ex-serviceman" class="w-5 h-5 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500" onchange="toggleSpecialDocs()">
+                                    <div class="ml-3">
+                                        <div class="font-medium">Ex-Serviceman (Army/Police)</div>
+                                        <div class="text-sm text-gray-400">+20% marks benefit</div>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-4 bg-gray-800/50 rounded-xl border border-gray-700 cursor-pointer hover:border-indigo-500 transition">
+                                    <input type="checkbox" name="special-category" value="experienced" class="w-5 h-5 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500" onchange="toggleSpecialDocs()">
+                                    <div class="ml-3">
+                                        <div class="font-medium">Experienced Professional</div>
+                                        <div class="text-sm text-gray-400">+10% marks benefit</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800/30 rounded-xl p-6 border border-gray-700">
+                            <h4 class="font-semibold mb-3 flex items-center">
+                                <i class="fas fa-file-contract text-indigo-400 mr-2"></i>
+                                Terms & Conditions
+                            </h4>
+                            <div class="h-32 overflow-y-auto text-sm text-gray-400 bg-gray-900/50 p-4 rounded-lg mb-4 scrollbar-hide">
+                                <p class="mb-2"><strong>1. Contract Period:</strong> Candidates must serve a minimum of 1 year. Early departure results in forfeiture of 3 months salary.</p>
+                                <p class="mb-2"><strong>2. Verification:</strong> All documents submitted will undergo strict verification. Falsification leads to permanent blacklisting.</p>
+                                <p class="mb-2"><strong>3. Examination Rules:</strong> Camera and screen sharing is mandatory. Any tab switching or third-party assistance results in immediate disqualification.</p>
+                                <p class="mb-2"><strong>4. Data Privacy:</strong> Personal information is stored securely and used solely for recruitment purposes.</p>
+                                <p><strong>5. Selection:</strong> Final selection is based on merit list and company requirements. Can be rejected without reason.</p>
+                            </div>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="terms-agree" required class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500">
+                                <span class="ml-2 text-sm text-gray-300">I agree to the Terms & Conditions and Privacy Policy</span>
+                            </label>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition transform hover:scale-105 neon-glow">
+                                Continue to Job Selection <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 2: Job Category -->
+                <div id="step-2" class="hidden glass-effect rounded-2xl p-8 border border-gray-800">
+                    <h2 class="text-2xl font-bold gradient-text mb-6">Select Job Category</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="space-y-4">
+                            <div class="bg-green-900/20 border border-green-700/50 rounded-xl p-4">
+                                <h3 class="text-green-400 font-bold text-lg mb-2">Entry Level Positions</h3>
+                                <p class="text-sm text-gray-400 mb-4">No degree required • Beginner friendly exam</p>
+                                
+                                <div class="space-y-3">
+                                    <label class="flex items-center p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                                        <input type="radio" name="job-category" value="gate-keeper" class="w-4 h-4 text-indigo-600">
+                                        <div class="ml-3">
+                                            <div class="font-medium">Gate Keeper</div>
+                                            <div class="text-xs text-gray-500">Security & Access Control</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                                        <input type="radio" name="job-category" value="sweeper" class="w-4 h-4 text-indigo-600">
+                                        <div class="ml-3">
+                                            <div class="font-medium">Sweeper/Housekeeping</div>
+                                            <div class="text-xs text-gray-500">Facility Maintenance</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                                        <input type="radio" name="job-category" value="data-entry" class="w-4 h-4 text-indigo-600">
+                                        <div class="ml-3">
+                                            <div class="font-medium">Data Entry Operator</div>
+                                            <div class="text-xs text-gray-500">Basic Computer Skills Required</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                                        <input type="radio" name="job-category" value="caller" class="w-4 h-4 text-indigo-600">
+                                        <div class="ml-3">
+                                            <div class="font-medium">Telecaller/Customer Care</div>
+                                            <div class="text-xs text-gray-500">Communication Skills</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-purple-900/20 border border-purple-700/50 rounded-xl p-4">
+                                <h3 class="text-purple-400 font-bold text-lg mb-2">Professional Level</h3>
+                                <p class="text-sm text-gray-400 mb-4">Degree required • Company-level entrance exam</p>
+                                
+                                <div class="space-y-3">
+                                    <label class="flex items-center p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                                        <input type="radio" name="job-category" value="project-manager" class="w-4 h-4 text-indigo-600">
+                                        <div class="ml-3">
+                                            <div class="font-medium">Project Manager</div>
+                                            <div class="text-xs text-gray-500">PMP/PRINCE2 Preferred</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                                        <input type="radio" name="job-category" value="site-engineer" class="w-4 h-4 text-indigo-600">
+                                        <div class="ml-3">
+                                            <div class="font-medium">Site Engineer</div>
+                                            <div class="text-xs text-gray-500">Civil/Mechanical Engineering</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                                        <input type="radio" name="job-category" value="sales-executive" class="w-4 h-4 text-indigo-600">
+                                        <div class="ml-3">
+                                            <div class="font-medium">Senior Sales Executive</div>
+                                            <div class="text-xs text-gray-500">B2B Sales Experience</div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                                        <input type="radio" name="job-category" value="production-head" class="w-4 h-4 text-indigo-600">
+                                        <div class="ml-3">
+                                            <div class="font-medium">Production Head/Engineer</div>
+                                            <div class="text-xs text-gray-500">Manufacturing Experience</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button onclick="prevStep(1)" class="text-gray-400 hover:text-white px-6 py-3 transition">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button onclick="nextStep(3)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition transform hover:scale-105">
+                            Continue <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Document Upload -->
+                <div id="step-3" class="hidden glass-effect rounded-2xl p-8 border border-gray-800">
+                    <h2 class="text-2xl font-bold gradient-text mb-6">Document Verification</h2>
+                    
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="document-card" id="photo-card">
+                                <div class="doc-preview" id="photo-preview-area">
+                                    <i class="fas fa-user-circle doc-icon text-gray-600"></i>
+                                </div>
+                                <div class="doc-info">
+                                    <h4>Passport Size Photo *</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">JPG/PNG</span>
+                                        <span class="doc-size">Max 2MB</span>
+                                    </div>
+                                    <div class="doc-date" id="photo-status">Not uploaded</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="photo-view-btn" onclick="previewDocument('photo')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="photo-delete-btn" onclick="removeDocument('photo')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="photo-upload-btn" onclick="document.getElementById('photo').click()">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </div>
+                                <input type="file" id="photo" accept="image/*" class="hidden" onchange="handleEnhancedUpload(this, 'photo', 'image')">
+                            </div>
+
+                            <div class="document-card" id="aadhar-card">
+                                <div class="doc-preview" id="aadhar-preview-area">
+                                    <i class="fas fa-id-card doc-icon text-gray-600"></i>
+                                </div>
+                                <div class="doc-info">
+                                    <h4>Aadhar Card *</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">PDF/Image</span>
+                                        <span class="doc-size">Max 2MB</span>
+                                    </div>
+                                    <div class="doc-date" id="aadhar-status">Not uploaded</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="aadhar-view-btn" onclick="previewDocument('aadhar')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="aadhar-delete-btn" onclick="removeDocument('aadhar')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="aadhar-upload-btn" onclick="document.getElementById('aadhar').click()">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </div>
+                                <input type="file" id="aadhar" accept=".pdf,image/*" class="hidden" onchange="handleEnhancedUpload(this, 'aadhar', 'mixed')">
+                            </div>
+
+                            <div class="document-card" id="pan-card">
+                                <div class="doc-preview" id="pan-preview-area">
+                                    <i class="fas fa-credit-card doc-icon text-gray-600"></i>
+                                </div>
+                                <div class="doc-info">
+                                    <h4>PAN Card</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">PDF/Image</span>
+                                        <span class="doc-size">Max 2MB</span>
+                                    </div>
+                                    <div class="doc-date" id="pan-status">Optional</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="pan-view-btn" onclick="previewDocument('pan')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="pan-delete-btn" onclick="removeDocument('pan')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="pan-upload-btn" onclick="document.getElementById('pan').click()">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </div>
+                                <input type="file" id="pan" accept=".pdf,image/*" class="hidden" onchange="handleEnhancedUpload(this, 'pan', 'mixed')">
+                            </div>
+
+                            <div class="document-card" id="cv-card">
+                                <div class="doc-preview" id="cv-preview-area">
+                                    <i class="fas fa-file-alt doc-icon text-gray-600"></i>
+                                </div>
+                                <div class="doc-info">
+                                    <h4>Resume/CV *</h4>
+                                    <div class="doc-meta">
+                                        <span class="doc-type">PDF</span>
+                                        <span class="doc-size">Max 5MB</span>
+                                    </div>
+                                    <div class="doc-date" id="cv-status">Not uploaded</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button type="button" class="btn-view-doc hidden" id="cv-view-btn" onclick="previewDocument('cv')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button type="button" class="btn-delete-doc hidden" id="cv-delete-btn" onclick="removeDocument('cv')">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                    <button type="button" class="btn-view-doc w-full" id="cv-upload-btn" onclick="document.getElementById('cv').click()">
+                                        <i class="fas fa-upload"></i> Upload
+                                    </button>
+                                </div>
+                                <input type="file" id="cv" accept=".pdf" class="hidden" onchange="handleEnhancedUpload(this, 'cv', 'pdf')">
+                            </div>
+                        </div>
+
+                        <div id="special-docs" class="hidden border-t border-gray-700 pt-6">
+                            <h3 class="text-lg font-semibold mb-4 text-yellow-400">Special Category Documents</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="document-card border-yellow-900/30" id="disability-card">
+                                    <div class="doc-preview bg-yellow-900/10" id="disability-preview-area">
+                                        <i class="fas fa-wheelchair doc-icon text-yellow-600"></i>
+                                    </div>
+                                    <div class="doc-info">
+                                        <h4>Disability Certificate</h4>
+                                        <div class="doc-meta">
+                                            <span class="doc-type bg-yellow-900/30 text-yellow-400">Medical</span>
+                                            <span class="doc-size">Max 2MB</span>
+                                        </div>
+                                        <div class="doc-date" id="disability-status">Not uploaded</div>
+                                    </div>
+                                    <div class="doc-actions">
+                                        <button type="button" class="btn-view-doc hidden" id="disability-view-btn" onclick="previewDocument('disability')">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                        <button type="button" class="btn-delete-doc hidden" id="disability-delete-btn" onclick="removeDocument('disability')">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                        <button type="button" class="btn-view-doc w-full bg-yellow-900/20 text-yellow-500" id="disability-upload-btn" onclick="document.getElementById('disability').click()">
+                                            <i class="fas fa-upload"></i> Upload
+                                        </button>
+                                    </div>
+                                    <input type="file" id="disability" accept=".pdf,image/*" class="hidden" onchange="handleEnhancedUpload(this, 'disability', 'mixed')">
+                                </div>
+                                
+                                <div class="document-card border-yellow-900/30" id="service-card">
+                                    <div class="doc-preview bg-yellow-900/10" id="service-preview-area">
+                                        <i class="fas fa-medal doc-icon text-yellow-600"></i>
+                                    </div>
+                                    <div class="doc-info">
+                                        <h4>Service Certificate</h4>
+                                        <div class="doc-meta">
+                                            <span class="doc-type bg-yellow-900/30 text-yellow-400">Defense</span>
+                                            <span class="doc-size">Max 2MB</span>
+                                        </div>
+                                        <div class="doc-date" id="service-status">Not uploaded</div>
+                                    </div>
+                                    <div class="doc-actions">
+                                        <button type="button" class="btn-view-doc hidden" id="service-view-btn" onclick="previewDocument('service')">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                        <button type="button" class="btn-delete-doc hidden" id="service-delete-btn" onclick="removeDocument('service')">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                        <button type="button" class="btn-view-doc w-full bg-yellow-900/20 text-yellow-500" id="service-upload-btn" onclick="document.getElementById('service').click()">
+                                            <i class="fas fa-upload"></i> Upload
+                                        </button>
+                                    </div>
+                                    <input type="file" id="service" accept=".pdf,image/*" class="hidden" onchange="handleEnhancedUpload(this, 'service', 'mixed')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep(2)" class="text-gray-400 hover:text-white px-6 py-3 transition">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button onclick="validateAndProceed()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition transform hover:scale-105">
+                            Proceed to Examination <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Examination -->
+                <div id="step-4" class="hidden">
+                    <div id="proctoring-setup" class="glass-effect rounded-2xl p-8 border border-red-500/50 mb-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-red-900/50 rounded-full flex items-center justify-center mr-4 pulse-ring">
+                                <i class="fas fa-video text-red-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-red-400">Proctored Examination</h3>
+                                <p class="text-gray-400">Camera and screen access required</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-800/50 rounded-xl p-4 mb-6">
+                            <ul class="space-y-2 text-sm text-gray-300">
+                                <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Webcam access mandatory</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> Screen sharing required</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> No tab switching allowed</li>
+                                <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i> AI monitoring active</li>
+                                <li class="flex items-center"><i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i> Switching tabs = Auto-disqualification</li>
+                            </ul>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <video id="camera-preview" class="w-32 h-24 bg-gray-800 rounded-lg object-cover" autoplay muted></video>
+                                <div class="text-sm text-gray-400">
+                                    <div class="flex items-center mb-1">
+                                        <div id="cam-status" class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+                                        Camera Status
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div id="screen-status" class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
+                                        Screen Share Status
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="startProctoring()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold transition">
+                                <i class="fas fa-play mr-2"></i>Start Exam
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="exam-interface" class="hidden glass-effect rounded-2xl p-8 border border-gray-800 proctoring-active relative">
+                        <div class="scan-line"></div>
+                        
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-700">
+                            <div>
+                                <h2 class="text-2xl font-bold" id="exam-title">Technical Assessment</h2>
+                                <p class="text-gray-400 text-sm mt-1">Job: <span id="exam-job">Data Entry Operator</span></p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-red-900/30 px-4 py-2 rounded-lg border border-red-500/30">
+                                    <i class="fas fa-clock mr-2 text-red-400"></i>
+                                    <span id="timer" class="exam-timer font-mono text-xl font-bold text-red-400">20:00</span>
+                                </div>
+                                <div class="bg-gray-800 px-4 py-2 rounded-lg">
+                                    <span id="question-counter" class="font-mono">1/20</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="question-container" class="space-y-6 mb-8"></div>
+
+                        <div class="flex justify-between items-center pt-6 border-t border-gray-700">
+                            <button onclick="prevQuestion()" class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-gray-300">
+                                <i class="fas fa-arrow-left mr-2"></i>Previous
+                            </button>
+                            
+                            <div class="flex space-x-2" id="question-nav"></div>
+                            
+                            <button onclick="nextQuestion()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition text-white">
+                                Next<i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+
+                        <button onclick="submitExam()" class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg transition">
+                            Submit Examination
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 5: IQ Test -->
+                <div id="step-5" class="hidden glass-effect rounded-2xl p-8 border border-gray-800">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-bold gradient-text">Cognitive Assessment (IQ Test)</h2>
+                        <p class="text-gray-400 mt-2">Level 2 Evaluation - Medium Difficulty</p>
+                    </div>
+
+                    <div id="iq-container" class="space-y-8"></div>
+
+                    <div class="flex justify-between mt-8">
+                        <button onclick="prevStep(4)" class="text-gray-400 hover:text-white px-6 py-3 transition">
+                            <i class="fas fa-arrow-left mr-2"></i>Back
+                        </button>
+                        <button onclick="startReasoningTest()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition">
+                            Continue to Final Round <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 6: Reasoning -->
+                <div id="step-6" class="hidden glass-effect rounded-2xl p-8 border border-gray-800">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-bold gradient-text">Common Reasoning & Interview</h2>
+                        <p class="text-gray-400 mt-2">Final Assessment - Personality & Logic</p>
+                    </div>
+
+                    <div class="space-y-6" id="reasoning-container"></div>
+
+                    <button onclick="finalizeApplication()" class="w-full mt-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl font-bold text-lg transition transform hover:scale-105">
+                        Complete Application <i class="fas fa-check-circle ml-2"></i>
+                    </button>
+                </div>
+
+                <!-- Success Message -->
+                <div id="success-message" class="hidden text-center py-16">
+                    <div class="w-24 h-24 bg-green-900/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-check text-4xl text-green-400"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-4">Application Submitted!</h2>
+                    <p class="text-gray-400 mb-6">Your application ID: <span class="text-indigo-400 font-mono text-xl" id="application-id">NRX-2026-78432</span></p>
+                    <p class="text-gray-300 mb-8">Check your email for further instructions. Results will be declared within 7 working days.</p>
+                    <a href="index.html" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl transition">
+                        Return to Home
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let currentQuestion = 0;
+        let examTimer = null;
+        let timeLeft = 1200;
+        let webcamStream = null;
+        let screenStream = null;
+        let violations = 0;
+        let examAnswers = {};
+        let iqAnswers = {};
+        let reasoningAnswers = {};
+        let uploadedDocuments = {};
+
+        const questionBanks = {
+            'data-entry': [
+                { q: "What is the shortcut for Copy in Windows?", options: ["Ctrl+C", "Ctrl+V", "Ctrl+X", "Ctrl+Z"], correct: 0 },
+                { q: "Which software is used for spreadsheets?", options: ["Word", "Excel", "PowerPoint", "Access"], correct: 1 },
+                { q: "What does CPU stand for?", options: ["Central Process Unit", "Central Processing Unit", "Computer Personal Unit", "Central Processor Unit"], correct: 1 },
+                { q: "Which key refreshes a webpage?", options: ["F5", "F1", "F12", "Esc"], correct: 0 },
+                { q: "What is the file extension for Excel?", options: [".doc", ".xls", ".ppt", ".txt"], correct: 1 }
+            ],
+            'gate-keeper': [
+                { q: "What is the primary duty of a security guard?", options: ["Cleaning", "Access Control", "Cooking", "Data Entry"], correct: 1 },
+                { q: "In case of fire, what should be done first?", options: ["Run away", "Raise alarm", "Call friends", "Ignore"], correct: 1 },
+                { q: "What does CCTV stand for?", options: ["Closed Circuit Television", "Central Circuit TV", "Computer Circuit TV", "Control Circuit TV"], correct: 0 },
+                { q: "Who should be allowed entry without check?", options: ["Everyone", "No one", "Only staff", "Only management"], correct: 1 },
+                { q: "What is essential for night duty?", options: ["Sleeping", "Flashlight", "Radio", "All of above"], correct: 1 }
+            ],
+            'project-manager': [
+                { q: "Which methodology uses sprints?", options: ["Waterfall", "Agile/Scrum", "Six Sigma", "Lean"], correct: 1 },
+                { q: "What does Gantt chart represent?", options: ["Budget", "Timeline", "Quality", "Risk"], correct: 1 },
+                { q: "Critical Path Method is used for?", options: ["Cost reduction", "Schedule optimization", "Quality check", "Team building"], correct: 1 },
+                { q: "Stakeholder management involves?", options: ["Ignoring complaints", "Communication", "Hiding facts", "Delaying reports"], correct: 1 },
+                { q: "Risk mitigation means?", options: ["Avoiding risk", "Reducing impact", "Ignoring risk", "Increasing risk"], correct: 1 }
+            ],
+            'site-engineer': [
+                { q: "Concrete mix ratio M20 means?", options: ["1:1.5:3", "1:2:4", "1:3:6", "1:4:8"], correct: 0 },
+                { q: "Which test checks concrete strength?", options: ["Slump test", "Compression test", "Permeability test", "Soundness test"], correct: 1 },
+                { q: "Rebar is used for?", options: ["Decoration", "Tensile strength", "Insulation", "Waterproofing"], correct: 1 },
+                { q: "Foundation type for heavy loads?", options: ["Strip", "Raft", "Pad", "Pile"], correct: 3 },
+                { q: "Curing period for concrete?", options: ["3 days", "7 days", "14 days", "28 days"], correct: 3 }
+            ],
+            'default': [
+                { q: "What is 15% of 200?", options: ["20", "25", "30", "35"], correct: 2 },
+                { q: "Complete the series: 2, 6, 12, 20, ?", options: ["28", "30", "32", "36"], correct: 1 },
+                { q: "Which is a programming language?", options: ["HTML", "HTTP", "Python", "URL"], correct: 2 },
+                { q: "Capital of Punjab?", options: ["Ludhiana", "Amritsar", "Chandigarh", "Jalandhar"], correct: 2 },
+                { q: "Opposite of 'Expand'?", options: ["Contract", "Shrink", "Reduce", "Compress"], correct: 0 }
+            ]
+        };
+
+        const iqQuestions = [
+            { q: "If all Bloops are Razzies and all Razzies are Lazzies, then all Bloops are definitely Lazzies?", options: ["True", "False", "Uncertain"], correct: 0, type: "logical" },
+            { q: "Which number should come next? 144, 121, 100, 81, 64, ?", options: ["36", "49", "50", "52"], correct: 1, type: "numerical" },
+            { q: "Book is to Reading as Fork is to?", options: ["Drawing", "Writing", "Eating", "Cooking"], correct: 2, type: "verbal" },
+            { q: "What is the missing letter? E, J, O, T, ?", options: ["X", "Y", "Z", "W"], correct: 1, type: "pattern" },
+            { q: "If it takes 5 machines 5 minutes to make 5 widgets, how long for 100 machines to make 100 widgets?", options: ["5 minutes", "100 minutes", "20 minutes", "500 minutes"], correct: 0, type: "logical" }
+        ];
+
+        const reasoningQuestions = [
+            { q: "Why do you want to join this specific field?", type: "text", placeholder: "Explain your motivation..." },
+            { q: "How do you handle work pressure and tight deadlines?", type: "text", placeholder: "Describe your approach..." },
+            { q: "Where do you see yourself in 5 years?", type: "text", placeholder: "Your career goals..." },
+            { q: "Describe a challenging situation you faced and how you resolved it.", type: "text", placeholder: "Use STAR method..." }
+        ];
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast px-6 py-3 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} text-white flex items-center`;
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function nextStep(step) {
+            document.getElementById(`step-${currentStep}`).classList.add('hidden');
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            document.getElementById(`step-${currentStep}-indicator`).classList.remove('bg-indigo-600', 'text-white');
+            document.getElementById(`step-${currentStep}-indicator`).classList.add('bg-green-600', 'text-white');
+            document.getElementById(`step-${currentStep}-indicator`).innerHTML = '<i class="fas fa-check"></i>';
+            document.getElementById(`step-${step}-indicator`).classList.remove('bg-gray-800', 'text-gray-500');
+            document.getElementById(`step-${step}-indicator`).classList.add('bg-indigo-600', 'text-white');
+            currentStep = step;
+            
+            if (step === 4) initializeExam();
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step-${currentStep}`).classList.add('hidden');
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            currentStep = step;
+        }
+
+        document.getElementById('kyc-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const kycData = {
+                name: document.getElementById('kyc-name').value,
+                dob: document.getElementById('kyc-dob').value,
+                aadhar: document.getElementById('kyc-aadhar').value,
+                pan: document.getElementById('kyc-pan').value,
+                email: document.getElementById('kyc-email').value,
+                phone: document.getElementById('kyc-phone').value,
+                city: document.getElementById('kyc-city').value,
+                state: document.getElementById('kyc-state').value,
+                specialCategories: Array.from(document.querySelectorAll('input[name="special-category"]:checked')).map(cb => cb.value)
+            };
+            sessionStorage.setItem('kycData', JSON.stringify(kycData));
+            nextStep(2);
+        });
+
+        function toggleSpecialDocs() {
+            const checkboxes = document.querySelectorAll('input[name="special-category"]:checked');
+            const specialDocs = document.getElementById('special-docs');
+            if (checkboxes.length > 0) specialDocs.classList.remove('hidden');
+            else specialDocs.classList.add('hidden');
+        }
+
+        function handleEnhancedUpload(input, docType, docCategory) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedDocuments[docType] = {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    data: e.target.result
+                };
+                updateDocumentCard(docType, file, e.target.result);
+                showToast(`${docType} uploaded successfully`);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateDocumentCard(docType, file, dataUrl) {
+            const previewArea = document.getElementById(`${docType}-preview-area`);
+            const status = document.getElementById(`${docType}-status`);
+            
+            previewArea.innerHTML = '';
+            
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = dataUrl;
+                img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 8px;';
+                previewArea.appendChild(img);
+            } else {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-file-pdf doc-icon text-red-400';
+                previewArea.appendChild(icon);
+            }
+            
+            status.textContent = `Uploaded: ${new Date().toLocaleDateString()}`;
+            status.className = 'doc-date text-green-400';
+            
+            document.getElementById(`${docType}-upload-btn`).classList.add('hidden');
+            document.getElementById(`${docType}-view-btn`).classList.remove('hidden');
+            document.getElementById(`${docType}-delete-btn`).classList.remove('hidden');
+        }
+
+        function removeDocument(docType) {
+            delete uploadedDocuments[docType];
+            
+            const previewArea = document.getElementById(`${docType}-preview-area`);
+            previewArea.innerHTML = `<i class="fas ${getDocIcon(docType)} doc-icon text-gray-600"></i>`;
+            
+            document.getElementById(`${docType}-status`).textContent = docType === 'pan' ? 'Optional' : 'Not uploaded';
+            document.getElementById(`${docType}-status`).className = 'doc-date';
+            
+            document.getElementById(`${docType}-upload-btn`).classList.remove('hidden');
+            document.getElementById(`${docType}-view-btn`).classList.add('hidden');
+            document.getElementById(`${docType}-delete-btn`).classList.add('hidden');
+            
+            const input = document.getElementById(docType);
+            if (input) input.value = '';
+            
+            showToast('Document removed');
+        }
+
+        function getDocIcon(docType) {
+            const icons = { 'photo': 'fa-user-circle', 'aadhar': 'fa-id-card', 'pan': 'fa-credit-card', 'cv': 'fa-file-alt', 'disability': 'fa-wheelchair', 'service': 'fa-medal' };
+            return icons[docType] || 'fa-file';
+        }
+
+        function previewDocument(docType) {
+            const doc = uploadedDocuments[docType];
+            if (!doc) return;
+            
+            const modal = document.getElementById('doc-preview-modal');
+            const container = document.getElementById('preview-container');
+            
+            document.getElementById('preview-doc-name').textContent = doc.name;
+            document.getElementById('preview-doc-type').textContent = doc.type.toUpperCase().split('/')[1];
+            document.getElementById('preview-doc-size').textContent = formatFileSize(doc.size);
+            document.getElementById('preview-download').href = doc.data;
+            document.getElementById('preview-download').download = doc.name;
+            
+            container.innerHTML = '';
+            
+            if (doc.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = doc.data;
+                img.className = 'preview-image';
+                container.appendChild(img);
+            } else {
+                const embed = document.createElement('embed');
+                embed.src = doc.data;
+                embed.type = 'application/pdf';
+                embed.className = 'w-full h-[70vh]';
+                container.appendChild(embed);
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeDocPreview() {
+            document.getElementById('doc-preview-modal').classList.add('hidden');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function validateAndProceed() {
+            const required = ['photo', 'aadhar', 'cv'];
+            const missing = required.filter(doc => !uploadedDocuments[doc]);
+            
+            if (missing.length > 0) {
+                showToast(`Please upload: ${missing.join(', ')}`, 'error');
+                return;
+            }
+            
+            nextStep(4);
+        }
+
+        async function startProctoring() {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
+                document.getElementById('camera-preview').srcObject = webcamStream;
+                document.getElementById('cam-status').classList.remove('bg-red-500');
+                document.getElementById('cam-status').classList.add('bg-green-500');
+                
+                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: { cursor: "always" }, audio: false });
+                document.getElementById('screen-status').classList.remove('bg-red-500');
+                document.getElementById('screen-status').classList.add('bg-green-500');
+                
+                document.addEventListener('visibilitychange', handleTabSwitch);
+                
+                document.getElementById('proctoring-setup').classList.add('hidden');
+                document.getElementById('exam-interface').classList.remove('hidden');
+                
+                startTimer();
+            } catch (err) {
+                showToast('Camera and screen access are mandatory for the examination', 'error');
+            }
+        }
+
+        function handleTabSwitch() {
+            if (document.hidden) {
+                violations++;
+                if (violations >= 3) {
+                    showToast('Exam terminated due to multiple tab switches', 'error');
+                    submitExam(true);
+                } else {
+                    showToast(`Warning: Tab switching detected! Violation ${violations}/3`, 'error');
+                }
+            }
+        }
+
+        function startTimer() {
+            examTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) submitExam();
+            }, 1000);
+        }
+
+        function initializeExam() {
+            const jobCategory = document.querySelector('input[name="job-category"]:checked')?.value || 'default';
+            const questions = questionBanks[jobCategory] || questionBanks['default'];
+            renderQuestion(questions[0], 0, questions.length);
+            renderQuestionNav(questions.length);
+            window.currentQuestions = questions;
+        }
+
+        function renderQuestion(question, index, total) {
+            const container = document.getElementById('question-container');
+            document.getElementById('question-counter').textContent = `${index + 1}/${total}`;
+            
+            let optionsHtml = '';
+            question.options.forEach((opt, i) => {
+                const checked = examAnswers[index] === i ? 'checked' : '';
+                optionsHtml += `<label class="flex items-center p-4 bg-gray-800/50 rounded-xl cursor-pointer hover:bg-gray-800 transition border border-gray-700 ${checked ? 'border-indigo-500 bg-indigo-900/20' : ''}">
+                    <input type="radio" name="q${index}" value="${i}" ${checked} onchange="saveAnswer(${index}, ${i})" class="w-4 h-4 text-indigo-600">
+                    <span class="ml-3">${opt}</span>
+                </label>`;
+            });
+            
+            container.innerHTML = `<div class="mb-4"><span class="text-indigo-400 text-sm font-semibold">Question ${index + 1}</span><h3 class="text-xl font-semibold mt-2">${question.q}</h3></div><div class="space-y-3">${optionsHtml}</div>`;
+        }
+
+        function renderQuestionNav(total) {
+            const nav = document.getElementById('question-nav');
+            let html = '';
+            for (let i = 0; i < total; i++) {
+                const status = examAnswers[i] !== undefined ? 'bg-indigo-600' : 'bg-gray-700';
+                html += `<button onclick="jumpToQuestion(${i})" class="w-8 h-8 rounded-lg ${status} text-white text-sm font-medium hover:opacity-80 transition">${i + 1}</button>`;
+            }
+            nav.innerHTML = html;
+        }
+
+        function saveAnswer(qIndex, optionIndex) {
+            examAnswers[qIndex] = optionIndex;
+            renderQuestionNav(window.currentQuestions.length);
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < window.currentQuestions.length - 1) {
+                currentQuestion++;
+                renderQuestion(window.currentQuestions[currentQuestion], currentQuestion, window.currentQuestions.length);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion(window.currentQuestions[currentQuestion], currentQuestion, window.currentQuestions.length);
+            }
+        }
+
+        function jumpToQuestion(index) {
+            currentQuestion = index;
+            renderQuestion(window.currentQuestions[currentQuestion], currentQuestion, window.currentQuestions.length);
+        }
+
+        function submitExam(force = false) {
+            clearInterval(examTimer);
+            
+            let score = 0;
+            window.currentQuestions.forEach((q, i) => {
+                if (examAnswers[i] === q.correct) score++;
+            });
+            
+            const percentage = Math.round((score / window.currentQuestions.length) * 100);
+            
+            if (!force) showToast(`Exam completed! Score: ${percentage}%`);
+            
+            if (webcamStream) webcamStream.getTracks().forEach(track => track.stop());
+            if (screenStream) screenStream.getTracks().forEach(track => track.stop());
+            document.removeEventListener('visibilitychange', handleTabSwitch);
+            
+            sessionStorage.setItem('examScore', percentage);
+            sessionStorage.setItem('examAnswers', JSON.stringify(examAnswers));
+            sessionStorage.setItem('violations', violations);
+            
+            document.getElementById('step-4').classList.add('hidden');
+            document.getElementById('step-5').classList.remove('hidden');
+            document.getElementById('step-4-indicator').classList.remove('bg-indigo-600');
+            document.getElementById('step-4-indicator').classList.add('bg-green-600');
+            document.getElementById('step-4-indicator').innerHTML = '<i class="fas fa-check"></i>';
+            document.getElementById('step-5-indicator').classList.remove('bg-gray-800');
+            document.getElementById('step-5-indicator').classList.add('bg-indigo-600');
+            
+            initializeIQTest();
+        }
+
+        function initializeIQTest() {
+            const container = document.getElementById('iq-container');
+            let html = '';
+            
+            iqQuestions.forEach((q, i) => {
+                let optionsHtml = '';
+                q.options.forEach((opt, j) => {
+                    optionsHtml += `<label class="flex items-center p-3 bg-gray-800/30 rounded-lg cursor-pointer hover:bg-gray-800 transition">
+                        <input type="radio" name="iq${i}" value="${j}" onchange="iqAnswers[${i}] = ${j}" class="w-4 h-4 text-indigo-600">
+                        <span class="ml-3">${opt}</span>
+                    </label>`;
+                });
+                
+                html += `<div class="border-b border-gray-700 pb-6 last:border-0">
+                    <div class="flex items-center mb-3">
+                        <span class="bg-indigo-900/50 text-indigo-300 px-3 py-1 rounded-full text-xs mr-3">${q.type}</span>
+                        <span class="text-gray-400 text-sm">Q${i + 1}</span>
+                    </div>
+                    <h4 class="text-lg font-medium mb-4">${q.q}</h4>
+                    <div class="space-y-2">${optionsHtml}</div>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function startReasoningTest() {
+            document.getElementById('step-5').classList.add('hidden');
+            document.getElementById('step-6').classList.remove('hidden');
+            
+            const container = document.getElementById('reasoning-container');
+            let html = '';
+            
+            reasoningQuestions.forEach((q, i) => {
+                html += `<div class="bg-gray-800/30 rounded-xl p-6 border border-gray-700">
+                    <h4 class="text-lg font-medium mb-4 flex items-center">
+                        <span class="bg-purple-900/50 text-purple-300 w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">${i + 1}</span>
+                        ${q.q}
+                    </h4>
+                    <textarea onchange="reasoningAnswers[${i}] = this.value" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition" rows="4" placeholder="${q.placeholder}"></textarea>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function finalizeApplication() {
+            const kycData = JSON.parse(sessionStorage.getItem('kycData') || '{}');
+            const examScore = parseInt(sessionStorage.getItem('examScore') || 0);
+            const jobCategory = document.querySelector('input[name="job-category"]:checked');
+            
+            let iqScore = 0;
+            iqQuestions.forEach((q, i) => { if (iqAnswers[i] === q.correct) iqScore++; });
+            iqScore = Math.round((iqScore / iqQuestions.length) * 100);
+            
+            let bonus = 0;
+            let specialText = 'None';
+            if (kycData.specialCategories) {
+                if (kycData.specialCategories.some(c => ['pwd', 'widow', 'ex-serviceman'].includes(c))) bonus += 20;
+                if (kycData.specialCategories.includes('experienced')) bonus += 10;
+                specialText = kycData.specialCategories.join(', ');
+            }
+            
+            const finalScore = Math.min(100, examScore + bonus);
+            
+            const documents = {
+                photo: !!uploadedDocuments.photo, aadhar: !!uploadedDocuments.aadhar,
+                pan: !!uploadedDocuments.pan, cv: !!uploadedDocuments.cv,
+                disability: !!uploadedDocuments.disability, service: !!uploadedDocuments.service
+            };
+            
+            const candidate = {
+                name: kycData.name, email: kycData.email, phone: kycData.phone,
+                aadhar: kycData.aadhar, pan: kycData.pan, dob: kycData.dob,
+                city: kycData.city, state: kycData.state,
+                role: jobCategory ? jobCategory.parentElement.querySelector('.font-medium').textContent : 'Unknown',
+                roleType: jobCategory ? jobCategory.value : 'unknown',
+                score: finalScore, baseScore: examScore, iqScore: iqScore,
+                bonus: bonus, special: specialText,
+                specialCategories: kycData.specialCategories || [],
+                status: finalScore >= 60 ? 'review' : 'rejected',
+                documents: documents, violations: parseInt(sessionStorage.getItem('violations') || 0),
+                notes: ''
+            };
+            
+            initializeStorage();
+            const id = addCandidate(candidate);
+            
+            document.getElementById('application-id').textContent = id;
+            document.getElementById('step-6').classList.add('hidden');
+            document.getElementById('success-message').classList.remove('hidden');
+            
+            sessionStorage.clear();
+            Object.keys(uploadedDocuments).forEach(key => delete uploadedDocuments[key]);
+            
+            showToast('Application submitted successfully!');
+        }
+
+        function initializeStorage() {
+            if (!localStorage.getItem('candidates')) {
+                localStorage.setItem('candidates', JSON.stringify([]));
+            }
+        }
+
+        function getCandidates() {
+            return JSON.parse(localStorage.getItem('candidates') || '[]');
+        }
+
+        function addCandidate(candidate) {
+            const candidates = getCandidates();
+            const id = 'NRX-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 90000) + 10000);
+            candidate.id = id;
+            candidate.appliedDate = new Date().toISOString();
+            candidates.push(candidate);
+            localStorage.setItem('candidates', JSON.stringify(candidates));
+            return id;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

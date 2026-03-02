@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - NexusRecruit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glass-effect {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .nav-link.active {
+            color: white !important;
+            border-bottom: 2px solid #6366f1;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-effect border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center" onclick="window.location.href='index.html'">
+                    <i class="fas fa-network-wired text-indigo-500 text-2xl mr-2"></i>
+                    <span class="text-2xl font-bold gradient-text">NexusRecruit</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="nav-link text-gray-300 hover:text-white transition">Home</a>
+                    <a href="about.html" class="nav-link text-gray-300 hover:text-white transition">About Us</a>
+                    <a href="branches.html" class="nav-link text-gray-300 hover:text-white transition">Branches</a>
+                    <a href="join.html" class="nav-link bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition neon-glow">
+                        <i class="fas fa-user-plus mr-2"></i>New Joining
+                    </a>
+                    <a href="admin.html" class="nav-link text-gray-300 hover:text-white transition">
+                        <i class="fas fa-lock mr-2"></i>Admin
+                    </a>
+                </div>
+                
+                <button class="md:hidden text-gray-300" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t border-gray-800">
+            <div class="px-4 pt-2 pb-4 space-y-2">
+                <a href="index.html" class="block w-full text-left py-2 text-gray-300">Home</a>
+                <a href="about.html" class="block w-full text-left py-2 text-gray-300">About Us</a>
+                <a href="branches.html" class="block w-full text-left py-2 text-gray-300">Branches</a>
+                <a href="join.html" class="block w-full text-left py-2 text-indigo-400">New Joining</a>
+                <a href="admin.html" class="block w-full text-left py-2 text-gray-300">Admin Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-16">
+        <section class="min-h-screen bg-gray-900 py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-bold mb-4">About <span class="gradient-text">NexusRecruit</span></h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">Transforming recruitment through automation and intelligence</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-indigo-400">Company Overview</h3>
+                        <p class="text-gray-300 leading-relaxed">
+                            NexusRecruit is a cutting-edge automated recruitment platform designed to streamline the hiring process 
+                            for companies across India. Founded in 2024, we specialize in connecting qualified candidates with 
+                            opportunities in Ludhiana, Punjab, and expanding to major cities nationwide.
+                        </p>
+                        <p class="text-gray-300 leading-relaxed">
+                            Our AI-driven system handles everything from KYC verification to proctored examinations, ensuring 
+                            fair and efficient hiring practices while maintaining the highest standards of security and compliance.
+                        </p>
+                        
+                        <div class="grid grid-cols-2 gap-4 mt-8">
+                            <div class="glass-effect p-4 rounded-xl border-l-4 border-indigo-500">
+                                <div class="text-2xl font-bold text-white">2019</div>
+                                <div class="text-sm text-gray-400">Founded</div>
+                            </div>
+                            <div class="glass-effect p-4 rounded-xl border-l-4 border-purple-500">
+                                <div class="text-2xl font-bold text-white">ISO</div>
+                                <div class="text-sm text-gray-400">Certified</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur-2xl opacity-20"></div>
+                        <div class="relative glass-effect p-8 rounded-2xl border border-gray-700">
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 rounded-full bg-indigo-900/50 flex items-center justify-center">
+                                        <i class="fas fa-eye text-indigo-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">Vision</h4>
+                                        <p class="text-sm text-gray-400">To revolutionize recruitment through intelligent automation</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 rounded-full bg-purple-900/50 flex items-center justify-center">
+                                        <i class="fas fa-bullseye text-purple-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">Mission</h4>
+                                        <p class="text-sm text-gray-400">Connecting talent with opportunity seamlessly and securely</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 rounded-full bg-pink-900/50 flex items-center justify-center">
+                                        <i class="fas fa-heart text-pink-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">Values</h4>
+                                        <p class="text-sm text-gray-400">Integrity, Innovation, Inclusion, Excellence</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leadership -->
+                <div class="mb-16">
+                    <h3 class="text-2xl font-bold mb-8 text-center">Leadership Team</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="glass-effect p-6 rounded-2xl text-center border border-gray-800 hover-lift">
+                            <div class="w-24 h-24 bg-gradient-to-br from-indigo-400 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold">RS</div>
+                            <h4 class="font-bold text-lg">Rajesh Sharma</h4>
+                            <p class="text-indigo-400 text-sm">CEO & Founder</p>
+                            <p class="text-gray-400 text-sm mt-2">20+ years in HR Tech</p>
+                        </div>
+                        <div class="glass-effect p-6 rounded-2xl text-center border border-gray-800 hover-lift">
+                            <div class="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-600 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold">PK</div>
+                            <h4 class="font-bold text-lg">Priya Kapoor</h4>
+                            <p class="text-purple-400 text-sm">CTO</p>
+                            <p class="text-gray-400 text-sm mt-2">AI & Security Expert</p>
+                        </div>
+                        <div class="glass-effect p-6 rounded-2xl text-center border border-gray-800 hover-lift">
+                            <div class="w-24 h-24 bg-gradient-to-br from-pink-400 to-red-600 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold">AS</div>
+                            <h4 class="font-bold text-lg">Amit Singh</h4>
+                            <p class="text-pink-400 text-sm">Head of Operations</p>
+                            <p class="text-gray-400 text-sm mt-2">Ex-Army Officer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
