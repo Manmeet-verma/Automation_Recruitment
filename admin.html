@@ -10,152 +10,34 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
         * { font-family: 'Inter', sans-serif; }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .glass-effect {
-            background: rgba(17, 24, 39, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
+        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass-effect { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
-        
         .toast { animation: slideIn 0.3s ease-out; }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .nav-link.active { color: white !important; border-bottom: 2px solid #6366f1; }
-        
-        .admin-doc-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-        
-        .admin-doc-card {
-            background: rgba(31, 41, 55, 0.8);
-            border: 1px solid rgba(75, 85, 99, 0.5);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .admin-doc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); border-color: rgba(99, 102, 241, 0.5); }
-        
-        .admin-doc-preview { height: 160px; background: linear-gradient(135deg, #1f2937 0%, #111827 100%); display: flex; align-items: center; justify-content: center; position: relative; }
-        .admin-doc-preview img { width: 100%; height: 100%; object-fit: cover; }
-        .admin-doc-icon { font-size: 3.5rem; opacity: 0.7; }
-        
-        .admin-doc-info { padding: 1rem; }
-        .admin-doc-info h4 { font-size: 0.85rem; font-weight: 600; color: #f3f4f6; margin-bottom: 0.25rem; }
-        .admin-doc-type { font-size: 0.7rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
-        
-        .admin-doc-actions { display: flex; gap: 0.5rem; padding: 0 1rem 1rem; }
-        
-        .btn-admin-view, .btn-admin-download {
-            flex: 1; padding: 0.5rem; border: none; border-radius: 6px; font-size: 0.75rem; cursor: pointer;
-            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.25rem;
-        }
-        
-        .btn-admin-view { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
-        .btn-admin-view:hover { background: rgba(99, 102, 241, 0.3); }
-        
-        .btn-admin-download { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-        .btn-admin-download:hover { background: rgba(16, 185, 129, 0.3); }
-        
-        .doc-verified-badge; top:  { position: absolute8px; right: 8px; background: rgba(16, 185, 129, 0.9); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
-        
-        .fullscreen-preview { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 200; display: none; align-items: center; justify-content: center; padding: 2rem; }
-        .fullscreen-preview.active { display: flex; }
-        .fullscreen-preview img { max-width: 90%; max-height: 90vh; object-fit: contain; }
-        
-        .fullscreen-close { position: absolute; top: 2rem; right: 2rem; background: rgba(239, 68, 68, 0.9); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: none; font-size: 1.25rem; }
-        .fullscreen-close:hover { background: rgba(239, 68, 68, 1); transform: scale(1.1); }
-        
-        .fullscreen-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(99, 102, 241, 0.9); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; border: none; font-size: 1.25rem; }
-        .fullscreen-nav:hover { background: rgba(99, 102, 241, 1); transform: translateY(-50%) scale(1.1); }
-        .fullscreen-prev { left: 2rem; }
-        .fullscreen-next { right: 2rem; }
-        
-        .fullscreen-counter { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.7); color: white; padding: 0.5rem 1.5rem; border-radius: 9999px; font-size: 0.875rem; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
-    
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
-    
-    <div id="fullscreen-preview" class="fullscreen-preview">
-        <button class="fullscreen-close" onclick="closeFullscreenPreview()"><i class="fas fa-times"></i></button>
-        <button class="fullscreen-nav fullscreen-prev" onclick="navigateFullscreen(-1)"><i class="fas fa-chevron-left"></i></button>
-        <div id="fullscreen-content"></div>
-        <button class="fullscreen-nav fullscreen-next" onclick="navigateFullscreen(1)"><i class="fas fa-chevron-right"></i></button>
-        <div class="fullscreen-counter" id="fullscreen-counter">1 / 5</div>
-    </div>
 
-    <div id="admin-doc-gallery-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-        <div class="modal-content max-w-6xl w-full">
-            <div class="p-6 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-gray-900/95">
+    <div id="delete-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-900 rounded-2xl border border-red-500/50 max-w-md w-full p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-red-900/50 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                </div>
                 <div>
-                    <h3 class="text-2xl font-bold gradient-text">Document Gallery</h3>
-                    <p class="text-gray-400 text-sm mt-1" id="gallery-candidate-info">Candidate</p>
-                </div>
-                <button onclick="closeAdminDocGallery()" class="text-gray-400 hover:text-white w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center transition">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <div class="p-6">
-                <div class="grid grid-cols-4 gap-4 mb-6">
-                    <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
-                        <div class="text-2xl font-bold text-indigo-400" id="gallery-total-docs">0</div>
-                        <div class="text-xs text-gray-400 mt-1">Total Documents</div>
-                    </div>
-                    <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
-                        <div class="text-2xl font-bold text-green-400" id="gallery-verified-docs">0</div>
-                        <div class="text-xs text-gray-400 mt-1">Verified</div>
-                    </div>
-                    <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
-                        <div class="text-2xl font-bold text-yellow-400" id="gallery-pending-docs">0</div>
-                        <div class="text-xs text-gray-400 mt-1">Pending</div>
-                    </div>
-                    <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
-                        <div class="text-2xl font-bold text-red-400" id="gallery-missing-docs">0</div>
-                        <div class="text-xs text-gray-400 mt-1">Missing</div>
-                    </div>
-                </div>
-
-                <div class="flex space-x-2 mb-6 border-b border-gray-800 pb-4">
-                    <button onclick="filterGalleryDocs('all')" class="gallery-tab active px-4 py-2 rounded-lg text-sm font-medium transition bg-indigo-600 text-white" data-filter="all">All Documents</button>
-                    <button onclick="filterGalleryDocs('verified')" class="gallery-tab px-4 py-2 rounded-lg text-sm font-medium transition bg-gray-800 text-gray-400 hover:text-white" data-filter="verified"><i class="fas fa-check-circle mr-2"></i>Verified</button>
-                    <button onclick="filterGalleryDocs('pending')" class="gallery-tab px-4 py-2 rounded-lg text-sm font-medium transition bg-gray-800 text-gray-400 hover:text-white" data-filter="pending"><i class="fas fa-clock mr-2"></i>Pending</button>
-                    <button onclick="filterGalleryDocs('missing')" class="gallery-tab px-4 py-2 rounded-lg text-sm font-medium transition bg-gray-800 text-gray-400 hover:text-white" data-filter="missing"><i class="fas fa-exclamation-circle mr-2"></i>Missing</button>
-                </div>
-
-                <div id="admin-doc-gallery-grid" class="admin-doc-gallery"></div>
-                <div id="gallery-empty-state" class="hidden text-center py-12">
-                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-folder-open text-2xl text-gray-600"></i></div>
-                    <p class="text-gray-500">No documents found in this category</p>
+                    <h3 class="text-xl font-bold text-white">Confirm Deletion</h3>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="candidate-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-gray-900 rounded-2xl border border-gray-700 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-gray-900">
-                <h3 class="text-xl font-bold">Candidate Details</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            <p class="text-gray-300 mb-6">Delete <strong id="delete-candidate-name" class="text-white"></strong>?</p>
+            <div class="flex space-x-3">
+                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-gray-300">Cancel</button>
+                <button onclick="executeDelete()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition text-white font-semibold">Delete</button>
             </div>
-            <div id="candidate-modal-content" class="p-6"></div>
         </div>
     </div>
 
@@ -166,32 +48,25 @@
                     <i class="fas fa-network-wired text-indigo-500 text-2xl mr-2"></i>
                     <span class="text-2xl font-bold gradient-text">NexusRecruit</span>
                 </div>
-                
                 <div class="hidden md:flex space-x-8">
                     <a href="index.html" class="nav-link text-gray-300 hover:text-white transition">Home</a>
                     <a href="about.html" class="nav-link text-gray-300 hover:text-white transition">About Us</a>
                     <a href="branches.html" class="nav-link text-gray-300 hover:text-white transition">Branches</a>
-                    <a href="join.html" class="nav-link bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition neon-glow">
-                        <i class="fas fa-user-plus mr-2"></i>New Joining
-                    </a>
-                    <a href="admin.html" class="nav-link text-gray-300 hover:text-white transition">
-                        <i class="fas fa-lock mr-2"></i>Admin
-                    </a>
+                    <a href="join.html" class="nav-link bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition">New Joining</a>
+                    <a href="admin.html" class="nav-link text-gray-300 hover:text-white transition"><i class="fas fa-lock mr-2"></i>Admin</a>
                 </div>
-                
-                <button class="md:hidden text-gray-300" onclick="toggleMobileMenu()">
+                <button class="md:hidden text-gray-300" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
         </div>
-        
         <div id="mobile-menu" class="hidden md:hidden glass-effect border-t border-gray-800">
             <div class="px-4 pt-2 pb-4 space-y-2">
-                <a href="index.html" class="block w-full text-left py-2 text-gray-300">Home</a>
-                <a href="about.html" class="block w-full text-left py-2 text-gray-300">About Us</a>
-                <a href="branches.html" class="block w-full text-left py-2 text-gray-300">Branches</a>
-                <a href="join.html" class="block w-full text-left py-2 text-indigo-400">New Joining</a>
-                <a href="admin.html" class="block w-full text-left py-2 text-gray-300">Admin Login</a>
+                <a href="index.html" class="block py-2 text-gray-300">Home</a>
+                <a href="about.html" class="block py-2 text-gray-300">About Us</a>
+                <a href="branches.html" class="block py-2 text-gray-300">Branches</a>
+                <a href="join.html" class="block py-2 text-indigo-400">New Joining</a>
+                <a href="admin.html" class="block py-2 text-gray-300">Admin Login</a>
             </div>
         </div>
     </nav>
@@ -204,25 +79,23 @@
                         <i class="fas fa-shield-alt text-3xl text-indigo-400"></i>
                     </div>
                     <h2 class="text-2xl font-bold">Admin Portal</h2>
-                    <p class="text-gray-400 text-sm mt-2">Secure Access Only</p>
+                    <p class="text-gray-400 text-sm mt-2">admin / admin123 / 123456</p>
                 </div>
-
                 <form id="admin-form" class="space-y-6" onsubmit="handleAdminLogin(event)">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Admin ID</label>
-                        <input type="text" id="admin-id" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="Enter Admin ID">
+                        <input type="text" id="admin-id" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500" placeholder="admin">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                        <input type="password" id="admin-password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="••••••••">
+                        <input type="password" id="admin-password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500" placeholder="admin123">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Security Key</label>
-                        <input type="password" id="admin-key" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="2FA Key">
+                        <input type="password" id="admin-key" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500" placeholder="123456">
                     </div>
-                    
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition transform hover:scale-105">
-                        <i class="fas fa-lock mr-2"></i>Secure Login
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition">
+                        <i class="fas fa-lock mr-2"></i>Login
                     </button>
                 </form>
             </div>
@@ -236,64 +109,35 @@
                         <p class="text-gray-400">Recruitment Management System</p>
                     </div>
                     <div class="flex items-center space-x-4">
-                        <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-sm flex items-center">
-                            <i class="fas fa-file-excel mr-2"></i>Export to Excel
-                        </button>
-                        <button onclick="exportSelectedExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm flex items-center">
-                            <i class="fas fa-file-export mr-2"></i>Export Selected
-                        </button>
-                        <button onclick="logout()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg transition text-sm border border-red-600/30">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                        </button>
+                        <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">Export to Excel</button>
+                        <button onclick="exportSelectedExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Export Selected</button>
+                        <button onclick="logout()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg text-sm border border-red-600/30">Logout</button>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
                         <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-400 text-sm">Total Applications</p>
-                                <p class="text-3xl font-bold text-white mt-1" id="admin-total">0</p>
-                            </div>
-                            <div class="w-12 h-12 bg-indigo-900/50 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-users text-indigo-400"></i>
-                            </div>
+                            <div><p class="text-gray-400 text-sm">Total</p><p class="text-3xl font-bold text-white" id="admin-total">0</p></div>
+                            <div class="w-12 h-12 bg-indigo-900/50 rounded-xl flex items-center justify-center"><i class="fas fa-users text-indigo-400"></i></div>
                         </div>
                     </div>
-
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
                         <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-400 text-sm">Pending Review</p>
-                                <p class="text-3xl font-bold text-yellow-400 mt-1" id="admin-pending">0</p>
-                            </div>
-                            <div class="w-12 h-12 bg-yellow-900/50 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-clock text-yellow-400"></i>
-                            </div>
+                            <div><p class="text-gray-400 text-sm">Pending</p><p class="text-3xl font-bold text-yellow-400" id="admin-pending">0</p></div>
+                            <div class="w-12 h-12 bg-yellow-900/50 rounded-xl flex items-center justify-center"><i class="fas fa-clock text-yellow-400"></i></div>
                         </div>
                     </div>
-
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
                         <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-400 text-sm">Exams Completed</p>
-                                <p class="text-3xl font-bold text-green-400 mt-1" id="admin-completed">0</p>
-                            </div>
-                            <div class="w-12 h-12 bg-green-900/50 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-check-circle text-green-400"></i>
-                            </div>
+                            <div><p class="text-gray-400 text-sm">Selected</p><p class="text-3xl font-bold text-green-400" id="admin-selected">0</p></div>
+                            <div class="w-12 h-12 bg-green-900/50 rounded-xl flex items-center justify-center"><i class="fas fa-check-circle text-green-400"></i></div>
                         </div>
                     </div>
-
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
                         <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-400 text-sm">Selected Candidates</p>
-                                <p class="text-3xl font-bold text-purple-400 mt-1" id="admin-selected">0</p>
-                            </div>
-                            <div class="w-12 h-12 bg-purple-900/50 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-user-check text-purple-400"></i>
-                            </div>
+                            <div><p class="text-gray-400 text-sm">Rejected</p><p class="text-3xl font-bold text-red-400" id="admin-rejected">0</p></div>
+                            <div class="w-12 h-12 bg-red-900/50 rounded-xl flex items-center justify-center"><i class="fas fa-times-circle text-red-400"></i></div>
                         </div>
                     </div>
                 </div>
@@ -310,55 +154,34 @@
                 </div>
 
                 <div class="glass-effect rounded-2xl border border-gray-800 overflow-hidden">
-                    <div class="p-4 border-b border-gray-800 flex flex-wrap gap-4 items-center justify-between">
-                        <h3 class="text-lg font-bold">Candidates</h3>
-                        <div class="flex flex-wrap gap-4 items-center">
-                            <input type="text" id="search-input" placeholder="Search..." class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" oninput="applyFilters(getCandidates())">
-                            <select id="status-filter" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" onchange="applyFilters(getCandidates())">
-                                <option value="all">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="review">Under Review</option>
-                                <option value="selected">Selected</option>
-                                <option value="rejected">Rejected</option>
-                            </select>
-                            <select id="role-filter" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" onchange="applyFilters(getCandidates())">
-                                <option value="all">All Roles</option>
-                            </select>
-                            <select id="special-filter" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" onchange="applyFilters(getCandidates())">
-                                <option value="all">All Categories</option>
-                                <option value="none">No Special</option>
-                                <option value="pwd">PwD</option>
-                                <option value="ex-serviceman">Ex-Serviceman</option>
-                            </select>
-                        </div>
+                    <div class="p-4 border-b border-gray-800 flex flex-wrap gap-4 items-center">
+                        <input type="text" id="search-input" placeholder="Search..." class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" oninput="applyFilters()">
+                        <select id="status-filter" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" onchange="applyFilters()">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="review">Review</option>
+                            <option value="selected">Selected</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <select id="role-filter" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" onchange="applyFilters()">
+                            <option value="all">All Roles</option>
+                        </select>
                     </div>
-
                     <div class="overflow-x-auto">
                         <table class="w-full">
                             <thead class="bg-gray-800/50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"><input type="checkbox" onchange="toggleSelectAll(this)" class="w-4 h-4"></th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase cursor-pointer" onclick="sortBy('id')">ID</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase cursor-pointer" onclick="sortBy('name')">Name</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase cursor-pointer" onclick="sortBy('role')">Role</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase cursor-pointer" onclick="sortBy('score')">Score</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase cursor-pointer" onclick="sortBy('status')">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Name</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Role</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Score</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="candidates-table" class="divide-y divide-gray-800"></tbody>
                         </table>
-                    </div>
-
-                    <div class="p-4 border-t border-gray-800 flex items-center justify-between">
-                        <div class="text-sm text-gray-400">
-                            <span id="showing-count">Showing 0 entries</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="changePage(-1)" class="px-3 py-1 bg-gray-800 rounded hover:bg-gray-700 text-sm">Previous</button>
-                            <span class="text-sm">Page <span id="page-number">1</span></span>
-                            <button onclick="changePage(1)" class="px-3 py-1 bg-gray-800 rounded hover:bg-gray-700 text-sm">Next</button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -370,12 +193,7 @@
         let selectedCandidates = new Set();
         let currentPage = 1;
         let itemsPerPage = 10;
-        let currentSort = { field: 'appliedDate', direction: 'desc' };
-        let currentGalleryCandidate = null;
-        let currentGalleryDocs = [];
-        let currentFullscreenIndex = 0;
-
-        function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
+        let deleteCandidateId = null;
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -386,8 +204,34 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        function initializeStorage() { if (!localStorage.getItem('candidates')) localStorage.setItem('candidates', JSON.stringify([])); }
+        function initializeStorage() {
+            if (!localStorage.getItem('candidates')) {
+                const sample = [
+                    { id: 'NRX-2026-10001', name: 'Rahul Sharma', email: 'rahul@email.com', phone: '9876543210', aadhar: '123456789012', pan: 'ABCDE1234F', dob: '1995-05-15', city: 'Ludhiana', state: 'Punjab', role: 'Project Manager', roleType: 'project-manager', score: 85, baseScore: 75, iqScore: 80, bonus: 10, special: 'Experienced +10%', specialCategories: ['experienced'], status: 'selected', documents: { photo: true, aadhar: true, pan: true, cv: true }, violations: 0, notes: 'Good', appliedDate: '2026-01-15T10:30:00.000Z' },
+                    { id: 'NRX-2026-10002', name: 'Priya Singh', email: 'priya@email.com', phone: '9876543211', aadhar: '123456789013', city: 'Chandigarh', state: 'Punjab', role: 'Data Entry', roleType: 'data-entry', score: 72, baseScore: 72, iqScore: 70, bonus: 0, special: 'None', specialCategories: [], status: 'review', documents: { photo: true, aadhar: true, cv: true }, violations: 0, notes: '', appliedDate: '2026-01-20T14:45:00.000Z' },
+                    { id: 'NRX-2026-10003', name: 'Amit Kumar', email: 'amit@email.com', phone: '9876543212', aadhar: '123456789014', city: 'Jalandhar', state: 'Punjab', role: 'Site Engineer', roleType: 'site-engineer', score: 58, baseScore: 58, iqScore: 55, bonus: 0, special: 'None', specialCategories: [], status: 'rejected', documents: { photo: true, aadhar: true, cv: true }, violations: 1, notes: 'Low score', appliedDate: '2026-01-22T09:15:00.000Z' },
+                    { id: 'NRX-2026-10004', name: 'Sapna Devi', email: 'sapna@email.com', phone: '9876543213', aadhar: '123456789015', city: 'Amritsar', state: 'Punjab', role: 'Gate Keeper', roleType: 'gate-keeper', score: 82, baseScore: 62, iqScore: 60, bonus: 20, special: 'Ex-Serviceman +20%', specialCategories: ['ex-serviceman'], status: 'selected', documents: { photo: true, aadhar: true, cv: true }, violations: 0, notes: 'Ex-Army', appliedDate: '2026-01-25T11:00:00.000Z' },
+                    { id: 'NRX-2026-10005', name: 'Vikramjeet Singh', email: 'vikram@email.com', phone: '9876543214', aadhar: '123456789016', city: 'Patiala', state: 'Punjab', role: 'Telecaller', roleType: 'caller', score: 65, baseScore: 65, iqScore: 68, bonus: 0, special: 'None', specialCategories: [], status: 'pending', documents: { photo: true, aadhar: true }, violations: 0, notes: '', appliedDate: '2026-02-01T16:30:00.000Z' }
+                ];
+                localStorage.setItem('candidates', JSON.stringify(sample));
+            }
+        }
+
         function getCandidates() { return JSON.parse(localStorage.getItem('candidates') || '[]'); }
+
+        function loadSampleData() {
+            localStorage.removeItem('candidates');
+            initializeStorage();
+            loadCandidates();
+            showToast('Sample data loaded!');
+        }
+
+        function deleteCandidate(id) {
+            const candidates = getCandidates().filter(c => c.id !== id);
+            localStorage.setItem('candidates', JSON.stringify(candidates));
+            return true;
+        }
+
         function updateCandidate(id, updates) {
             const candidates = getCandidates();
             const index = candidates.findIndex(c => c.id === id);
@@ -400,15 +244,13 @@
             const id = document.getElementById('admin-id').value;
             const pass = document.getElementById('admin-password').value;
             const key = document.getElementById('admin-key').value;
-
             if (id === 'admin' && pass === 'admin123' && key === '123456') {
                 localStorage.setItem('isAdminLoggedIn', 'true');
-                localStorage.setItem('adminId', id);
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 initializeCharts();
                 loadCandidates();
-                showToast('Welcome back, Admin!');
+                showToast('Welcome Admin!');
             } else {
                 showToast('Invalid credentials', 'error');
             }
@@ -419,35 +261,50 @@
             localStorage.removeItem('isAdminLoggedIn');
             document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('admin-login').classList.remove('hidden');
-            document.getElementById('admin-form').reset();
-            showToast('Logged out successfully');
+            showToast('Logged out');
+        }
+
+        function confirmDelete(id, name) {
+            deleteCandidateId = id;
+            document.getElementById('delete-candidate-name').textContent = name;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            deleteCandidateId = null;
+        }
+
+        function executeDelete() {
+            if (deleteCandidateId) {
+                deleteCandidate(deleteCandidateId);
+                closeDeleteModal();
+                loadCandidates();
+                showToast('Deleted successfully');
+            }
         }
 
         function initializeCharts() {
             const candidates = getCandidates();
             const last7Days = [], counts = [];
-            
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 last7Days.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
                 counts.push(candidates.filter(c => new Date(c.appliedDate).toDateString() === date.toDateString()).length);
             }
-            
             const ctx1 = document.getElementById('trendsChart').getContext('2d');
             new Chart(ctx1, { type: 'line', data: { labels: last7Days, datasets: [{ label: 'Applications', data: counts, borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', tension: 0.4, fill: true }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#9ca3af' } }, x: { grid: { display: false }, ticks: { color: '#9ca3af' } } } } });
-
             const roles = {};
             candidates.forEach(c => { roles[c.role] = (roles[c.role] || 0) + 1; });
-            
             const ctx2 = document.getElementById('deptChart').getContext('2d');
-            new Chart(ctx2, { type: 'doughnut', data: { labels: Object.keys(roles), datasets: [{ data: Object.values(roles), backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'] }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#9ca3af' } } } } });
+            new Chart(ctx2, { type: 'doughnut', data: { labels: Object.keys(roles), datasets: [{ data: Object.values(roles), backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'] }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#9ca3af' } } } } });
         }
 
         function loadCandidates() {
             const candidates = getCandidates();
             populateRoleFilter(candidates);
-            applyFilters(candidates);
+            applyFilters();
         }
 
         function populateRoleFilter(candidates) {
@@ -456,68 +313,45 @@
             select.innerHTML = '<option value="all">All Roles</option>' + roles.map(r => `<option value="${r}">${r}</option>`).join('');
         }
 
-        function applyFilters(candidates) {
+        function applyFilters() {
+            const candidates = getCandidates();
             const statusFilter = document.getElementById('status-filter').value;
             const roleFilter = document.getElementById('role-filter').value;
-            const specialFilter = document.getElementById('special-filter').value;
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            
+
             filteredCandidates = candidates.filter(c => {
                 if (statusFilter !== 'all' && c.status !== statusFilter) return false;
                 if (roleFilter !== 'all' && c.role !== roleFilter) return false;
-                if (specialFilter !== 'all') {
-                    if (specialFilter === 'none') { if (c.specialCategories && c.specialCategories.length > 0) return false; }
-                    else { if (!c.specialCategories || !c.specialCategories.includes(specialFilter)) return false; }
-                }
-                if (searchTerm) { const searchable = `${c.name} ${c.id} ${c.email}`.toLowerCase(); if (!searchable.includes(searchTerm)) return false; }
+                if (searchTerm && !`${c.name} ${c.id} ${c.email}`.toLowerCase().includes(searchTerm)) return false;
                 return true;
             });
-            
-            filteredCandidates.sort((a, b) => {
-                let aVal = a[currentSort.field], bVal = b[currentSort.field];
-                if (currentSort.field === 'appliedDate') { aVal = new Date(aVal); bVal = new Date(bVal); }
-                return currentSort.direction === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
-            });
-            
             renderTable();
             updateStats();
-        }
-
-        function sortBy(field) {
-            if (currentSort.field === field) currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-            else { currentSort.field = field; currentSort.direction = 'asc'; }
-            applyFilters(getCandidates());
         }
 
         function renderTable() {
             const tbody = document.getElementById('candidates-table');
             tbody.innerHTML = '';
-            
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
             const pageData = filteredCandidates.slice(start, end);
-            
-            document.getElementById('showing-count').textContent = `Showing ${filteredCandidates.length} entries`;
-            document.getElementById('page-number').textContent = currentPage;
 
             pageData.forEach(c => {
                 const statusColors = { 'selected': 'bg-green-900/30 text-green-400', 'rejected': 'bg-red-900/30 text-red-400', 'pending': 'bg-yellow-900/30 text-yellow-400', 'review': 'bg-purple-900/30 text-purple-400' };
                 const isSelected = selectedCandidates.has(c.id);
-                
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-800/30 transition';
                 row.innerHTML = `
-                    <td class="px-4 py-4"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection('${c.id}')" class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded"></td>
+                    <td class="px-4 py-4"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection('${c.id}')" class="w-4 h-4"></td>
                     <td class="px-4 py-4 font-mono text-sm">${c.id}</td>
                     <td class="px-4 py-4"><div class="font-medium">${c.name}</div><div class="text-xs text-gray-500">${c.email}</div></td>
                     <td class="px-4 py-4">${c.role}</td>
                     <td class="px-4 py-4"><span class="font-bold ${c.score >= 60 ? 'text-green-400' : 'text-red-400'}">${c.score}%</span></td>
                     <td class="px-4 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[c.status] || 'bg-gray-800 text-gray-400'}">${c.status.toUpperCase()}</span></td>
                     <td class="px-4 py-4">
-                        <button onclick="viewCandidate('${c.id}')" class="text-indigo-400 hover:text-indigo-300 mr-2"><i class="fas fa-eye"></i></button>
-                        <button onclick="openAdminDocGallery('${c.id}')" class="text-blue-400 hover:text-blue-300 mr-2"><i class="fas fa-folder"></i></button>
                         ${c.status !== 'selected' ? `<button onclick="updateStatus('${c.id}', 'selected')" class="text-green-400 hover:text-green-300 mr-2" title="Select"><i class="fas fa-check"></i></button>` : ''}
-                        ${c.status !== 'rejected' ? `<button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-400 hover:text-red-300" title="Reject"><i class="fas fa-times"></i></button>` : ''}
+                        ${c.status !== 'rejected' ? `<button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-400 hover:text-red-300 mr-2" title="Reject"><i class="fas fa-times"></i></button>` : ''}
+                        <button onclick="confirmDelete('${c.id}', '${c.name}')" class="text-red-600 hover:text-red-400" title="Delete"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -528,179 +362,65 @@
             const candidates = getCandidates();
             document.getElementById('admin-total').textContent = candidates.length;
             document.getElementById('admin-pending').textContent = candidates.filter(c => c.status === 'pending' || c.status === 'review').length;
-            document.getElementById('admin-completed').textContent = candidates.filter(c => c.status !== 'pending').length;
             document.getElementById('admin-selected').textContent = candidates.filter(c => c.status === 'selected').length;
+            document.getElementById('admin-rejected').textContent = candidates.filter(c => c.status === 'rejected').length;
         }
 
         function toggleSelection(id) {
-            if (selectedCandidates.has(id)) selectedCandidates.delete(id);
-            else selectedCandidates.add(id);
+            if (selectedCandidates.has(id)) {
+                selectedCandidates.delete(id);
+            } else {
+                selectedCandidates.add(id);
+            }
         }
 
         function toggleSelectAll(checkbox) {
-            if (checkbox.checked) filteredCandidates.forEach(c => selectedCandidates.add(c.id));
-            else selectedCandidates.clear();
+            if (checkbox.checked) {
+                filteredCandidates.forEach(c => selectedCandidates.add(c.id));
+            } else {
+                selectedCandidates.clear();
+            }
             renderTable();
         }
 
-        function changePage(delta) {
-            const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
-            const newPage = currentPage + delta;
-            if (newPage >= 1 && newPage <= totalPages) { currentPage = newPage; renderTable(); }
-        }
-
-        function viewCandidate(id) {
-            const c = getCandidates().find(c => c.id === id);
-            if (!c) return;
-            
-            const content = document.getElementById('candidate-modal-content');
-            content.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="text-lg font-bold mb-4 text-indigo-400">Personal Information</h4>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between border-b border-gray-800 pb-2"><span class="text-gray-400">Full Name</span><span class="font-medium">${c.name}</span></div>
-                            <div class="flex justify-between border-b border-gray-800 pb-2"><span class="text-gray-400">Application ID</span><span class="font-mono text-indigo-400">${c.id}</span></div>
-                            <div class="flex justify-between border-b border-gray-800 pb-2"><span class="text-gray-400">Email</span><span>${c.email}</span></div>
-                            <div class="flex justify-between border-b border-gray-800 pb-2"><span class="text-gray-400">Phone</span><span>${c.phone}</span></div>
-                            <div class="flex justify-between border-b border-gray-800 pb-2"><span class="text-gray-400">Location</span><span>${c.city}, ${c.state}</span></div>
-                            <div class="flex justify-between border-b border-gray-800 pb-2"><span class="text-gray-400">Applied For</span><span class="font-medium">${c.role}</span></div>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-bold mb-4 text-indigo-400">Examination Results</h4>
-                        <div class="space-y-4">
-                            <div class="bg-gray-800/30 p-4 rounded-xl"><div class="flex justify-between items-center mb-2"><span class="text-gray-400">Technical Score</span><span class="text-2xl font-bold text-indigo-400">${c.baseScore || c.score}%</span></div></div>
-                            <div class="bg-gray-800/30 p-4 rounded-xl"><div class="flex justify-between items-center mb-2"><span class="text-gray-400">IQ Score</span><span class="text-2xl font-bold text-purple-400">${c.iqScore || 0}%</span></div></div>
-                            ${c.bonus > 0 ? `<div class="bg-green-900/20 border border-green-700/30 p-4 rounded-xl"><div class="flex justify-between items-center"><span class="text-green-400">Bonus</span><span class="text-2xl font-bold text-green-400">+${c.bonus}%</span></div></div>` : ''}
-                            <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700"><div class="flex justify-between items-center"><span class="text-gray-300">Final Score</span><span class="text-3xl font-bold text-white">${c.score}%</span></div></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-6 pt-6 border-t border-gray-800 flex justify-end space-x-4">
-                    <button onclick="closeModal()" class="px-6 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition">Close</button>
-                    ${c.status !== 'selected' ? `<button onclick="updateStatus('${c.id}', 'selected'); closeModal();" class="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">Select Candidate</button>` : ''}
-                    ${c.status !== 'rejected' ? `<button onclick="updateStatus('${c.id}', 'rejected'); closeModal();" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">Reject</button>` : ''}
-                </div>
-            `;
-            document.getElementById('candidate-modal').classList.remove('hidden');
-        }
-
-        function closeModal() { document.getElementById('candidate-modal').classList.add('hidden'); }
-
         function updateStatus(id, status) {
-            if (updateCandidate(id, { status })) { showToast(`Candidate ${status === 'selected' ? 'selected' : 'rejected'} successfully`); loadCandidates(); }
+            if (updateCandidate(id, { status })) { showToast(`Candidate ${status}`); loadCandidates(); }
         }
 
-        function openAdminDocGallery(candidateId) {
-            const candidate = getCandidates().find(c => c.id === candidateId);
-            if (!candidate) return;
-            
-            currentGalleryCandidate = candidate;
-            document.getElementById('gallery-candidate-info').textContent = `Candidate: ${candidate.name} • ID: ${candidate.id} • ${candidate.role}`;
-            
-            currentGalleryDocs = [
-                { key: 'photo', label: 'Passport Photo', icon: 'fa-user-circle', status: candidate.documents?.photo ? 'verified' : 'missing' },
-                { key: 'aadhar', label: 'Aadhar Card', icon: 'fa-id-card', status: candidate.documents?.aadhar ? 'verified' : 'missing' },
-                { key: 'pan', label: 'PAN Card', icon: 'fa-credit-card', status: candidate.documents?.pan ? 'verified' : 'missing' },
-                { key: 'cv', label: 'Resume/CV', icon: 'fa-file-alt', status: candidate.documents?.cv ? 'verified' : 'missing' }
-            ];
-            
-            updateGalleryStats();
-            renderGalleryDocs('all');
-            document.getElementById('admin-doc-gallery-modal').classList.remove('hidden');
-        }
-
-        function updateGalleryStats() {
-            document.getElementById('gallery-total-docs').textContent = currentGalleryDocs.length;
-            document.getElementById('gallery-verified-docs').textContent = currentGalleryDocs.filter(d => d.status === 'verified').length;
-            document.getElementById('gallery-pending-docs').textContent = currentGalleryDocs.filter(d => d.status === 'pending').length;
-            document.getElementById('gallery-missing-docs').textContent = currentGalleryDocs.filter(d => d.status === 'missing').length;
-        }
-
-        function renderGalleryDocs(filter) {
-            const grid = document.getElementById('admin-doc-gallery-grid');
-            const emptyState = document.getElementById('gallery-empty-state');
-            
-            grid.innerHTML = '';
-            const filteredDocs = filter === 'all' ? currentGalleryDocs : currentGalleryDocs.filter(d => d.status === filter);
-            
-            if (filteredDocs.length === 0) { grid.classList.add('hidden'); emptyState.classList.remove('hidden'); return; }
-            
-            grid.classList.remove('hidden'); emptyState.classList.add('hidden');
-            
-            filteredDocs.forEach((doc, index) => {
-                const card = document.createElement('div');
-                card.className = 'admin-doc-card';
-                card.innerHTML = `
-                    <div class="admin-doc-preview">
-                        <i class="fas ${doc.icon} admin-doc-icon ${doc.status === 'verified' ? 'text-green-400' : 'text-gray-600'}"></i>
-                    </div>
-                    <div class="admin-doc-info">
-                        <h4>${doc.label}</h4>
-                        <div class="admin-doc-type">${doc.status.toUpperCase()}</div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function filterGalleryDocs(filter) {
-            document.querySelectorAll('.gallery-tab').forEach(tab => {
-                if (tab.dataset.filter === filter) { tab.classList.add('bg-indigo-600', 'text-white'); tab.classList.remove('bg-gray-800', 'text-gray-400'); }
-                else { tab.classList.remove('bg-indigo-600', 'text-white'); tab.classList.add('bg-gray-800', 'text-gray-400'); }
-            });
-            renderGalleryDocs(filter);
-        }
-
-        function closeAdminDocGallery() { document.getElementById('admin-doc-gallery-modal').classList.add('hidden'); }
-
-        function exportToExcel() { exportCandidatesToExcel(getCandidates(), 'All_Candidates.xlsx'); }
-
-        function exportSelectedExcel() {
-            if (selectedCandidates.size === 0) { showToast('Please select at least one candidate', 'error'); return; }
-            const selected = getCandidates().filter(c => selectedCandidates.has(c.id));
-            exportCandidatesToExcel(selected, 'Selected_Candidates.xlsx');
-        }
-
-        function exportCandidatesToExcel(candidates, filename) {
-            const data = candidates.map(c => ({
-                'Application ID': c.id, 'Full Name': c.name, 'Email': c.email, 'Phone': c.phone,
-                'Job Role': c.role, 'Technical Score (%)': c.baseScore || c.score, 'IQ Score (%)': c.iqScore || 0,
-                'Bonus Marks (%)': c.bonus || 0, 'Final Score (%)': c.score, 'Special Category': c.special || 'None',
-                'Status': c.status.toUpperCase(), 'Application Date': new Date(c.appliedDate).toLocaleString()
-            }));
-
+        function exportToExcel() {
+            const data = getCandidates().map(c => ({ 'ID': c.id, 'Name': c.name, 'Email': c.email, 'Phone': c.phone, 'Role': c.role, 'Score': c.score, 'Status': c.status }));
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Candidates");
-            XLSX.writeFile(wb, filename);
-            showToast(`Exported ${candidates.length} candidates to Excel`);
+            XLSX.writeFile(wb, 'All_Candidates.xlsx');
+            showToast('Exported all candidates!');
+        }
+
+        function exportSelectedExcel() {
+            if (selectedCandidates.size === 0) {
+                showToast('Please select candidates first', 'error');
+                return;
+            }
+            const selected = getCandidates().filter(c => selectedCandidates.has(c.id));
+            const data = selected.map(c => ({ 'ID': c.id, 'Name': c.name, 'Email': c.email, 'Phone': c.phone, 'Role': c.role, 'Score': c.score, 'Status': c.status }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Selected");
+            XLSX.writeFile(wb, 'Selected_Candidates.xlsx');
+            showToast(`Exported ${selected.length} selected candidates!`);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeStorage();
-            
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
             document.querySelectorAll('.nav-link').forEach(link => { if (link.getAttribute('href') === currentPage) link.classList.add('active'); });
-            
-            if (localStorage.getItem('isAdminLoggedIn') && localStorage.getItem('adminId')) {
+            if (localStorage.getItem('isAdminLoggedIn')) {
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 initializeCharts();
                 loadCandidates();
             }
-            
-            document.getElementById('candidate-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
-            document.getElementById('admin-doc-gallery-modal').addEventListener('click', function(e) { if (e.target === this) closeAdminDocGallery(); });
-            
-            document.addEventListener('keydown', function(e) {
-                if (document.getElementById('fullscreen-preview').classList.contains('active')) {
-                    if (e.key === 'Escape') closeFullscreenPreview();
-                    if (e.key === 'ArrowLeft') navigateFullscreen(-1);
-                    if (e.key === 'ArrowRight') navigateFullscreen(1);
-                }
-            });
+            document.getElementById('delete-modal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
         });
     </script>
 </body>
