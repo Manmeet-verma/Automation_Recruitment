@@ -254,8 +254,8 @@
                                 <input type="text" id="kyc-name" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" placeholder="Enter full name">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Date of Birth *</label>
-                                <input type="date" id="kyc-dob" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Date of Birth * <span class="text-xs text-gray-500">(18+ only)</span></label>
+                                <input type="date" id="kyc-dob" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition" onchange="validateAge()">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Aadhar Number *</label>
@@ -827,6 +827,34 @@
 
         function toggleMobileMenu() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // Set max date to 18 years ago for age validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const dobInput = document.getElementById('kyc-dob');
+            const today = new Date();
+            const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+            dobInput.max = maxDate.toISOString().split('T')[0];
+            
+            // Also set min date to 100 years ago
+            const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+            dobInput.min = minDate.toISOString().split('T')[0];
+        });
+
+        function validateAge() {
+            const dobInput = document.getElementById('kyc-dob');
+            const dob = new Date(dobInput.value);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDiff = today.getMonth() - dob.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            
+            if (age < 18) {
+                showToast('You must be 18 years or older to apply', 'error');
+                dobInput.value = '';
+            }
         }
 
         function showToast(message, type = 'success') {
