@@ -144,12 +144,16 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
-                        <h3 class="text-lg font-bold mb-4">Application Trends</h3>
-                        <canvas id="trendsChart"></canvas>
+                        <h3 class="text-lg font-bold mb-4">Application Trends (Last 30 Days)</h3>
+                        <div style="height: 280px;">
+                            <canvas id="trendsChart"></canvas>
+                        </div>
                     </div>
                     <div class="glass-effect p-6 rounded-2xl border border-gray-800">
                         <h3 class="text-lg font-bold mb-4">Department Distribution</h3>
-                        <canvas id="deptChart"></canvas>
+                        <div style="height: 280px;">
+                            <canvas id="deptChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -284,27 +288,142 @@
             }
         }
 
+        let trendsChart = null;
+        let deptChart = null;
+
         function initializeCharts() {
+            updateCharts();
+        }
+
+        function updateCharts() {
             const candidates = getCandidates();
-            const last7Days = [], counts = [];
-            for (let i = 6; i >= 0; i--) {
+            
+            // Line Chart - Application Trends (Last 30 days)
+            const last30Days = [];
+            const applicationCounts = [];
+            for (let i = 29; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
-                last7Days.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                counts.push(candidates.filter(c => new Date(c.appliedDate).toDateString() === date.toDateString()).length);
+                const dateStr = date.toISOString().split('T')[0];
+                last30Days.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                applicationCounts.push(candidates.filter(c => c.appliedDate && c.appliedDate.split('T')[0] === dateStr).length);
             }
+
             const ctx1 = document.getElementById('trendsChart').getContext('2d');
-            new Chart(ctx1, { type: 'line', data: { labels: last7Days, datasets: [{ label: 'Applications', data: counts, borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', tension: 0.4, fill: true }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#9ca3af' } }, x: { grid: { display: false }, ticks: { color: '#9ca3af' } } } } });
+            if (trendsChart) trendsChart.destroy();
+            trendsChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: last30Days,
+                    datasets: [{
+                        label: 'Applications',
+                        data: applicationCounts,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#9ca3af',
+                            borderColor: 'rgba(99, 102, 241, 0.5)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#9ca3af', stepSize: 1 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', maxTicksLimit: 10 }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+
+            // Bar Chart - Status Distribution
+            const statusCounts = {
+                'Selected': candidates.filter(c => c.status === 'selected').length,
+                'Pending': candidates.filter(c => c.status === 'pending').length,
+                'Review': candidates.filter(c => c.status === 'review').length,
+                'Rejected': candidates.filter(c => c.status === 'rejected').length
+            };
+
+            // Doughnut Chart - Department Distribution
             const roles = {};
             candidates.forEach(c => { roles[c.role] = (roles[c.role] || 0) + 1; });
+
             const ctx2 = document.getElementById('deptChart').getContext('2d');
-            new Chart(ctx2, { type: 'doughnut', data: { labels: Object.keys(roles), datasets: [{ data: Object.values(roles), backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'] }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#9ca3af' } } } } });
+            if (deptChart) deptChart.destroy();
+            deptChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(roles),
+                    datasets: [{
+                        data: Object.values(roles),
+                        backgroundColor: [
+                            '#6366f1', '#8b5cf6', '#ec4899', '#10b981', 
+                            '#f59e0b', '#3b82f6', '#ef4444', '#14b8a6'
+                        ],
+                        borderColor: '#1f2937',
+                        borderWidth: 3,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#9ca3af',
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#9ca3af',
+                            borderColor: 'rgba(99, 102, 241, 0.5)',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    }
+                }
+            });
         }
 
         function loadCandidates() {
             const candidates = getCandidates();
             populateRoleFilter(candidates);
             applyFilters();
+            updateCharts();
         }
 
         function populateRoleFilter(candidates) {
