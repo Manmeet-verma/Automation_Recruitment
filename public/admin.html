@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="icon" href="/public/favicon.ico">
     <title>Admin - Techon LED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -11,181 +11,238 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary: #0b2a5b;
+            --accent: #ff0000;
+            --bg-white: #ffffff;
+            --section-bg: #f5f5f5;
+        }
+        
         * { font-family: 'Inter', sans-serif; }
-        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .glass-effect { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #0b2a5b 0%, #1a4a8a 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 3px solid #0b2a5b;
+        }
+        
+        .led-glow {
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+        
         .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(11, 42, 91, 0.15); }
+        
         .toast { animation: slideIn 0.3s ease-out; }
+        
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .nav-link.active { color: white !important; border-bottom: 2px solid #6366f1; }
+        
+        .nav-link.active { color: #ff0000 !important; border-bottom: 2px solid #ff0000; }
+        
+        h1, h2, h3, h4, h5, h6 { color: #0b2a5b; }
+        
+        a { color: #0b2a5b; transition: color 0.3s ease; }
+        a:hover { color: #ff0000; }
+        
+        .card {
+            background: white;
+            border-left: 4px solid #0b2a5b;
+            box-shadow: 0 4px 15px rgba(11, 42, 91, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #0b2a5b 0%, #1a4a8a 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover { box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); }
+        
+        .btn-accent {
+            background: #ff0000;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-accent:hover {
+            background: #cc0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
+<body class="bg-white text-gray-800 min-h-screen overflow-x-hidden">
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
 
-    <div id="delete-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-        <div class="bg-gray-900 rounded-2xl border border-red-500/50 max-w-md w-full p-6">
+    <div id="delete-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-red-500/50 max-w-md w-full p-6">
             <div class="flex items-center mb-4">
-                <div class="w-12 h-12 bg-red-900/50 rounded-full flex items-center justify-center mr-4">
-                    <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold text-white">Confirm Deletion</h3>
+                    <h3 class="text-xl font-bold text-[#0b2a5b]">Confirm Deletion</h3>
                 </div>
             </div>
-            <p class="text-gray-300 mb-6">Delete <strong id="delete-candidate-name" class="text-white"></strong>?</p>
+            <p class="text-gray-600 mb-6">Delete <strong id="delete-candidate-name" class="text-[#0b2a5b]"></strong>?</p>
             <div class="flex space-x-3">
-                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition text-gray-300">Cancel</button>
+                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-gray-700">Cancel</button>
                 <button onclick="executeDelete()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition text-white font-semibold">Delete</button>
             </div>
         </div>
     </div>
 
-    <nav class="fixed w-full z-50 glass-effect border-b border-gray-800">
+    <nav class="fixed w-full z-50 glass-effect shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center" onclick="window.location.href='index.html'">
-                    <i class="fas fa-network-wired text-indigo-500 text-2xl mr-2"></i>
+                    <i class="fas fa-network-wired text-[#0b2a5b] text-2xl mr-2"></i>
                     <span class="text-2xl font-bold gradient-text">NexusRecruit</span>
                 </div>
                 <div class="hidden md:flex space-x-8">
-                    <a href="index.html" class="nav-link text-gray-300 hover:text-white transition">Home</a>
-                    <a href="about.html" class="nav-link text-gray-300 hover:text-white transition">About Us</a>
-                    <a href="branches.html" class="nav-link text-gray-300 hover:text-white transition">Branches</a>
-                    <a href="join.html" class="nav-link bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition">New Joining</a>
-                    <a href="admin.html" class="nav-link text-gray-300 hover:text-white transition"><i class="fas fa-lock mr-2"></i>Admin</a>
+                    <a href="index.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">Home</a>
+                    <a href="about.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">About Us</a>
+                    <a href="branches.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">Branches</a>
+                    <a href="join.html" class="nav-link btn-accent px-4 py-2 rounded-lg transition led-glow font-medium">New Joining</a>
+                    <a href="admin.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium"><i class="fas fa-lock mr-2"></i>Admin</a>
                 </div>
-                <button class="md:hidden text-gray-300" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <button class="md:hidden text-gray-700" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t border-gray-800">
+        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t-2 border-[#0b2a5b]">
             <div class="px-4 pt-2 pb-4 space-y-2">
-                <a href="index.html" class="block py-2 text-gray-300">Home</a>
-                <a href="about.html" class="block py-2 text-gray-300">About Us</a>
-                <a href="branches.html" class="block py-2 text-gray-300">Branches</a>
-                <a href="join.html" class="block py-2 text-indigo-400">New Joining</a>
-                <a href="admin.html" class="block py-2 text-gray-300">Admin Login</a>
+                <a href="index.html" class="block py-2 text-gray-600 font-medium">Home</a>
+                <a href="about.html" class="block py-2 text-gray-600 font-medium">About Us</a>
+                <a href="branches.html" class="block py-2 text-gray-600 font-medium">Branches</a>
+                <a href="join.html" class="block py-2 text-[#ff0000] font-medium">New Joining</a>
+                <a href="admin.html" class="block py-2 text-gray-600 font-medium">Admin Login</a>
             </div>
         </div>
     </nav>
 
     <div class="pt-16">
-        <section id="admin-login" class="min-h-screen bg-gray-900 flex items-center justify-center py-16">
-            <div class="glass-effect rounded-3xl p-8 md:p-12 border border-gray-800 w-full max-w-md mx-4">
+        <section id="admin-login" class="min-h-screen bg-[#f5f5f5] flex items-center justify-center py-16">
+            <div class="glass-effect rounded-3xl p-8 md:p-12 bg-white w-full max-w-md mx-4">
                 <div class="text-center mb-8">
-                    <div class="w-16 h-16 bg-indigo-900/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-shield-alt text-3xl text-indigo-400"></i>
+                    <div class="w-16 h-16 bg-[#0b2a5b]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-alt text-3xl text-[#0b2a5b]"></i>
                     </div>
-                    <h2 class="text-2xl font-bold">Admin Portal</h2>
-                    <p class="text-gray-400 text-sm mt-2">admin / admin123 / 123456</p>
+                    <h2 class="text-2xl font-bold text-[#0b2a5b]">Admin Portal</h2>
+                    <p class="text-gray-500 text-sm mt-2">admin / admin123 / 123456</p>
                 </div>
                 <form id="admin-form" class="space-y-6" onsubmit="handleAdminLogin(event)">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Admin ID</label>
-                        <input type="text" id="admin-id" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500" placeholder="admin">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Admin ID</label>
+                        <input type="text" id="admin-id" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="admin">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                        <input type="password" id="admin-password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500" placeholder="admin123">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="admin-password" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="admin123">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Security Key</label>
-                        <input type="password" id="admin-key" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-indigo-500" placeholder="123456">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Security Key</label>
+                        <input type="password" id="admin-key" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="123456">
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition">
+                    <button type="submit" class="w-full btn-accent hover:bg-[#cc0000] text-white py-3 rounded-xl font-semibold transition">
                         <i class="fas fa-lock mr-2"></i>Login
                     </button>
                 </form>
             </div>
         </section>
 
-        <section id="admin-dashboard" class="hidden min-h-screen bg-gray-900 py-8">
+        <section id="admin-dashboard" class="hidden min-h-screen bg-[#f5f5f5] py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between mb-8">
                     <div>
                         <h1 class="text-3xl font-bold gradient-text">Admin Dashboard</h1>
-                        <p class="text-gray-400">Recruitment Management System</p>
+                        <p class="text-gray-500">Recruitment Management System</p>
                     </div>
                     <div class="flex items-center space-x-4">
                         <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm">Export to Excel</button>
                         <button onclick="exportSelectedExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Export Selected</button>
-                        <button onclick="logout()" class="bg-red-600/20 hover:bg-red-600/30 text-red-400 px-4 py-2 rounded-lg text-sm border border-red-600/30">Logout</button>
+                        <button onclick="logout()" class="bg-red-100 hover:bg-red-200 text-red-600 px-4 py-2 rounded-lg text-sm border border-red-200">Logout</button>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="glass-effect p-6 rounded-2xl border border-gray-800">
+                    <div class="glass-effect p-6 rounded-2xl bg-white">
                         <div class="flex items-center justify-between">
-                            <div><p class="text-gray-400 text-sm">Total</p><p class="text-3xl font-bold text-white" id="admin-total">0</p></div>
-                            <div class="w-12 h-12 bg-indigo-900/50 rounded-xl flex items-center justify-center"><i class="fas fa-users text-indigo-400"></i></div>
+                            <div><p class="text-gray-500 text-sm">Total</p><p class="text-3xl font-bold text-[#0b2a5b]" id="admin-total">0</p></div>
+                            <div class="w-12 h-12 bg-[#0b2a5b]/10 rounded-xl flex items-center justify-center"><i class="fas fa-users text-[#0b2a5b]"></i></div>
                         </div>
                     </div>
-                    <div class="glass-effect p-6 rounded-2xl border border-gray-800">
+                    <div class="glass-effect p-6 rounded-2xl bg-white">
                         <div class="flex items-center justify-between">
-                            <div><p class="text-gray-400 text-sm">Pending</p><p class="text-3xl font-bold text-yellow-400" id="admin-pending">0</p></div>
-                            <div class="w-12 h-12 bg-yellow-900/50 rounded-xl flex items-center justify-center"><i class="fas fa-clock text-yellow-400"></i></div>
+                            <div><p class="text-gray-500 text-sm">Pending</p><p class="text-3xl font-bold text-yellow-600" id="admin-pending">0</p></div>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center"><i class="fas fa-clock text-yellow-600"></i></div>
                         </div>
                     </div>
-                    <div class="glass-effect p-6 rounded-2xl border border-gray-800">
+                    <div class="glass-effect p-6 rounded-2xl bg-white">
                         <div class="flex items-center justify-between">
-                            <div><p class="text-gray-400 text-sm">Selected</p><p class="text-3xl font-bold text-green-400" id="admin-selected">0</p></div>
-                            <div class="w-12 h-12 bg-green-900/50 rounded-xl flex items-center justify-center"><i class="fas fa-check-circle text-green-400"></i></div>
+                            <div><p class="text-gray-500 text-sm">Selected</p><p class="text-3xl font-bold text-green-600" id="admin-selected">0</p></div>
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-check-circle text-green-600"></i></div>
                         </div>
                     </div>
-                    <div class="glass-effect p-6 rounded-2xl border border-gray-800">
+                    <div class="glass-effect p-6 rounded-2xl bg-white">
                         <div class="flex items-center justify-between">
-                            <div><p class="text-gray-400 text-sm">Rejected</p><p class="text-3xl font-bold text-red-400" id="admin-rejected">0</p></div>
-                            <div class="w-12 h-12 bg-red-900/50 rounded-xl flex items-center justify-center"><i class="fas fa-times-circle text-red-400"></i></div>
+                            <div><p class="text-gray-500 text-sm">Rejected</p><p class="text-3xl font-bold text-red-600" id="admin-rejected">0</p></div>
+                            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center"><i class="fas fa-times-circle text-red-600"></i></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    <div class="glass-effect p-6 rounded-2xl border border-gray-800">
-                        <h3 class="text-lg font-bold mb-4">Application Trends (Last 30 Days)</h3>
+                    <div class="glass-effect p-6 rounded-2xl bg-white">
+                        <h3 class="text-lg font-bold mb-4 text-[#0b2a5b]">Application Trends (Last 30 Days)</h3>
                         <div style="height: 280px;">
                             <canvas id="trendsChart"></canvas>
                         </div>
                     </div>
-                    <div class="glass-effect p-6 rounded-2xl border border-gray-800">
-                        <h3 class="text-lg font-bold mb-4">Department Distribution</h3>
+                    <div class="glass-effect p-6 rounded-2xl bg-white">
+                        <h3 class="text-lg font-bold mb-4 text-[#0b2a5b]">Department Distribution</h3>
                         <div style="height: 280px;">
                             <canvas id="deptChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-effect rounded-2xl border border-gray-800 overflow-hidden">
-                    <div class="p-4 border-b border-gray-800 flex flex-wrap gap-4 items-center">
-                        <input type="text" id="search-input" placeholder="Search..." class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" oninput="applyFilters()">
-                        <select id="status-filter" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" onchange="applyFilters()">
+                <div class="glass-effect rounded-2xl bg-white overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 flex flex-wrap gap-4 items-center">
+                        <input type="text" id="search-input" placeholder="Search..." class="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-800" oninput="applyFilters()">
+                        <select id="status-filter" class="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-800" onchange="applyFilters()">
                             <option value="all">All Status</option>
                             <option value="pending">Pending</option>
                             <option value="review">Review</option>
                             <option value="selected">Selected</option>
                             <option value="rejected">Rejected</option>
                         </select>
-                        <select id="role-filter" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white" onchange="applyFilters()">
+                        <select id="role-filter" class="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-800" onchange="applyFilters()">
                             <option value="all">All Roles</option>
                         </select>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full">
-                            <thead class="bg-gray-800/50">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase"><input type="checkbox" onchange="toggleSelectAll(this)"></th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">ID</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Name</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Role</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Score</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase"><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Score</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="candidates-table" class="divide-y divide-gray-800"></tbody>
+                            <tbody id="candidates-table" class="divide-y divide-gray-200"></tbody>
                         </table>
                     </div>
                 </div>
@@ -319,12 +376,12 @@
                     datasets: [{
                         label: 'Applications',
                         data: applicationCounts,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                        borderColor: '#0b2a5b',
+                        backgroundColor: 'rgba(11, 42, 91, 0.15)',
                         borderWidth: 3,
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#6366f1',
+                        pointBackgroundColor: '#0b2a5b',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 4,
@@ -337,10 +394,10 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                            titleColor: '#fff',
-                            bodyColor: '#9ca3af',
-                            borderColor: 'rgba(99, 102, 241, 0.5)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#0b2a5b',
+                            bodyColor: '#6b7280',
+                            borderColor: 'rgba(11, 42, 91, 0.3)',
                             borderWidth: 1,
                             padding: 12,
                             displayColors: false
@@ -349,12 +406,12 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            ticks: { color: '#9ca3af', stepSize: 1 }
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            ticks: { color: '#6b7280', stepSize: 1 }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#9ca3af', maxTicksLimit: 10 }
+                            ticks: { color: '#6b7280', maxTicksLimit: 10 }
                         }
                     },
                     interaction: {
@@ -385,10 +442,10 @@
                     datasets: [{
                         data: Object.values(roles),
                         backgroundColor: [
-                            '#6366f1', '#8b5cf6', '#ec4899', '#10b981', 
-                            '#f59e0b', '#3b82f6', '#ef4444', '#14b8a6'
+                            '#0b2a5b', '#ff0000', '#1a4a8a', '#cc0000', 
+                            '#0b2a5b', '#ff6666', '#ff0000', '#0b2a5b'
                         ],
-                        borderColor: '#1f2937',
+                        borderColor: '#ffffff',
                         borderWidth: 3,
                         hoverOffset: 10
                     }]
@@ -401,17 +458,17 @@
                         legend: {
                             position: 'right',
                             labels: {
-                                color: '#9ca3af',
+                                color: '#6b7280',
                                 padding: 15,
                                 usePointStyle: true,
                                 pointStyle: 'circle'
                             }
                         },
                         tooltip: {
-                            backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                            titleColor: '#fff',
-                            bodyColor: '#9ca3af',
-                            borderColor: 'rgba(99, 102, 241, 0.5)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#0b2a5b',
+                            bodyColor: '#6b7280',
+                            borderColor: 'rgba(11, 42, 91, 0.3)',
                             borderWidth: 1,
                             padding: 12
                         }
@@ -457,21 +514,21 @@
             const pageData = filteredCandidates.slice(start, end);
 
             pageData.forEach(c => {
-                const statusColors = { 'selected': 'bg-green-900/30 text-green-400', 'rejected': 'bg-red-900/30 text-red-400', 'pending': 'bg-yellow-900/30 text-yellow-400', 'review': 'bg-purple-900/30 text-purple-400' };
+                const statusColors = { 'selected': 'bg-green-100 text-green-700', 'rejected': 'bg-red-100 text-red-700', 'pending': 'bg-yellow-100 text-yellow-700', 'review': 'bg-purple-100 text-purple-700' };
                 const isSelected = selectedCandidates.has(c.id);
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-800/30 transition';
+                row.className = 'hover:bg-gray-50 transition';
                 row.innerHTML = `
                     <td class="px-4 py-4"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection('${c.id}')" class="w-4 h-4"></td>
-                    <td class="px-4 py-4 font-mono text-sm">${c.id}</td>
-                    <td class="px-4 py-4"><div class="font-medium">${c.name}</div><div class="text-xs text-gray-500">${c.email}</div></td>
-                    <td class="px-4 py-4">${c.role}</td>
-                    <td class="px-4 py-4"><span class="font-bold ${c.score >= 60 ? 'text-green-400' : 'text-red-400'}">${c.score}%</span></td>
-                    <td class="px-4 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[c.status] || 'bg-gray-800 text-gray-400'}">${c.status.toUpperCase()}</span></td>
+                    <td class="px-4 py-4 font-mono text-sm text-[#0b2a5b]">${c.id}</td>
+                    <td class="px-4 py-4"><div class="font-medium text-[#0b2a5b]">${c.name}</div><div class="text-xs text-gray-500">${c.email}</div></td>
+                    <td class="px-4 py-4 text-gray-600">${c.role}</td>
+                    <td class="px-4 py-4"><span class="font-bold ${c.score >= 60 ? 'text-green-600' : 'text-red-600'}">${c.score}%</span></td>
+                    <td class="px-4 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[c.status] || 'bg-gray-100 text-gray-600'}">${c.status.toUpperCase()}</span></td>
                     <td class="px-4 py-4">
-                        ${c.status !== 'selected' ? `<button onclick="updateStatus('${c.id}', 'selected')" class="text-green-400 hover:text-green-300 mr-2" title="Select"><i class="fas fa-check"></i></button>` : ''}
-                        ${c.status !== 'rejected' ? `<button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-400 hover:text-red-300 mr-2" title="Reject"><i class="fas fa-times"></i></button>` : ''}
-                        <button onclick="confirmDelete('${c.id}', '${c.name}')" class="text-red-600 hover:text-red-400" title="Delete"><i class="fas fa-trash"></i></button>
+                        ${c.status !== 'selected' ? `<button onclick="updateStatus('${c.id}', 'selected')" class="text-green-600 hover:text-green-700 mr-2" title="Select"><i class="fas fa-check"></i></button>` : ''}
+                        ${c.status !== 'rejected' ? `<button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-600 hover:text-red-700 mr-2" title="Reject"><i class="fas fa-times"></i></button>` : ''}
+                        <button onclick="confirmDelete('${c.id}', '${c.name}')" class="text-red-700 hover:text-red-800" title="Delete"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
                 tbody.appendChild(row);

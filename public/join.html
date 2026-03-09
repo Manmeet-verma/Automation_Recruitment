@@ -3,48 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="icon" href="/public/favicon.ico">
     <title>New Joining - Techon LED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
+        :root {
+            --primary: #0b2a5b;
+            --accent: #ff0000;
+            --bg-white: #ffffff;
+            --section-bg: #f5f5f5;
+        }
+        
         * { font-family: 'Inter', sans-serif; }
         
         .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0b2a5b 0%, #1a4a8a 100%);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         
         .glass-effect {
-            background: rgba(17, 24, 39, 0.7);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 3px solid #0b2a5b;
         }
         
-        .neon-glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+        .led-glow { box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
         
         .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(11, 42, 91, 0.15); }
         
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         
         .exam-timer { font-variant-numeric: tabular-nums; }
         
-        .proctoring-active { border: 2px solid #ef4444; animation: border-pulse 2s infinite; }
+        .proctoring-active { border: 2px solid #ff0000; animation: border-pulse 2s infinite; }
         
         @keyframes border-pulse {
-            0%, 100% { border-color: #ef4444; }
-            50% { border-color: #f87171; }
+            0%, 100% { border-color: #ff0000; }
+            50% { border-color: #ff6666; }
         }
         
         .scan-line {
             position: absolute; top: 0; left: 0;
             width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, #10b981, transparent);
+            background: linear-gradient(90deg, transparent, #0b2a5b, transparent);
             animation: scan 2s linear infinite;
         }
         
@@ -58,8 +65,8 @@
         }
         
         .document-card {
-            background: rgba(31, 41, 55, 0.8);
-            border: 1px solid rgba(75, 85, 99, 0.5);
+            background: white;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -67,37 +74,37 @@
         
         .document-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 25px rgba(11, 42, 91, 0.15);
+            border-color: rgba(11, 42, 91, 0.3);
         }
         
         .doc-preview {
             height: 140px;
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            background: linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%);
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
         .doc-preview img { width: 100%; height: 100%; object-fit: cover; }
-        .doc-icon { font-size: 3rem; opacity: 0.8; }
+        .doc-icon { font-size: 3rem; color: #0b2a5b; opacity: 0.5; }
         
         .doc-info { padding: 1rem; }
-        .doc-info h4 { font-size: 0.9rem; font-weight: 600; color: #f3f4f6; margin-bottom: 0.5rem; }
+        .doc-info h4 { font-size: 0.9rem; font-weight: 600; color: #0b2a5b; margin-bottom: 0.5rem; }
         
         .doc-meta { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
         
         .doc-type {
-            background: rgba(99, 102, 241, 0.2);
-            color: #818cf8;
+            background: rgba(11, 42, 91, 0.1);
+            color: #0b2a5b;
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.7rem;
             font-weight: 500;
         }
         
-        .doc-size { color: #9ca3af; font-size: 0.75rem; }
-        .doc-date { color: #6b7280; font-size: 0.75rem; }
+        .doc-size { color: #6b7280; font-size: 0.75rem; }
+        .doc-date { color: #9ca3af; font-size: 0.75rem; }
         
         .doc-actions { display: flex; gap: 0.5rem; padding: 0 1rem 1rem; }
         
@@ -107,22 +114,20 @@
             display: flex; align-items: center; justify-content: center; gap: 0.25rem;
         }
         
-        .btn-view-doc { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-        .btn-view-doc:hover { background: rgba(59, 130, 246, 0.3); }
+        .btn-view-doc { background: rgba(11, 42, 91, 0.1); color: #0b2a5b; }
+        .btn-view-doc:hover { background: rgba(11, 42, 91, 0.2); }
         
-        .btn-delete-doc { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-        .btn-delete-doc:hover { background: rgba(239, 68, 68, 0.3); }
+        .btn-delete-doc { background: rgba(255, 0, 0, 0.1); color: #ff0000; }
+        .btn-delete-doc:hover { background: rgba(255, 0, 0, 0.2); }
         
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5);
             display: flex; align-items: center; justify-content: center;
             z-index: 100; padding: 1rem;
         }
         
         .modal-content {
-            background: rgba(17, 24, 39, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(75, 85, 99, 0.5);
+            background: white;
             border-radius: 16px;
             max-width: 900px; width: 100%; max-height: 90vh;
             overflow-y: auto;
@@ -130,10 +135,39 @@
         
         .preview-image { max-width: 100%; max-height: 70vh; object-fit: contain; }
         
-        .nav-link.active { color: white !important; border-bottom: 2px solid #6366f1; }
+        .nav-link.active { border-bottom: 2px solid #ff0000; }
+        
+        .nav-link.btn-accent.active { color: #ffffff !important; }
+        
+        h1, h2, h3, h4, h5, h6 { color: #0b2a5b; }
+        
+        a { color: #0b2a5b; transition: color 0.3s ease; }
+        a:hover { color: #ff0000; }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #0b2a5b 0%, #1a4a8a 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover { box-shadow: 0 0 20px rgba(255, 0, 0, 0.4); }
+        
+        .btn-accent {
+            background: #ff0000;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-accent:hover {
+            background: #cc0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+        }
+        
+        .step-active { background: #0b2a5b; color: white; }
+        .step-inactive { background: #f5f5f5; color: #9ca3af; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
+<body class="bg-white text-gray-800 min-h-screen overflow-x-hidden">
     
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
     
@@ -158,92 +192,92 @@
         </div>
     </div>
 
-    <nav class="fixed w-full z-50 glass-effect border-b border-gray-800">
+    <nav class="fixed w-full z-50 glass-effect shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center" onclick="window.location.href='index.html'">
-                    <i class="fas fa-network-wired text-indigo-500 text-2xl mr-2"></i>
+                    <i class="fas fa-network-wired text-[#0b2a5b] text-2xl mr-2"></i>
                     <span class="text-2xl font-bold gradient-text">NexusRecruit</span>
                 </div>
                 
                 <div class="hidden md:flex space-x-8">
-                    <a href="index.html" class="nav-link text-gray-300 hover:text-white transition">Home</a>
-                    <a href="about.html" class="nav-link text-gray-300 hover:text-white transition">About Us</a>
-                    <a href="branches.html" class="nav-link text-gray-300 hover:text-white transition">Branches</a>
-                    <a href="join.html" class="nav-link bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition neon-glow">
+                    <a href="index.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">Home</a>
+                    <a href="about.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">About Us</a>
+                    <a href="branches.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">Branches</a>
+                    <a href="join.html" class="nav-link btn-accent px-4 py-2 rounded-lg transition led-glow font-medium">
                         <i class="fas fa-user-plus mr-2"></i>New Joining
                     </a>
-                    <a href="admin.html" class="nav-link text-gray-300 hover:text-white transition">
+                    <a href="admin.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">
                         <i class="fas fa-lock mr-2"></i>Admin
                     </a>
                 </div>
                 
-                <button class="md:hidden text-gray-300" onclick="toggleMobileMenu()">
+                <button class="md:hidden text-gray-700" onclick="toggleMobileMenu()">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
         </div>
         
-        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t border-gray-800">
+        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t-2 border-[#0b2a5b]">
             <div class="px-4 pt-2 pb-4 space-y-2">
-                <a href="index.html" class="block w-full text-left py-2 text-gray-300">Home</a>
-                <a href="about.html" class="block w-full text-left py-2 text-gray-300">About Us</a>
-                <a href="branches.html" class="block w-full text-left py-2 text-gray-300">Branches</a>
-                <a href="join.html" class="block w-full text-left py-2 text-indigo-400">New Joining</a>
-                <a href="admin.html" class="block w-full text-left py-2 text-gray-300">Admin Login</a>
+                <a href="index.html" class="block w-full text-left py-2 text-gray-600 font-medium">Home</a>
+                <a href="about.html" class="block w-full text-left py-2 text-gray-600 font-medium">About Us</a>
+                <a href="branches.html" class="block w-full text-left py-2 text-gray-600 font-medium">Branches</a>
+                <a href="join.html" class="block w-full text-left py-2 text-[#ff0000] font-medium">New Joining</a>
+                <a href="admin.html" class="block w-full text-left py-2 text-gray-600 font-medium">Admin Login</a>
             </div>
         </div>
     </nav>
 
     <div class="pt-16">
-        <section class="min-h-screen bg-gray-900 py-8">
+        <section class="min-h-screen bg-[#f5f5f5] py-8">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div class="mb-8">
                     <div class="flex items-center justify-between relative">
-                        <div class="absolute left-0 right-0 top-1/2 h-1 bg-gray-800 -z-10"></div>
+                        <div class="absolute left-0 right-0 top-1/2 h-1 bg-gray-300 -z-10"></div>
                         <div class="flex flex-col items-center">
-                            <div id="step-1-indicator" class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white">1</div>
-                            <span class="text-xs mt-2 text-gray-400">KYC</span>
+                            <div id="step-1-indicator" class="w-10 h-10 rounded-full bg-[#0b2a5b] flex items-center justify-center font-bold text-white">1</div>
+                            <span class="text-xs mt-2 text-gray-600">KYC</span>
                         </div>
                         <div class="flex flex-col items-center">
-                            <div id="step-2-indicator" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-500">2</div>
-                            <span class="text-xs mt-2 text-gray-400">Category</span>
+                            <div id="step-2-indicator" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-500">2</div>
+                            <span class="text-xs mt-2 text-gray-600">Category</span>
                         </div>
                         <div class="flex flex-col items-center">
-                            <div id="step-3-indicator" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-500">3</div>
-                            <span class="text-xs mt-2 text-gray-400">Documents</span>
+                            <div id="step-3-indicator" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-500">3</div>
+                            <span class="text-xs mt-2 text-gray-600">Documents</span>
                         </div>
                         <div class="flex flex-col items-center">
-                            <div id="step-4-indicator" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-500">4</div>
-                            <span class="text-xs mt-2 text-gray-400">Exam</span>
+                            <div id="step-4-indicator" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-500">4</div>
+                            <span class="text-xs mt-2 text-gray-600">Exam</span>
                         </div>
                         <div class="flex flex-col items-center">
-                            <div id="step-5-indicator" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center font-bold text-gray-500">5</div>
-                            <span class="text-xs mt-2 text-gray-400">Review</span>
+                            <div id="step-5-indicator" class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-500">5</div>
+                            <span class="text-xs mt-2 text-gray-600">Review</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Step 1: KYC -->
-                <div id="step-1" class="glass-effect rounded-2xl p-8 border border-gray-800">
+                <div id="step-1" class="glass-effect rounded-2xl p-8 bg-white">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-bold gradient-text">KYC Verification & Special Categories</h2>
-                        <div class="bg-indigo-900/50 px-4 py-2 rounded-lg border border-indigo-500/30">
-                            <i class="fas fa-shield-alt text-indigo-400 mr-2"></i>
-                            <span class="text-sm text-indigo-300">Secure Verification</span>
+                        <div class="bg-[#0b2a5b]/10 px-4 py-2 rounded-lg border border-[#0b2a5b]/30">
+                            <i class="fas fa-shield-alt text-[#0b2a5b] mr-2"></i>
+                            <span class="text-sm text-[#0b2a5b]">Secure Verification</span>
                         </div>
                     </div>
 
-                    <div class="bg-yellow-900/20 border border-yellow-700/50 rounded-xl p-4 mb-6 flex items-start">
-                        <i class="fas fa-info-circle text-yellow-500 mt-1 mr-3"></i>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 flex items-start">
+                        <i class="fas fa-info-circle text-yellow-600 mt-1 mr-3"></i>
                         <div>
-                            <p class="text-yellow-200 text-sm font-semibold">Special Benefits Available</p>
-                            <p class="text-yellow-200/80 text-sm mt-1">
+                            <p class="text-yellow-800 text-sm font-semibold">Special Benefits Available</p>
+                            <p class="text-yellow-700 text-sm mt-1">
                                 Candidates with disabilities, widows, or retired defense personnel (Army/Police) 
-                                are eligible for <span class="font-bold text-yellow-400">20% additional marks</span>. 
+                                are eligible for <span class="font-bold text-yellow-900">20% additional marks</span>. 
                                 Ex-servicemen and candidates with extra certifications get 
-                                <span class="font-bold text-yellow-400">10% additional marks</span>.
+                                <span class="font-bold text-yellow-900">10% additional marks</span>.
                             </p>
                         </div>
                     </div>

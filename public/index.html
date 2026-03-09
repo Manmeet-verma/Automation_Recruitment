@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="images/favicon.png">
+<link rel="icon" href="/public/favicon.ico">
     <title>automation - Techon LED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -12,25 +12,32 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
+        :root {
+            --primary: #0b2a5b;
+            --accent: #ff0000;
+            --bg-white: #ffffff;
+            --section-bg: #f5f5f5;
+        }
+        
         * {
             font-family: 'Inter', sans-serif;
         }
         
         .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0b2a5b 0%, #1a4a8a 100%);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         
         .glass-effect {
-            background: rgba(17, 24, 39, 0.7);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 3px solid #0b2a5b;
         }
         
-        .neon-glow {
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        .led-glow {
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
         }
         
         .hover-lift {
@@ -39,7 +46,7 @@
         
         .hover-lift:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(11, 42, 91, 0.15);
         }
         
         .scrollbar-hide::-webkit-scrollbar {
@@ -56,79 +63,150 @@
         }
         
         .nav-link.active {
-            color: white !important;
-            border-bottom: 2px solid #6366f1;
+            color: #ff0000 !important;
+            border-bottom: 2px solid #ff0000;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #0b2a5b 0%, #1a4a8a 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1a4a8a 0%, #0b2a5b 100%);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+        }
+        
+        .btn-accent {
+            background: #ff0000;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-accent:hover {
+            background: #cc0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #0b2a5b;
+        }
+        
+        a {
+            color: #0b2a5b;
+            transition: color 0.3s ease;
+        }
+        
+        a:hover {
+            color: #ff0000;
+        }
+        
+        .section-light {
+            background: #f5f5f5;
+        }
+        
+        .card {
+            background: white;
+            border-left: 4px solid #0b2a5b;
+            box-shadow: 0 4px 15px rgba(11, 42, 91, 0.1);
+        }
+        
+        .stat-card {
+            background: white;
+            border: 2px solid #0b2a5b;
+        }
+        
+        .stat-number {
+            color: #0b2a5b;
+        }
+        
+        .accent-text {
+            color: #ff0000;
+        }
+        
+        .footer {
+            background: #0b2a5b;
+            color: white;
+        }
+        
+        .footer a:hover {
+            color: #ff0000;
+        }
+        
+        .icon-box {
+            background: rgba(11, 42, 91, 0.1);
+            color: #0b2a5b;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen overflow-x-hidden">
+<body class="bg-white text-gray-800 min-h-screen overflow-x-hidden">
     
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 glass-effect border-b border-gray-800">
+    <nav class="fixed w-full z-50 glass-effect shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center" onclick="window.location.href='index.html'">
-                    <i class="fas fa-network-wired text-indigo-500 text-2xl mr-2"></i>
+                    <i class="fas fa-network-wired text-[#0b2a5b] text-2xl mr-2"></i>
                     <span class="text-2xl font-bold gradient-text">NexusRecruit</span>
                 </div>
                 
                 <div class="hidden md:flex space-x-8">
-                    <a href="index.html" class="nav-link text-gray-300 hover:text-white transition">Home</a>
-                    <a href="about.html" class="nav-link text-gray-300 hover:text-white transition">About Us</a>
-                    <a href="branches.html" class="nav-link text-gray-300 hover:text-white transition">Branches</a>
-                    <a href="join.html" class="nav-link bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition neon-glow">
+                    <a href="index.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">Home</a>
+                    <a href="about.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">About Us</a>
+                    <a href="branches.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">Branches</a>
+                    <a href="join.html" class="nav-link btn-accent px-4 py-2 rounded-lg transition led-glow font-medium">
                         <i class="fas fa-user-plus mr-2"></i>New Joining
                     </a>
-                    <a href="admin.html" class="nav-link text-gray-300 hover:text-white transition">
+                    <a href="admin.html" class="nav-link text-gray-600 hover:text-[#ff0000] transition font-medium">
                         <i class="fas fa-lock mr-2"></i>Admin
                     </a>
                 </div>
                 
-                <button class="md:hidden text-gray-300" onclick="toggleMobileMenu()">
+                <button class="md:hidden text-gray-700" onclick="toggleMobileMenu()">
                     <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
         </div>
         
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t border-gray-800">
+        <div id="mobile-menu" class="hidden md:hidden glass-effect border-t-2 border-[#0b2a5b]">
             <div class="px-4 pt-2 pb-4 space-y-2">
-                <a href="index.html" class="block w-full text-left py-2 text-gray-300">Home</a>
-                <a href="about.html" class="block w-full text-left py-2 text-gray-300">About Us</a>
-                <a href="branches.html" class="block w-full text-left py-2 text-gray-300">Branches</a>
-                <a href="join.html" class="block w-full text-left py-2 text-indigo-400">New Joining</a>
-                <a href="admin.html" class="block w-full text-left py-2 text-gray-300">Admin Login</a>
+                <a href="index.html" class="block w-full text-left py-2 text-gray-600 font-medium">Home</a>
+                <a href="about.html" class="block w-full text-left py-2 text-gray-600 font-medium">About Us</a>
+                <a href="branches.html" class="block w-full text-left py-2 text-gray-600 font-medium">Branches</a>
+                <a href="join.html" class="block w-full text-left py-2 text-[#ff0000] font-medium">New Joining</a>
+                <a href="admin.html" class="block w-full text-left py-2 text-gray-600 font-medium">Admin Login</a>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
     <div class="pt-16">
-        <section class="min-h-screen relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 opacity-50"></div>
-            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);"></div>
+        <section class="min-h-screen relative overflow-hidden" style="background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 50%, #e8e8e8 100%);">
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 50% 50%, rgba(11, 42, 91, 0.08) 0%, transparent 50%);"></div>
             
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
                 <div class="text-center mb-16">
-                    <div class="inline-block mb-4 px-4 py-1 rounded-full bg-indigo-900/50 border border-indigo-500/30 text-indigo-300 text-sm font-medium">
+                    <div class="inline-block mb-4 px-4 py-1 rounded-full bg-[#0b2a5b]/10 border border-[#0b2a5b]/30 text-[#0b2a5b] text-sm font-medium">
                         <i class="fas fa-robot mr-2"></i>AI-Powered Recruitment
                     </div>
-                    <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                    <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight text-[#0b2a5b]">
                         Automated <span class="gradient-text">Recruitment</span><br>
                         For The Modern Era
                     </h1>
-                    <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+                    <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
                         Advanced AI-driven recruitment system with proctored examinations, KYC verification, 
                         and automated candidate filtering for Ludhiana, Punjab and across India.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        <a href="join.html" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition transform hover:scale-105 neon-glow">
+                        <a href="join.html" class="btn-accent hover:bg-[#cc0000] text-white px-8 py-4 rounded-xl font-semibold text-lg transition transform hover:scale-105 led-glow">
                             Start Application <i class="fas fa-arrow-right ml-2"></i>
                         </a>
-                        <a href="about.html" class="glass-effect hover:bg-gray-800 text-white px-8 py-4 rounded-xl font-semibold text-lg transition border border-gray-700">
+                        <a href="about.html" class="bg-white hover:bg-gray-50 text-[#0b2a5b] px-8 py-4 rounded-xl font-semibold text-lg transition border-2 border-[#0b2a5b] hover:border-[#ff0000]">
                             Learn More
                         </a>
                     </div>
@@ -136,46 +214,46 @@
 
                 <!-- Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
-                    <div class="glass-effect p-6 rounded-2xl text-center hover-lift">
-                        <div class="text-3xl font-bold text-indigo-400 mb-2" id="stat-total">0</div>
-                        <div class="text-gray-400">Active Applications</div>
+                    <div class="stat-card p-6 rounded-2xl text-center hover-lift">
+                        <div class="text-3xl font-bold stat-number mb-2" id="stat-total">0</div>
+                        <div class="text-gray-600">Active Applications</div>
                     </div>
-                    <div class="glass-effect p-6 rounded-2xl text-center hover-lift">
-                        <div class="text-3xl font-bold text-purple-400 mb-2" id="stat-pending">0</div>
-                        <div class="text-gray-400">Pending Review</div>
+                    <div class="stat-card p-6 rounded-2xl text-center hover-lift">
+                        <div class="text-3xl font-bold accent-text mb-2" id="stat-pending">0</div>
+                        <div class="text-gray-600">Pending Review</div>
                     </div>
-                    <div class="glass-effect p-6 rounded-2xl text-center hover-lift">
-                        <div class="text-3xl font-bold text-pink-400 mb-2" id="stat-selected">0</div>
-                        <div class="text-gray-400">Selected Candidates</div>
+                    <div class="stat-card p-6 rounded-2xl text-center hover-lift">
+                        <div class="text-3xl font-bold accent-text mb-2" id="stat-selected">0</div>
+                        <div class="text-gray-600">Selected Candidates</div>
                     </div>
-                    <div class="glass-effect p-6 rounded-2xl text-center hover-lift">
-                        <div class="text-3xl font-bold text-green-400 mb-2">98%</div>
-                        <div class="text-gray-400">Success Rate</div>
+                    <div class="stat-card p-6 rounded-2xl text-center hover-lift">
+                        <div class="text-3xl font-bold stat-number mb-2">98%</div>
+                        <div class="text-gray-600">Success Rate</div>
                     </div>
                 </div>
 
                 <!-- Features Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="glass-effect p-8 rounded-2xl hover-lift border border-gray-800">
-                        <div class="w-14 h-14 bg-indigo-900/50 rounded-xl flex items-center justify-center mb-4">
-                            <i class="fas fa-shield-alt text-2xl text-indigo-400"></i>
+                    <div class="card p-8 rounded-2xl hover-lift">
+                        <div class="w-14 h-14 icon-box rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-shield-alt text-2xl"></i>
                         </div>
                         <h3 class="text-xl font-bold mb-3">AI Proctoring</h3>
-                        <p class="text-gray-400">Advanced anti-cheating system with camera monitoring, screen tracking, and browser lockdown.</p>
+                        <p class="text-gray-600">Advanced anti-cheating system with camera monitoring, screen tracking, and browser lockdown.</p>
                     </div>
-                    <div class="glass-effect p-8 rounded-2xl hover-lift border border-gray-800">
-                        <div class="w-14 h-14 bg-purple-900/50 rounded-xl flex items-center justify-center mb-4">
-                            <i class="fas fa-brain text-2xl text-purple-400"></i>
+                    <div class="card p-8 rounded-2xl hover-lift">
+                        <div class="w-14 h-14 icon-box rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-brain text-2xl"></i>
                         </div>
                         <h3 class="text-xl font-bold mb-3">Smart Filtering</h3>
-                        <p class="text-gray-400">AI-generated department-specific exams with automatic merit list generation.</p>
+                        <p class="text-gray-600">AI-generated department-specific exams with automatic merit list generation.</p>
                     </div>
-                    <div class="glass-effect p-8 rounded-2xl hover-lift border border-gray-800">
-                        <div class="w-14 h-14 bg-pink-900/50 rounded-xl flex items-center justify-center mb-4">
-                            <i class="fas fa-wheelchair text-2xl text-pink-400"></i>
+                    <div class="card p-8 rounded-2xl hover-lift">
+                        <div class="w-14 h-14 icon-box rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-wheelchair text-2xl"></i>
                         </div>
                         <h3 class="text-xl font-bold mb-3">Inclusive Hiring</h3>
-                        <p class="text-gray-400">Special provisions for PwD, ex-servicemen with 20% additional marks benefit.</p>
+                        <p class="text-gray-600">Special provisions for PwD, ex-servicemen with 20% additional marks benefit.</p>
                     </div>
                 </div>
             </div>
