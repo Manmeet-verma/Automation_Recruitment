@@ -317,5 +317,24 @@
             });
         });
     </script>
+   <script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB0LnXzoD1GjblHfs2ND62mftHQ5vaY8B4",
+  authDomain: "recruitment-system-4eef6.firebaseapp.com",
+  projectId: "recruitment-system-4eef6",
+  storageBucket: "recruitment-system-4eef6.firebasestorage.app",
+  messagingSenderId: "409451145346",
+  appId: "1:409451145346:web:a7b8e99f8fd2d7de69ec9b",
+  measurementId: "G-1L8KFD38K5"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+</script>
 </body>
 </html>
