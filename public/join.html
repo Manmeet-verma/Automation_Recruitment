@@ -385,7 +385,7 @@
                         </div>
 
                         <div class="flex justify-end">
-                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition transform hover:scale-105 neon-glow">
+                            <button type="button" id="kyc-submit-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition transform hover:scale-105 neon-glow">
                                 Continue to Job Selection <i class="fas fa-arrow-right ml-2"></i>
                             </button>
                         </div>
@@ -1263,7 +1263,7 @@
             container.innerHTML = html;
         }
 
-        function finalizeApplication() {
+        async function finalizeApplication() {
             const kycData = JSON.parse(sessionStorage.getItem('kycData') || '{}');
             const examScore = parseInt(sessionStorage.getItem('examScore') || 0);
             const jobCategory = document.querySelector('input[name="job-category"]:checked');
@@ -1368,8 +1368,12 @@
                 }
             });
             
-            document.getElementById('kyc-form').addEventListener('submit', function(e) {
-                e.preventDefault();
+            document.getElementById('kyc-submit-btn').addEventListener('click', function() {
+                const form = document.getElementById('kyc-form');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
                 const kycData = {
                     name: document.getElementById('kyc-name').value,
                     dob: document.getElementById('kyc-dob').value,
