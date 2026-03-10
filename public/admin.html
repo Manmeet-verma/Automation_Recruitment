@@ -81,6 +81,16 @@
 <body class="bg-white text-gray-800 min-h-screen overflow-x-hidden">
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
 
+    <div id="view-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white">
+                <h3 class="text-xl font-bold text-[#0b2a5b]">Candidate Details</h3>
+                <button onclick="closeViewModal()" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div id="view-modal-content" class="p-6"></div>
+        </div>
+    </div>
+
     <div id="delete-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl border border-red-500/50 max-w-md w-full p-6">
             <div class="flex items-center mb-4">
@@ -281,7 +291,23 @@
             }
         }
 
-        function getCandidates() { return JSON.parse(localStorage.getItem('candidates') || '[]'); }
+        function getCandidates() { 
+            return JSON.parse(localStorage.getItem('candidates') || '[]'); 
+        }
+
+        async function fetchCandidatesFromDB() {
+            try {
+                const response = await fetch('api/candidates.php?department=all&status=all');
+                const data = await response.json();
+                if (data.candidates) {
+                    localStorage.setItem('candidates', JSON.stringify(data.candidates));
+                    return data.candidates;
+                }
+            } catch (e) {
+                console.log('DB fetch failed, using localStorage');
+            }
+            return getCandidates();
+        }
 
         function loadSampleData() {
             localStorage.removeItem('candidates');
@@ -290,13 +316,23 @@
             showToast('Sample data loaded!');
         }
 
-        function deleteCandidate(id) {
+        async function deleteCandidate(id) {
+            try {
+                await fetch(`api/candidates.php?id=${id}`, { method: 'DELETE' });
+            } catch (e) {}
             const candidates = getCandidates().filter(c => c.id !== id);
             localStorage.setItem('candidates', JSON.stringify(candidates));
             return true;
         }
 
-        function updateCandidate(id, updates) {
+        async function updateCandidate(id, updates) {
+            try {
+                await fetch('api/candidates.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update_status', id: id, status: updates.status })
+                });
+            } catch (e) {}
             const candidates = getCandidates();
             const index = candidates.findIndex(c => c.id === id);
             if (index !== -1) { candidates[index] = { ...candidates[index], ...updates }; localStorage.setItem('candidates', JSON.stringify(candidates)); return true; }
@@ -332,6 +368,97 @@
             deleteCandidateId = id;
             document.getElementById('delete-candidate-name').textContent = name;
             document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        function viewCandidate(id) {
+            const candidates = getCandidates();
+            const candidate = candidates.find(c => c.id === id);
+            if (!candidate) return;
+
+            const statusColors = { 'selected': 'bg-green-100 text-green-700', 'rejected': 'bg-red-100 text-red-700', 'pending': 'bg-yellow-100 text-yellow-700', 'review': 'bg-purple-100 text-purple-700' };
+            const docIcons = { photo: 'fa-user', aadhar: 'fa-id-card', pan: 'fa-id-badge', cv: 'fa-file-pdf' };
+            const docLabels = { photo: 'Photo', aadhar: 'Aadhar Card', pan: 'PAN Card', cv: 'Resume/CV' };
+
+            let docsHtml = '';
+            for (const [docType, uploaded] of Object.entries(candidate.documents || {})) {
+                docsHtml += `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas ${docIcons[docType] || 'fa-file'} text-[#0b2a5b] mr-3"></i>
+                            <span class="font-medium">${docLabels[docType] || docType}</span>
+                        </div>
+                        <div>
+                            ${uploaded ? 
+                                `<span class="text-green-600 text-sm mr-2"><i class="fas fa-check-circle"></i> Uploaded</span>
+                                <a href="uploads/${candidate.id}/${docType}" download="${candidate.name}_${docType}" class="text-blue-600 hover:text-blue-700 text-sm" title="Download"><i class="fas fa-download"></i> Download</a>` : 
+                                `<span class="text-red-500 text-sm"><i class="fas fa-times-circle"></i> Not Uploaded</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }
+
+            const content = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">Application ID</p>
+                        <p class="font-mono font-bold text-[#0b2a5b]">${candidate.id}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">Status</p>
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[candidate.status] || 'bg-gray-100 text-gray-600'}">${candidate.status.toUpperCase()}</span>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">Full Name</p>
+                        <p class="font-semibold text-[#0b2a5b]">${candidate.name}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">Email</p>
+                        <p class="text-[#0b2a5b]">${candidate.email}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">Phone</p>
+                        <p class="text-[#0b2a5b]">${candidate.phone}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">Date of Birth</p>
+                        <p class="text-[#0b2a5b]">${candidate.dob || 'N/A'}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">City</p>
+                        <p class="text-[#0b2a5b]">${candidate.city || 'N/A'}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">State</p>
+                        <p class="text-[#0b2a5b]">${candidate.state || 'N/A'}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">Applied Role</p>
+                        <p class="font-semibold text-[#0b2a5b]">${candidate.role}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="text-xs text-gray-500 uppercase">Total Score</p>
+                        <p class="font-bold ${candidate.score >= 60 ? 'text-green-600' : 'text-red-600'}">${candidate.score}%</p>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <h4 class="font-bold text-[#0b2a5b] mb-3"><i class="fas fa-file-alt mr-2"></i>Documents</h4>
+                    <div class="space-y-2">${docsHtml || '<p class="text-gray-500 text-sm">No documents uploaded</p>'}</div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="updateStatus('${candidate.id}', 'selected')" class="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"><i class="fas fa-check mr-2"></i>Select</button>
+                    <button onclick="closeViewModal(); updateStatus('${candidate.id}', 'rejected')" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium"><i class="fas fa-times mr-2"></i>Reject</button>
+                </div>
+            `;
+
+            document.getElementById('view-modal-content').innerHTML = content;
+            document.getElementById('view-modal').classList.remove('hidden');
+        }
+
+        function closeViewModal() {
+            document.getElementById('view-modal').classList.add('hidden');
         }
 
         function closeDeleteModal() {
@@ -479,8 +606,8 @@
             });
         }
 
-        function loadCandidates() {
-            const candidates = getCandidates();
+        async function loadCandidates() {
+            const candidates = await fetchCandidatesFromDB();
             populateRoleFilter(candidates);
             applyFilters();
             updateCharts();
@@ -528,6 +655,7 @@
                     <td class="px-4 py-4"><span class="font-bold ${c.score >= 60 ? 'text-green-600' : 'text-red-600'}">${c.score}%</span></td>
                     <td class="px-4 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[c.status] || 'bg-gray-100 text-gray-600'}">${c.status.toUpperCase()}</span></td>
                     <td class="px-4 py-4">
+                        <button onclick="viewCandidate('${c.id}')" class="text-blue-600 hover:text-blue-700 mr-2" title="View"><i class="fas fa-eye"></i></button>
                         ${c.status !== 'selected' ? `<button onclick="updateStatus('${c.id}', 'selected')" class="text-green-600 hover:text-green-700 mr-2" title="Select"><i class="fas fa-check"></i></button>` : ''}
                         ${c.status !== 'rejected' ? `<button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-600 hover:text-red-700 mr-2" title="Reject"><i class="fas fa-times"></i></button>` : ''}
                         <button onclick="confirmDelete('${c.id}', '${c.name}')" class="text-red-700 hover:text-red-800" title="Delete"><i class="fas fa-trash"></i></button>
@@ -600,6 +728,7 @@
                 loadCandidates();
             }
             document.getElementById('delete-modal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
+            document.getElementById('view-modal').addEventListener('click', function(e) { if (e.target === this) closeViewModal(); });
         });
     </script>
 </body>

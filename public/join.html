@@ -1286,6 +1286,26 @@
             
             initializeStorage();
             const id = addCandidate(candidate);
+
+            // Also save to database
+            try {
+                await fetch('api/candidates.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create',
+                        full_name: kycData.name,
+                        email: kycData.email,
+                        phone: kycData.phone,
+                        dob: kycData.dob,
+                        aadhaar: kycData.aadhar,
+                        city: kycData.city,
+                        state: kycData.state,
+                        department: jobCategory ? jobCategory.value : 'unknown',
+                        position: jobCategory ? jobCategory.parentElement.querySelector('.font-medium').textContent : 'Unknown'
+                    })
+                });
+            } catch (e) { console.log('DB save failed'); }
             
             document.getElementById('application-id').textContent = id;
             document.getElementById('step-6').classList.add('hidden');
