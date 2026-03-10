@@ -1330,7 +1330,9 @@
                 });
                 const result = await response.json();
                 console.log('DB Save Result:', result);
-            } catch (e) { console.log('DB save failed:', e); }
+            } catch (e) { 
+                console.log('DB save failed:', e); 
+            }
             
             document.getElementById('application-id').textContent = id;
             document.getElementById('step-6').classList.add('hidden');

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Database</title>
+</head>
+<body>
+    <h1>Test Database Insert</h1>
+    <button onclick="testInsert()">Click to Test Insert</button>
+    <p id="result"></p>
+    <script>
+        async function testInsert() {
+            const response = await fetch('api/test_insert.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({full_name: 'Test User', email: 'test@test.com', phone: '1234567890'})
+            });
+            const data = await response.json();
+            document.getElementById('result').innerText = JSON.stringify(data);
+        }
+    </script>
+</body>
+</html>
