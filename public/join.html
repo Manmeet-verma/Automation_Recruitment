@@ -902,6 +902,21 @@
         }
 
         function nextStep(step) {
+            if (step === 2) {
+                const kycForm = document.getElementById('kyc-form');
+                if (!kycForm.checkValidity()) {
+                    kycForm.reportValidity();
+                    return;
+                }
+            }
+            if (step === 3) {
+                const jobCategory = document.querySelector('input[name="job-category"]:checked');
+                if (!jobCategory) {
+                    showToast('Please select a job category', 'error');
+                    return;
+                }
+                sessionStorage.setItem('jobCategory', jobCategory.value);
+            }
             document.getElementById(`step-${currentStep}`).classList.add('hidden');
             document.getElementById(`step-${step}`).classList.remove('hidden');
             document.getElementById(`step-${currentStep}-indicator`).classList.remove('bg-indigo-600', 'text-white');
@@ -918,6 +933,33 @@
             document.getElementById(`step-${currentStep}`).classList.add('hidden');
             document.getElementById(`step-${step}`).classList.remove('hidden');
             currentStep = step;
+            if (step === 1) restoreKYCData();
+            if (step === 2) restoreJobCategory();
+        }
+
+        function restoreKYCData() {
+            const kycData = JSON.parse(sessionStorage.getItem('kycData') || '{}');
+            if (kycData.name) document.getElementById('kyc-name').value = kycData.name;
+            if (kycData.dob) document.getElementById('kyc-dob').value = kycData.dob;
+            if (kycData.aadhar) document.getElementById('kyc-aadhar').value = kycData.aadhar;
+            if (kycData.pan) document.getElementById('kyc-pan').value = kycData.pan;
+            if (kycData.email) document.getElementById('kyc-email').value = kycData.email;
+            if (kycData.phone) document.getElementById('kyc-phone').value = kycData.phone;
+            if (kycData.city) document.getElementById('kyc-city').value = kycData.city;
+            if (kycData.state) document.getElementById('kyc-state').value = kycData.state;
+            if (kycData.specialCategories) {
+                document.querySelectorAll('input[name="special-category"]').forEach(cb => {
+                    cb.checked = kycData.specialCategories.includes(cb.value);
+                });
+            }
+        }
+
+        function restoreJobCategory() {
+            const savedCategory = sessionStorage.getItem('jobCategory');
+            if (savedCategory) {
+                const radio = document.querySelector(`input[name="job-category"][value="${savedCategory}"]`);
+                if (radio) radio.checked = true;
+            }
         }
 
         document.getElementById('kyc-form').addEventListener('submit', function(e) {
