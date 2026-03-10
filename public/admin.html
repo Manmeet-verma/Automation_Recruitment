@@ -297,14 +297,16 @@
 
         async function fetchCandidatesFromDB() {
             try {
-                const response = await fetch('api/candidates.php?department=all&status=all');
-                const data = await response.json();
-                if (data.candidates) {
-                    localStorage.setItem('candidates', JSON.stringify(data.candidates));
-                    return data.candidates;
+                const response = await fetch('api/candidates.php');
+                const result = await response.json();
+                console.log('API Response:', result);
+                
+                if (result.candidates) {
+                    localStorage.setItem("candidates", JSON.stringify(result.candidates));
+                    return result.candidates;
                 }
             } catch (e) {
-                console.log('DB fetch failed, using localStorage');
+                console.error("DB fetch failed:", e);
             }
             return getCandidates();
         }

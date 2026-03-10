@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="/favicon.ico">
+<link rel="icon" href="favicon.ico">
     <title>automation - Techon LED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -261,6 +261,8 @@
     </div>
 
     <script>
+        const API_URL = 'api/candidates.php';
+
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
@@ -277,38 +279,25 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        function initializeStorage() {
-            if (!localStorage.getItem('candidates')) {
-                localStorage.setItem('candidates', JSON.stringify([]));
+        async function fetchStats() {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+                
+                if (result.candidates) {
+                    const candidates = result.candidates;
+                    document.getElementById('stat-total').textContent = candidates.length;
+                    document.getElementById('stat-pending').textContent = candidates.filter(c => c.status === 'pending' || c.status === 'review').length;
+                    document.getElementById('stat-selected').textContent = candidates.filter(c => c.status === 'selected').length;
+                }
+            } catch (error) {
+                console.error('Failed to fetch stats:', error);
             }
         }
 
-        function getCandidates() {
-            return JSON.parse(localStorage.getItem('candidates') || '[]');
-        }
-
-        function addCandidate(candidate) {
-            const candidates = getCandidates();
-            const id = 'NRX-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 90000) + 10000);
-            candidate.id = id;
-            candidate.appliedDate = new Date().toISOString();
-            candidates.push(candidate);
-            localStorage.setItem('candidates', JSON.stringify(candidates));
-            return id;
-        }
-
-        function updateStats() {
-            const candidates = getCandidates();
-            document.getElementById('stat-total').textContent = candidates.length;
-            document.getElementById('stat-pending').textContent = candidates.filter(c => c.status === 'pending' || c.status === 'review').length;
-            document.getElementById('stat-selected').textContent = candidates.filter(c => c.status === 'selected').length;
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
-            initializeStorage();
-            updateStats();
+            fetchStats();
             
-            // Set active nav link
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
             document.querySelectorAll('.nav-link').forEach(link => {
                 if (link.getAttribute('href') === currentPage) {
@@ -317,24 +306,5 @@
             });
         });
     </script>
-   <script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB0LnXzoD1GjblHfs2ND62mftHQ5vaY8B4",
-  authDomain: "recruitment-system-4eef6.firebaseapp.com",
-  projectId: "recruitment-system-4eef6",
-  storageBucket: "recruitment-system-4eef6.firebasestorage.app",
-  messagingSenderId: "409451145346",
-  appId: "1:409451145346:web:a7b8e99f8fd2d7de69ec9b",
-  measurementId: "G-1L8KFD38K5"
-};
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-</script>
 </body>
 </html>

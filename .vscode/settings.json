@@ -1,0 +1,6 @@
+{
+    "liveServer.settings.proxy": {
+        "enable": true,
+        "proxyUri": "http://localhost/automation"
+    }
+}
