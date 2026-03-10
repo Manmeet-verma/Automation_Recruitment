@@ -902,13 +902,6 @@
         }
 
         function nextStep(step) {
-            if (step === 2) {
-                const kycForm = document.getElementById('kyc-form');
-                if (!kycForm.checkValidity()) {
-                    kycForm.reportValidity();
-                    return;
-                }
-            }
             if (step === 3) {
                 const jobCategory = document.querySelector('input[name="job-category"]:checked');
                 if (!jobCategory) {
@@ -961,23 +954,6 @@
                 if (radio) radio.checked = true;
             }
         }
-
-        document.getElementById('kyc-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const kycData = {
-                name: document.getElementById('kyc-name').value,
-                dob: document.getElementById('kyc-dob').value,
-                aadhar: document.getElementById('kyc-aadhar').value,
-                pan: document.getElementById('kyc-pan').value,
-                email: document.getElementById('kyc-email').value,
-                phone: document.getElementById('kyc-phone').value,
-                city: document.getElementById('kyc-city').value,
-                state: document.getElementById('kyc-state').value,
-                specialCategories: Array.from(document.querySelectorAll('input[name="special-category"]:checked')).map(cb => cb.value)
-            };
-            sessionStorage.setItem('kycData', JSON.stringify(kycData));
-            nextStep(2);
-        });
 
         function toggleSpecialDocs() {
             const checkboxes = document.querySelectorAll('input[name="special-category"]:checked');
@@ -1341,13 +1317,18 @@
                         phone: kycData.phone,
                         dob: kycData.dob,
                         aadhaar: kycData.aadhar,
+                        pan: kycData.pan,
                         city: kycData.city,
                         state: kycData.state,
                         department: jobCategory ? jobCategory.value : 'unknown',
-                        position: jobCategory ? jobCategory.parentElement.querySelector('.font-medium').textContent : 'Unknown'
+                        position: jobCategory ? jobCategory.parentElement.querySelector('.font-medium').textContent : 'Unknown',
+                        score: finalScore,
+                        iqScore: iqScore,
+                        bonus: bonus,
+                        specialCategories: kycData.specialCategories || []
                     })
                 });
-            } catch (e) { console.log('DB save failed'); }
+            } catch (e) { console.log('DB save failed:', e); }
             
             document.getElementById('application-id').textContent = id;
             document.getElementById('step-6').classList.add('hidden');
@@ -1385,6 +1366,23 @@
                 if (link.getAttribute('href') === currentPage) {
                     link.classList.add('active');
                 }
+            });
+            
+            document.getElementById('kyc-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const kycData = {
+                    name: document.getElementById('kyc-name').value,
+                    dob: document.getElementById('kyc-dob').value,
+                    aadhar: document.getElementById('kyc-aadhar').value,
+                    pan: document.getElementById('kyc-pan').value,
+                    email: document.getElementById('kyc-email').value,
+                    phone: document.getElementById('kyc-phone').value,
+                    city: document.getElementById('kyc-city').value,
+                    state: document.getElementById('kyc-state').value,
+                    specialCategories: Array.from(document.querySelectorAll('input[name="special-category"]:checked')).map(cb => cb.value)
+                };
+                sessionStorage.setItem('kycData', JSON.stringify(kycData));
+                nextStep(2);
             });
         });
     </script>

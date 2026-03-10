@@ -6,6 +6,24 @@ $conn = getDB();
 
 switch ($method) {
     case 'GET':
+        // Get single candidate by ID
+        if (isset($_GET['id'])) {
+            $id = intval($_GET['id']);
+            $stmt = $conn->prepare("SELECT * FROM candidates WHERE id = ? OR application_id = ?");
+            $stmt->bind_param("is", $id, $_GET['id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows === 1) {
+                $candidate = $result->fetch_assoc();
+                $candidate = mapCandidateFields($candidate);
+                jsonResponse(['candidate' => $candidate]);
+            } else {
+                jsonResponse(['error' => 'Candidate not found'], 404);
+            }
+            break;
+        }
+        
         // Get candidates with filters
         $dept = $_GET['department'] ?? 'all';
         $status = $_GET['status'] ?? 'all';
@@ -49,10 +67,7 @@ switch ($method) {
         $candidates = [];
         
         while ($row = $result->fetch_assoc()) {
-            $row['certificates'] = json_decode($row['certificates'], true);
-            $row['exam_answers'] = json_decode($row['exam_answers'], true);
-            $row['proctoring_logs'] = json_decode($row['proctoring_logs'], true);
-            $candidates[] = $row;
+            $candidates[] = mapCandidateFields($row);
         }
         
         jsonResponse(['candidates' => $candidates, 'count' => count($candidates)]);
@@ -63,27 +78,43 @@ switch ($method) {
         $action = $data['action'] ?? 'create';
         
         if ($action === 'create') {
-            // Create new candidate (KYC step)
             $app_id = generateAppId();
+            $documents = json_encode([
+                'photo' => false, 'aadhar' => false, 'pan' => false, 'cv' => false,
+                'disability' => false, 'service' => false
+            ]);
+            $specialCategories = json_encode($data['specialCategories'] ?? []);
             
             $stmt = $conn->prepare("INSERT INTO candidates (
-                application_id, full_name, email, phone, dob, aadhaar, 
-                address, city, state, department, position, location
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                application_id, full_name, email, phone, dob, aadhaar, pan,
+                address, city, state, department, position, location,
+                entrance_score, iq_score, final_score, total_score, bonus_score,
+                special_categories, documents, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             
-            $stmt->bind_param("ssssssssssss",
+            $entrance = intval($data['score'] ?? 0);
+            $iq = intval($data['iqScore'] ?? 0);
+            $final = intval($data['score'] ?? 0);
+            $total = intval($data['score'] ?? 0);
+            $bonus = intval($data['bonus'] ?? 0);
+            $status = $final >= 60 ? 'review' : 'rejected';
+            
+            $stmt->bind_param("ssssssssssssiiiiiisss",
                 $app_id,
                 sanitize($conn, $data['full_name']),
                 sanitize($conn, $data['email']),
                 sanitize($conn, $data['phone']),
                 $data['dob'],
                 sanitize($conn, $data['aadhaar']),
-                sanitize($conn, $data['address']),
+                sanitize($conn, $data['pan'] ?? ''),
+                sanitize($conn, $data['address'] ?? ''),
                 sanitize($conn, $data['city']),
                 sanitize($conn, $data['state']),
                 sanitize($conn, $data['department']),
                 sanitize($conn, $data['position']),
-                sanitize($conn, $data['location'])
+                sanitize($conn, $data['location'] ?? ''),
+                $entrance, $iq, $final, $total, $bonus,
+                $specialCategories, $documents, $status
             );
             
             if ($stmt->execute()) {
@@ -99,33 +130,12 @@ switch ($method) {
             }
         }
         
-        if ($action === 'update_scores') {
-            $id = intval($data['id']);
-            $entrance = intval($data['entrance_score']);
-            $iq = intval($data['iq_score']);
-            $final = intval($data['final_score']);
-            $total = intval($data['total_score']);
-            $answers = json_encode($data['exam_answers'] ?? []);
-            
-            $stmt = $conn->prepare("UPDATE candidates SET 
-                entrance_score = ?, iq_score = ?, final_score = ?, 
-                total_score = ?, exam_answers = ? WHERE id = ?");
-            
-            $stmt->bind_param("iiiisi", $entrance, $iq, $final, $total, $answers, $id);
-            
-            if ($stmt->execute()) {
-                jsonResponse(['success' => true, 'message' => 'Scores updated']);
-            } else {
-                jsonResponse(['error' => 'Update failed'], 500);
-            }
-        }
-        
         if ($action === 'update_status') {
             $id = intval($data['id']);
             $status = sanitize($conn, $data['status']);
             
-            $stmt = $conn->prepare("UPDATE candidates SET status = ? WHERE id = ?");
-            $stmt->bind_param("si", $status, $id);
+            $stmt = $conn->prepare("UPDATE candidates SET status = ? WHERE id = ? OR application_id = ?");
+            $stmt->bind_param("sis", $status, $id, $id);
             
             if ($stmt->execute()) {
                 jsonResponse(['success' => true, 'message' => 'Status updated to ' . $status]);
@@ -139,8 +149,8 @@ switch ($method) {
             $cv = sanitize($conn, $data['cv_filename']);
             $certs = json_encode($data['certificates'] ?? []);
             
-            $stmt = $conn->prepare("UPDATE candidates SET cv_filename = ?, certificates = ? WHERE id = ?");
-            $stmt->bind_param("ssi", $cv, $certs, $id);
+            $stmt = $conn->prepare("UPDATE candidates SET cv_filename = ?, certificates = ? WHERE id = ? OR application_id = ?");
+            $stmt->bind_param("ssii", $cv, $certs, $id, $id);
             
             if ($stmt->execute()) {
                 jsonResponse(['success' => true]);
@@ -150,30 +160,10 @@ switch ($method) {
         }
         break;
         
-    case 'GET':
-        // Get single candidate
-        if (isset($_GET['id'])) {
-            $id = intval($_GET['id']);
-            $stmt = $conn->prepare("SELECT * FROM candidates WHERE id = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows === 1) {
-                $candidate = $result->fetch_assoc();
-                $candidate['certificates'] = json_decode($candidate['certificates'], true);
-                $candidate['exam_answers'] = json_decode($candidate['exam_answers'], true);
-                jsonResponse(['candidate' => $candidate]);
-            } else {
-                jsonResponse(['error' => 'Candidate not found'], 404);
-            }
-        }
-        break;
-        
     case 'DELETE':
         $id = intval($_GET['id']);
-        $stmt = $conn->prepare("DELETE FROM candidates WHERE id = ?");
-        $stmt->bind_param("i", $id);
+        $stmt = $conn->prepare("DELETE FROM candidates WHERE id = ? OR application_id = ?");
+        $stmt->bind_param("is", $id, $_GET['id']);
         
         if ($stmt->execute()) {
             jsonResponse(['success' => true, 'message' => 'Candidate deleted']);
@@ -181,6 +171,33 @@ switch ($method) {
             jsonResponse(['error' => 'Delete failed'], 500);
         }
         break;
+}
+
+function mapCandidateFields($row) {
+    return [
+        'id' => $row['application_id'] ?? $row['id'],
+        'name' => $row['full_name'] ?? '',
+        'email' => $row['email'] ?? '',
+        'phone' => $row['phone'] ?? '',
+        'dob' => $row['dob'] ?? '',
+        'aadhar' => $row['aadhaar'] ?? '',
+        'pan' => $row['pan'] ?? '',
+        'city' => $row['city'] ?? '',
+        'state' => $row['state'] ?? '',
+        'role' => $row['position'] ?? '',
+        'roleType' => $row['department'] ?? '',
+        'score' => intval($row['total_score'] ?? 0),
+        'baseScore' => intval($row['entrance_score'] ?? 0),
+        'iqScore' => intval($row['iq_score'] ?? 0),
+        'bonus' => intval($row['bonus_score'] ?? 0),
+        'special' => '',
+        'specialCategories' => json_decode($row['special_categories'] ?? '[]', true),
+        'status' => $row['status'] ?? 'pending',
+        'documents' => json_decode($row['documents'] ?? '{}', true),
+        'violations' => intval($row['violations'] ?? 0),
+        'notes' => $row['notes'] ?? '',
+        'appliedDate' => $row['applied_date'] ?? $row['created_at'] ?? date('Y-m-d H:i:s')
+    ];
 }
 
 $conn->close();
