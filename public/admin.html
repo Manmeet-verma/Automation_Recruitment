@@ -262,12 +262,11 @@
         </section>
     </div>
 
-    <script>
+  <script>
         let filteredCandidates = [];
-        let selectedCandidates = new Set();
-        let currentPage = 1;
-        let itemsPerPage = 10;
-        let deleteCandidateId = null;
+let currentPage = 1;
+let itemsPerPage = 10;
+let selectedCandidates = new Set();
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -297,7 +296,7 @@
 
         async function fetchCandidatesFromDB() {
             try {
-                const response = await fetch('api/candidates.php');
+                const response = await fetch('http://localhost/automation/api/candidates.php');
                 const result = await response.json();
                 console.log('API Response:', result);
                 
@@ -320,16 +319,16 @@
 
         async function deleteCandidate(id) {
             try {
-                await fetch(`api/candidates.php?id=${id}`, { method: 'DELETE' });
+                await fetch(`http://localhost/automation/api/candidates.php?id=${id}`, { method: 'DELETE' });
             } catch (e) {}
-            const candidates = getCandidates().filter(c => c.id !== id);
+            const candidates = getDocs(collection(db, "applications")).filter(c => c.id !== id);
             localStorage.setItem('candidates', JSON.stringify(candidates));
             return true;
         }
 
         async function updateCandidate(id, updates) {
             try {
-                await fetch('api/candidates.php', {
+                await fetch('http://localhost/automation/api/candidates.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'update_status', id: id, status: updates.status })
@@ -485,7 +484,7 @@
         }
 
         function updateCharts() {
-            const candidates = getCandidates();
+            const candidates = getDocs(collection(db, "applications"))
             
             // Line Chart - Application Trends (Last 30 days)
             const last30Days = [];
@@ -622,7 +621,7 @@
         }
 
         function applyFilters() {
-            const candidates = getCandidates();
+            const candidates = getDocs(collection(db, "applications"))
             const statusFilter = document.getElementById('status-filter').value;
             const roleFilter = document.getElementById('role-filter').value;
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
@@ -638,35 +637,78 @@
         }
 
         function renderTable() {
-            const tbody = document.getElementById('candidates-table');
-            tbody.innerHTML = '';
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = filteredCandidates.slice(start, end);
+    const tbody = document.getElementById('candidates-table');
+    tbody.innerHTML = '';
 
-            pageData.forEach(c => {
-                const statusColors = { 'selected': 'bg-green-100 text-green-700', 'rejected': 'bg-red-100 text-red-700', 'pending': 'bg-yellow-100 text-yellow-700', 'review': 'bg-purple-100 text-purple-700' };
-                const isSelected = selectedCandidates.has(c.id);
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50 transition';
-                row.innerHTML = `
-                    <td class="px-4 py-4"><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelection('${c.id}')" class="w-4 h-4"></td>
-                    <td class="px-4 py-4 font-mono text-sm text-[#0b2a5b]">${c.id}</td>
-                    <td class="px-4 py-4"><div class="font-medium text-[#0b2a5b]">${c.name}</div><div class="text-xs text-gray-500">${c.email}</div></td>
-                    <td class="px-4 py-4 text-gray-600">${c.role}</td>
-                    <td class="px-4 py-4"><span class="font-bold ${c.score >= 60 ? 'text-green-600' : 'text-red-600'}">${c.score}%</span></td>
-                    <td class="px-4 py-4"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[c.status] || 'bg-gray-100 text-gray-600'}">${c.status.toUpperCase()}</span></td>
-                    <td class="px-4 py-4">
-                        <button onclick="viewCandidate('${c.id}')" class="text-blue-600 hover:text-blue-700 mr-2" title="View"><i class="fas fa-eye"></i></button>
-                        ${c.status !== 'selected' ? `<button onclick="updateStatus('${c.id}', 'selected')" class="text-green-600 hover:text-green-700 mr-2" title="Select"><i class="fas fa-check"></i></button>` : ''}
-                        ${c.status !== 'rejected' ? `<button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-600 hover:text-red-700 mr-2" title="Reject"><i class="fas fa-times"></i></button>` : ''}
-                        <button onclick="confirmDelete('${c.id}', '${c.name}')" class="text-red-700 hover:text-red-800" title="Delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageData = filteredCandidates.slice(start, end);
 
+    const statusColors = {
+        selected: 'bg-green-100 text-green-700',
+        rejected: 'bg-red-100 text-red-700',
+        pending: 'bg-yellow-100 text-yellow-700',
+        review: 'bg-purple-100 text-purple-700'
+    };
+
+    pageData.forEach(c => {
+        const isSelected = selectedCandidates.has(c.id);
+
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition';
+
+        row.innerHTML = `
+            <td class="px-4 py-4">
+                <input type="checkbox" ${isSelected ? 'checked' : ''} 
+                    onchange="toggleSelection('${c.id}')" class="w-4 h-4">
+            </td>
+
+            <td class="px-4 py-4 font-mono text-sm text-[#0b2a5b]">${c.id}</td>
+
+            <td class="px-4 py-4">
+                <div class="font-medium text-[#0b2a5b]">${c.name}</div>
+                <div class="text-xs text-gray-500">${c.email}</div>
+            </td>
+
+            <td class="px-4 py-4 text-gray-600">${c.role}</td>
+
+            <td class="px-4 py-4">
+                <span class="font-bold ${c.score >= 60 ? 'text-green-600' : 'text-red-600'}">
+                    ${c.score}%
+                </span>
+            </td>
+
+            <td class="px-4 py-4">
+                <span class="px-2 py-1 rounded-full text-xs font-medium 
+                    ${statusColors[c.status] || 'bg-gray-100 text-gray-600'}">
+                    ${c.status.toUpperCase()}
+                </span>
+            </td>
+
+            <td class="px-4 py-4">
+                <button onclick="viewCandidate('${c.id}')" class="text-blue-600 mr-2">
+                    <i class="fas fa-eye"></i>
+                </button>
+
+                ${c.status !== 'selected' ? `
+                    <button onclick="updateStatus('${c.id}', 'selected')" class="text-green-600 mr-2">
+                        <i class="fas fa-check"></i>
+                    </button>` : ''}
+
+                ${c.status !== 'rejected' ? `
+                    <button onclick="updateStatus('${c.id}', 'rejected')" class="text-red-600 mr-2">
+                        <i class="fas fa-times"></i>
+                    </button>` : ''}
+
+                <button onclick="confirmDelete('${c.id}', '${c.name}')" class="text-red-700">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+}
         function updateStats() {
             const candidates = getCandidates();
             document.getElementById('admin-total').textContent = candidates.length;
@@ -733,5 +775,41 @@
             document.getElementById('view-modal').addEventListener('click', function(e) { if (e.target === this) closeViewModal(); });
         });
     </script>
+
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "YOUR_KEY",
+    authDomain: "YOUR_DOMAIN",
+    projectId: "automation-recruitment",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function loadCandidates() {
+    const querySnapshot = await getDocs(collection(db, "applications"));
+
+    filteredCandidates = []; // reset
+
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+
+        filteredCandidates.push({
+            id: doc.id,
+            name: data.name || '-',
+            email: data.email || '-',
+            role: data.role || '-',
+            score: data.score || 0,
+            status: data.status || 'pending'
+        });
+    });
+
+    renderTable(); // 🔥 IMPORTANT
+}
+loadCandidates();
+</script> 
 </body>
 </html>

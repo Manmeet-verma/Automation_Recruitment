@@ -260,9 +260,26 @@
         </section>
     </div>
 
-    <script>
-        const API_URL = 'api/candidates.php';
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
 
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2lR2JEBKILxAnekRQSSB_oGusijsymzg",
+            authDomain: "automation-recruitment.firebaseapp.com",
+            projectId: "automation-recruitment",
+            storageBucket: "automation-recruitment.firebasestorage.app",
+            messagingSenderId: "1077317899826",
+            appId: "1:1077317899826:web:c28e920356378073a7ce2b",
+            measurementId: "G-1LVFVT3FXE"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
+
+    <script>
+const API_URL = '/automation/api/candidates.php';
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             menu.classList.toggle('hidden');
@@ -280,20 +297,31 @@
         }
 
         async function fetchStats() {
-            try {
-                const response = await fetch(API_URL);
-                const result = await response.json();
-                
-                if (result.candidates) {
-                    const candidates = result.candidates;
-                    document.getElementById('stat-total').textContent = candidates.length;
-                    document.getElementById('stat-pending').textContent = candidates.filter(c => c.status === 'pending' || c.status === 'review').length;
-                    document.getElementById('stat-selected').textContent = candidates.filter(c => c.status === 'selected').length;
-                }
-            } catch (error) {
-                console.error('Failed to fetch stats:', error);
-            }
+    try {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const result = await response.json();
+
+        if (result.candidates) {
+            const candidates = result.candidates;
+
+            document.getElementById('stat-total').textContent = candidates.length;
+
+            document.getElementById('stat-pending').textContent =
+                candidates.filter(c => ['pending', 'review'].includes(c.status)).length;
+
+            document.getElementById('stat-selected').textContent =
+                candidates.filter(c => c.status === 'selected').length;
+        }
+    } catch (error) {
+        console.error('Failed to fetch stats:', error);
+        showToast('Failed to load stats', 'error');
+    }
+}
 
         document.addEventListener('DOMContentLoaded', function() {
             fetchStats();

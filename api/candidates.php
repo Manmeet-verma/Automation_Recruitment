@@ -132,10 +132,11 @@ switch ($method) {
         
         if ($action === 'update_status') {
             $id = intval($data['id']);
+            $appId = $data['id'];
             $status = sanitize($conn, $data['status']);
             
             $stmt = $conn->prepare("UPDATE candidates SET status = ? WHERE id = ? OR application_id = ?");
-            $stmt->bind_param("sis", $status, $id, $id);
+            $stmt->bind_param("sis", $status, $id, $appId);
             
             if ($stmt->execute()) {
                 jsonResponse(['success' => true, 'message' => 'Status updated to ' . $status]);
