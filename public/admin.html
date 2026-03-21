@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="/favicon.ico">
+<link rel="icon" href="favicon.ico">
     <title>Admin - Techon LED</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -263,10 +263,11 @@
     </div>
 
   <script>
-        let filteredCandidates = [];
-let currentPage = 1;
-let itemsPerPage = 10;
-let selectedCandidates = new Set();
+        window.allCandidates = [];
+        window.filteredCandidates = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let selectedCandidates = new Set();
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -277,67 +278,26 @@ let selectedCandidates = new Set();
             setTimeout(() => toast.remove(), 3000);
         }
 
-        function initializeStorage() {
-            if (!localStorage.getItem('candidates')) {
-                const sample = [
-                    { id: 'NRX-2026-10001', name: 'Rahul Sharma', email: 'rahul@email.com', phone: '9876543210', aadhar: '123456789012', pan: 'ABCDE1234F', dob: '1995-05-15', city: 'Ludhiana', state: 'Punjab', role: 'Project Manager', roleType: 'project-manager', score: 85, baseScore: 75, iqScore: 80, bonus: 10, special: 'Experienced +10%', specialCategories: ['experienced'], status: 'selected', documents: { photo: true, aadhar: true, pan: true, cv: true }, violations: 0, notes: 'Good', appliedDate: '2026-01-15T10:30:00.000Z' },
-                    { id: 'NRX-2026-10002', name: 'Priya Singh', email: 'priya@email.com', phone: '9876543211', aadhar: '123456789013', city: 'Chandigarh', state: 'Punjab', role: 'Data Entry', roleType: 'data-entry', score: 72, baseScore: 72, iqScore: 70, bonus: 0, special: 'None', specialCategories: [], status: 'review', documents: { photo: true, aadhar: true, cv: true }, violations: 0, notes: '', appliedDate: '2026-01-20T14:45:00.000Z' },
-                    { id: 'NRX-2026-10003', name: 'Amit Kumar', email: 'amit@email.com', phone: '9876543212', aadhar: '123456789014', city: 'Jalandhar', state: 'Punjab', role: 'Site Engineer', roleType: 'site-engineer', score: 58, baseScore: 58, iqScore: 55, bonus: 0, special: 'None', specialCategories: [], status: 'rejected', documents: { photo: true, aadhar: true, cv: true }, violations: 1, notes: 'Low score', appliedDate: '2026-01-22T09:15:00.000Z' },
-                    { id: 'NRX-2026-10004', name: 'Sapna Devi', email: 'sapna@email.com', phone: '9876543213', aadhar: '123456789015', city: 'Amritsar', state: 'Punjab', role: 'Gate Keeper', roleType: 'gate-keeper', score: 82, baseScore: 62, iqScore: 60, bonus: 20, special: 'Ex-Serviceman +20%', specialCategories: ['ex-serviceman'], status: 'selected', documents: { photo: true, aadhar: true, cv: true }, violations: 0, notes: 'Ex-Army', appliedDate: '2026-01-25T11:00:00.000Z' },
-                    { id: 'NRX-2026-10005', name: 'Vikramjeet Singh', email: 'vikram@email.com', phone: '9876543214', aadhar: '123456789016', city: 'Patiala', state: 'Punjab', role: 'Telecaller', roleType: 'caller', score: 65, baseScore: 65, iqScore: 68, bonus: 0, special: 'None', specialCategories: [], status: 'pending', documents: { photo: true, aadhar: true }, violations: 0, notes: '', appliedDate: '2026-02-01T16:30:00.000Z' }
-                ];
-                localStorage.setItem('candidates', JSON.stringify(sample));
-            }
-        }
-
-        function getCandidates() { 
-            return JSON.parse(localStorage.getItem('candidates') || '[]'); 
-        }
-
-        async function fetchCandidatesFromDB() {
-            try {
-                const response = await fetch('http://localhost/automation/api/candidates.php');
-                const result = await response.json();
-                console.log('API Response:', result);
-                
-                if (result.candidates) {
-                    localStorage.setItem("candidates", JSON.stringify(result.candidates));
-                    return result.candidates;
-                }
-            } catch (e) {
-                console.error("DB fetch failed:", e);
-            }
-            return getCandidates();
-        }
-
-        function loadSampleData() {
-            localStorage.removeItem('candidates');
-            initializeStorage();
-            loadCandidates();
-            showToast('Sample data loaded!');
+        function isAdminLoggedIn() {
+            return sessionStorage.getItem('isAdminLoggedIn') === 'true';
         }
 
         async function deleteCandidate(id) {
             try {
-                await fetch(`http://localhost/automation/api/candidates.php?id=${id}`, { method: 'DELETE' });
-            } catch (e) {}
-            const candidates = getDocs(collection(db, "applications")).filter(c => c.id !== id);
-            localStorage.setItem('candidates', JSON.stringify(candidates));
+                await window.deleteDoc(window.doc(window.db, "applications", id));
+            } catch (e) {
+                console.error("Delete failed:", e);
+            }
             return true;
         }
 
         async function updateCandidate(id, updates) {
             try {
-                await fetch('http://localhost/automation/api/candidates.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'update_status', id: id, status: updates.status })
-                });
-            } catch (e) {}
-            const candidates = getCandidates();
-            const index = candidates.findIndex(c => c.id === id);
-            if (index !== -1) { candidates[index] = { ...candidates[index], ...updates }; localStorage.setItem('candidates', JSON.stringify(candidates)); return true; }
-            return false;
+                await window.updateDoc(window.doc(window.db, "applications", id), updates);
+            } catch (e) {
+                console.error("Update failed:", e);
+            }
+            return true;
         }
 
         function handleAdminLogin(e) {
@@ -346,11 +306,10 @@ let selectedCandidates = new Set();
             const pass = document.getElementById('admin-password').value;
             const key = document.getElementById('admin-key').value;
             if (id === 'admin' && pass === 'admin123' && key === '123456') {
-                localStorage.setItem('isAdminLoggedIn', 'true');
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 initializeCharts();
-                loadCandidates();
                 showToast('Welcome Admin!');
             } else {
                 showToast('Invalid credentials', 'error');
@@ -358,8 +317,7 @@ let selectedCandidates = new Set();
         }
 
         function logout() {
-            localStorage.removeItem('adminId');
-            localStorage.removeItem('isAdminLoggedIn');
+            sessionStorage.removeItem('isAdminLoggedIn');
             document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('admin-login').classList.remove('hidden');
             showToast('Logged out');
@@ -372,8 +330,7 @@ let selectedCandidates = new Set();
         }
 
         function viewCandidate(id) {
-            const candidates = getCandidates();
-            const candidate = candidates.find(c => c.id === id);
+            const candidate = window.allCandidates.find(c => c.id === id);
             if (!candidate) return;
 
             const statusColors = { 'selected': 'bg-green-100 text-green-700', 'rejected': 'bg-red-100 text-red-700', 'pending': 'bg-yellow-100 text-yellow-700', 'review': 'bg-purple-100 text-purple-700' };
@@ -471,7 +428,6 @@ let selectedCandidates = new Set();
             if (deleteCandidateId) {
                 deleteCandidate(deleteCandidateId);
                 closeDeleteModal();
-                loadCandidates();
                 showToast('Deleted successfully');
             }
         }
@@ -484,17 +440,23 @@ let selectedCandidates = new Set();
         }
 
         function updateCharts() {
-            const candidates = getDocs(collection(db, "applications"))
-            
-            // Line Chart - Application Trends (Last 30 days)
+            const candidates = window.allCandidates;
             const last30Days = [];
             const applicationCounts = [];
             for (let i = 29; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                last30Days.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                applicationCounts.push(candidates.filter(c => c.appliedDate && c.appliedDate.split('T')[0] === dateStr).length);
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const label = d.toLocaleDateString();
+                last30Days.push(label);
+                const count = candidates.filter(c => {
+                    const cDate = new Date(c.appliedDate);
+                    return (
+                        cDate.getFullYear() === d.getFullYear() &&
+                        cDate.getMonth() === d.getMonth() &&
+                        cDate.getDate() === d.getDate()
+                    );
+                }).length;
+                applicationCounts.push(count);
             }
 
             const ctx1 = document.getElementById('trendsChart').getContext('2d');
@@ -607,13 +569,6 @@ let selectedCandidates = new Set();
             });
         }
 
-        async function loadCandidates() {
-            const candidates = await fetchCandidatesFromDB();
-            populateRoleFilter(candidates);
-            applyFilters();
-            updateCharts();
-        }
-
         function populateRoleFilter(candidates) {
             const roles = [...new Set(candidates.map(c => c.role))];
             const select = document.getElementById('role-filter');
@@ -621,12 +576,11 @@ let selectedCandidates = new Set();
         }
 
         function applyFilters() {
-            const candidates = getDocs(collection(db, "applications"))
             const statusFilter = document.getElementById('status-filter').value;
             const roleFilter = document.getElementById('role-filter').value;
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
 
-            filteredCandidates = candidates.filter(c => {
+            window.filteredCandidates = window.allCandidates.filter(c => {
                 if (statusFilter !== 'all' && c.status !== statusFilter) return false;
                 if (roleFilter !== 'all' && c.role !== roleFilter) return false;
                 if (searchTerm && !`${c.name} ${c.id} ${c.email}`.toLowerCase().includes(searchTerm)) return false;
@@ -642,7 +596,7 @@ let selectedCandidates = new Set();
 
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
-    const pageData = filteredCandidates.slice(start, end);
+    const pageData = window.filteredCandidates.slice(start, end);
 
     const statusColors = {
         selected: 'bg-green-100 text-green-700',
@@ -710,11 +664,13 @@ let selectedCandidates = new Set();
     });
 }
         function updateStats() {
-            const candidates = getCandidates();
-            document.getElementById('admin-total').textContent = candidates.length;
-            document.getElementById('admin-pending').textContent = candidates.filter(c => c.status === 'pending' || c.status === 'review').length;
-            document.getElementById('admin-selected').textContent = candidates.filter(c => c.status === 'selected').length;
-            document.getElementById('admin-rejected').textContent = candidates.filter(c => c.status === 'rejected').length;
+            document.getElementById('admin-total').textContent = window.allCandidates.length;
+            document.getElementById('admin-pending').textContent =
+                window.allCandidates.filter(c => c.status === 'pending' || c.status === 'review').length;
+            document.getElementById('admin-selected').textContent =
+                window.allCandidates.filter(c => c.status === 'selected').length;
+            document.getElementById('admin-rejected').textContent =
+                window.allCandidates.filter(c => c.status === 'rejected').length;
         }
 
         function toggleSelection(id) {
@@ -727,19 +683,26 @@ let selectedCandidates = new Set();
 
         function toggleSelectAll(checkbox) {
             if (checkbox.checked) {
-                filteredCandidates.forEach(c => selectedCandidates.add(c.id));
+                window.filteredCandidates.forEach(c => selectedCandidates.add(c.id));
             } else {
                 selectedCandidates.clear();
             }
             renderTable();
         }
 
-        function updateStatus(id, status) {
-            if (updateCandidate(id, { status })) { showToast(`Candidate ${status}`); loadCandidates(); }
+        async function updateStatus(id, status) {
+            try {
+                await window.updateDoc(window.doc(window.db, "applications", id), { status });
+                showToast(`Candidate ${status}`);
+                closeViewModal();
+            } catch (e) {
+                console.error("Update failed:", e);
+                showToast("Update failed", "error");
+            }
         }
 
         function exportToExcel() {
-            const data = getCandidates().map(c => ({ 'ID': c.id, 'Name': c.name, 'Email': c.email, 'Phone': c.phone, 'Role': c.role, 'Score': c.score, 'Status': c.status }));
+            const data = window.allCandidates.map(c => ({ 'ID': c.id, 'Name': c.name, 'Email': c.email, 'Phone': c.phone, 'Role': c.role, 'Score': c.score, 'Status': c.status }));
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Candidates");
@@ -752,7 +715,7 @@ let selectedCandidates = new Set();
                 showToast('Please select candidates first', 'error');
                 return;
             }
-            const selected = getCandidates().filter(c => selectedCandidates.has(c.id));
+            const selected = window.allCandidates.filter(c => selectedCandidates.has(c.id));
             const data = selected.map(c => ({ 'ID': c.id, 'Name': c.name, 'Email': c.email, 'Phone': c.phone, 'Role': c.role, 'Score': c.score, 'Status': c.status }));
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
@@ -762,23 +725,22 @@ let selectedCandidates = new Set();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            initializeStorage();
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
             document.querySelectorAll('.nav-link').forEach(link => { if (link.getAttribute('href') === currentPage) link.classList.add('active'); });
-            if (localStorage.getItem('isAdminLoggedIn')) {
+            document.getElementById('delete-modal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
+            document.getElementById('view-modal').addEventListener('click', function(e) { if (e.target === this) closeViewModal(); });
+            
+            if (isAdminLoggedIn()) {
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 initializeCharts();
-                loadCandidates();
             }
-            document.getElementById('delete-modal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
-            document.getElementById('view-modal').addEventListener('click', function(e) { if (e.target === this) closeViewModal(); });
         });
     </script>
 
     <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "YOUR_KEY",
@@ -789,27 +751,47 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function loadCandidates() {
-    const querySnapshot = await getDocs(collection(db, "applications"));
+window.db = db;
+window.deleteDoc = deleteDoc;
+window.updateDoc = updateDoc;
+window.doc = doc;
 
-    filteredCandidates = []; // reset
-
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
-
-        filteredCandidates.push({
-            id: doc.id,
-            name: data.name || '-',
-            email: data.email || '-',
-            role: data.role || '-',
-            score: data.score || 0,
-            status: data.status || 'pending'
+function listenToCandidates() {
+    const colRef = collection(db, "applications");
+    onSnapshot(colRef, (snapshot) => {
+        window.allCandidates = [];
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            let appliedDate = new Date();
+            if (data.appliedDate?.toDate) {
+                appliedDate = data.appliedDate.toDate();
+            } else if (data.appliedDate) {
+                appliedDate = new Date(data.appliedDate);
+            }
+            window.allCandidates.push({
+                id: docSnap.id,
+                name: data.name || '-',
+                email: data.email || '-',
+                phone: data.phone || '-',
+                role: data.role || '-',
+                score: data.score || 0,
+                status: data.status || 'pending',
+                dob: data.dob || '',
+                city: data.city || '',
+                state: data.state || '',
+                documents: data.documents || {},
+                appliedDate: appliedDate
+            });
         });
+        window.filteredCandidates = [...window.allCandidates];
+        populateRoleFilter(window.allCandidates);
+        applyFilters();
+        updateStats();
+        updateCharts();
     });
-
-    renderTable(); // 🔥 IMPORTANT
 }
-loadCandidates();
+
+listenToCandidates();
 </script> 
 </body>
 </html>
