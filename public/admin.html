@@ -816,65 +816,112 @@
         });
     </script>
 
-    <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyD2lR2JEBKILxAnekRQSSB_oGusijsymzg",
-    authDomain: "automation-recruitment.firebaseapp.com",
-    projectId: "automation-recruitment",
-    storageBucket: "automation-recruitment.firebasestorage.app",
-    messagingSenderId: "1077317899826",
-    appId: "1:1077317899826:web:c28e920356378073a7ce2b"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.db = db;
-window.deleteDoc = deleteDoc;
-window.updateDoc = updateDoc;
-window.doc = doc;
-window.firebaseReady = true;
-
-function listenToCandidates() {
-    const colRef = collection(db, "applications");
-    onSnapshot(colRef, (snapshot) => {
-        window.allCandidates = [];
-        snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            let appliedDate = new Date();
-            if (data.appliedDate?.toDate) {
-                appliedDate = data.appliedDate.toDate();
-            } else if (data.appliedDate) {
-                appliedDate = new Date(data.appliedDate);
-            }
-            window.allCandidates.push({
-                id: docSnap.id,
-                name: data.name || '-',
-                email: data.email || '-',
-                phone: data.phone || '-',
-                role: data.role || '-',
-                score: data.score || 0,
-                status: data.status || 'pending',
-                dob: data.dob || '',
-                city: data.city || '',
-                state: data.state || '',
-                documents: data.documents || {},
-                uploadedDocuments: data.uploadedDocuments || {},
-                appliedDate: appliedDate
+    <script>
+        window.firebaseReady = false;
+        
+        function initAdminFirebase() {
+            return new Promise((resolve, reject) => {
+                const script1 = document.createElement('script');
+                script1.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js';
+                script1.onload = function() {
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js';
+                    script2.onload = function() {
+                        try {
+                            const firebaseConfig = {
+                                apiKey: "AIzaSyD2lR2JEBKILxAnekRQSSB_oGusijsymzg",
+                                authDomain: "automation-recruitment.firebaseapp.com",
+                                projectId: "automation-recruitment",
+                                storageBucket: "automation-recruitment.firebasestorage.app",
+                                messagingSenderId: "1077317899826",
+                                appId: "1:1077317899826:web:c28e920356378073a7ce2b"
+                            };
+                            
+                            firebase.initializeApp(firebaseConfig);
+                            window.db = firebase.firestore();
+                            window.collection = function(name) {
+                                return window.db.collection(name);
+                            };
+                            window.doc = function(path) {
+                                return window.db.doc(path);
+                            };
+                            window.updateDoc = function(docRef, data) {
+                                return docRef.update(data);
+                            };
+                            window.deleteDoc = function(docRef) {
+                                return docRef.delete();
+                            };
+                            window.firebaseReady = true;
+                            console.log('Admin Firebase initialized');
+                            resolve(true);
+                        } catch(e) {
+                            console.error('Admin Firebase init error:', e);
+                            reject(e);
+                        }
+                    };
+                    script2.onerror = function() {
+                        reject(new Error('Firestore load failed'));
+                    };
+                    document.head.appendChild(script2);
+                };
+                script1.onerror = function() {
+                    reject(new Error('Firebase core load failed'));
+                };
+                document.head.appendChild(script1);
             });
+        }
+        
+        initAdminFirebase().then(() => {
+            listenToCandidates();
+        }).catch(err => {
+            console.error('Admin Firebase initialization failed:', err);
+            showToast('Error loading system. Please refresh the page.', 'error');
         });
-        window.filteredCandidates = [...window.allCandidates];
-        populateRoleFilter(window.allCandidates);
-        applyFilters();
-        updateStats();
-        updateCharts();
-    });
-}
-
-listenToCandidates();
-</script> 
+        
+        function listenToCandidates() {
+            if (!window.db || !window.collection) {
+                console.error('Firebase not ready');
+                return;
+            }
+            const colRef = window.collection("applications");
+            colRef.onSnapshot((snapshot) => {
+                window.allCandidates = [];
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    let appliedDate = new Date();
+                    if (data.appliedDate) {
+                        if (data.appliedDate.toDate) {
+                            appliedDate = data.appliedDate.toDate();
+                        } else if (typeof data.appliedDate === 'string') {
+                            appliedDate = new Date(data.appliedDate);
+                        }
+                    }
+                    window.allCandidates.push({
+                        id: docSnap.id,
+                        name: data.name || '-',
+                        email: data.email || '-',
+                        phone: data.phone || '-',
+                        role: data.role || '-',
+                        score: data.score || 0,
+                        status: data.status || 'pending',
+                        dob: data.dob || '',
+                        city: data.city || '',
+                        state: data.state || '',
+                        documents: data.documents || {},
+                        uploadedDocuments: data.uploadedDocuments || {},
+                        appliedDate: appliedDate
+                    });
+                });
+                window.filteredCandidates = [...window.allCandidates];
+                populateRoleFilter(window.allCandidates);
+                applyFilters();
+                updateStats();
+                updateCharts();
+            }, (error) => {
+                console.error('Firestore error:', error);
+                showToast('Error loading candidates. Please refresh.', 'error');
+            });
+        }
+    </script> 
 </body>
 </html>

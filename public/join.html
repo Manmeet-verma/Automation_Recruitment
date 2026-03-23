@@ -1536,8 +1536,8 @@
         }
 
         async function finalizeApplication() {
-            if (!window.db || !window.addDoc) {
-                showToast('System not ready. Please refresh the page and try again.', 'error');
+            if (!window.firebaseReady || !window.db || !window.addDoc) {
+                showToast('System not ready. Please wait for page to load completely, then refresh if needed.', 'error');
                 return;
             }
             
@@ -1546,6 +1546,8 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
             }
+            
+            showToast('Submitting application...', 'info');
             
             const kycDataRaw = sessionStorage.getItem('kycData');
             let kycData = {};
@@ -1762,50 +1764,82 @@
         });
     </script>
 
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2lR2JEBKILxAnekRQSSB_oGusijsymzg",
-            authDomain: "automation-recruitment.firebaseapp.com",
-            projectId: "automation-recruitment",
-            storageBucket: "automation-recruitment.firebasestorage.app",
-            messagingSenderId: "1077317899826",
-            appId: "1:1077317899826:web:c28e920356378073a7ce2b",
-            measurementId: "G-1LVFVT3FXE"
-        };
-
-        // Initialize Firebase
-        try {
-            const app = initializeApp(firebaseConfig);
-            const analytics = getAnalytics(app);
-            const db = getFirestore(app);
-            // Make db global
-            window.db = db;
-            window.addDoc = addDoc;
-            window.collection = collection;
-            window.serverTimestamp = serverTimestamp;
-            window.firebaseReady = true;
-            console.log('Firebase initialized successfully');
-            
-            // Enable submit button if it exists
-            const btn = document.getElementById('submit-application-btn');
-            if (btn) btn.disabled = false;
-        } catch (error) {
-            console.error('Firebase initialization error:', error);
-            window.firebaseReady = false;
+    <script>
+        window.firebaseReady = false;
+        window.db = null;
+        window.addDoc = null;
+        window.collection = null;
+        window.serverTimestamp = null;
+        
+        function initFirebase() {
+            return new Promise((resolve, reject) => {
+                const script1 = document.createElement('script');
+                script1.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js';
+                script1.onload = function() {
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js';
+                    script2.onload = function() {
+                        try {
+                            const firebaseConfig = {
+                                apiKey: "AIzaSyD2lR2JEBKILxAnekRQSSB_oGusijsymzg",
+                                authDomain: "automation-recruitment.firebaseapp.com",
+                                projectId: "automation-recruitment",
+                                storageBucket: "automation-recruitment.firebasestorage.app",
+                                messagingSenderId: "1077317899826",
+                                appId: "1:1077317899826:web:c28e920356378073a7ce2b"
+                            };
+                            
+                            firebase.initializeApp(firebaseConfig);
+                            window.db = firebase.firestore();
+                            window.addDoc = function(collectionRef, data) {
+                                return window.db.collection(collectionRef).add(data);
+                            };
+                            window.collection = function(db, name) {
+                                return window.db.collection(name);
+                            };
+                            window.serverTimestamp = function() {
+                                return firebase.firestore.FieldValue.serverTimestamp();
+                            };
+                            window.firebaseReady = true;
+                            console.log('Firebase initialized successfully');
+                            
+                            const btn = document.getElementById('submit-application-btn');
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.innerHTML = 'Complete Application <i class="fas fa-check-circle ml-2"></i>';
+                            }
+                            resolve(true);
+                        } catch(e) {
+                            console.error('Firebase init error:', e);
+                            window.firebaseReady = false;
+                            reject(e);
+                        }
+                    };
+                    script2.onerror = function() {
+                        console.error('Failed to load Firebase Firestore');
+                        reject(new Error('Firestore load failed'));
+                    };
+                    document.head.appendChild(script2);
+                };
+                script1.onerror = function() {
+                    console.error('Failed to load Firebase Core');
+                    reject(new Error('Firebase core load failed'));
+                };
+                document.head.appendChild(script1);
+            });
+        }
+        
+        initFirebase().then(() => {
+            console.log('Firebase ready');
+        }).catch(err => {
+            console.error('Firebase initialization failed:', err);
             const btn = document.getElementById('submit-application-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> System Error - Refresh Page';
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> System Error - Refresh';
+                btn.onclick = function() { location.reload(); };
             }
-        }
+        });
     </script>
 </body>
 
