@@ -343,19 +343,25 @@
             const docLabels = { photo: 'Photo', aadhar: 'Aadhar Card', pan: 'PAN Card', cv: 'Resume/CV' };
 
             let docsHtml = '';
+            const uploadedDocs = candidate.uploadedDocuments || {};
             for (const [docType, uploaded] of Object.entries(candidate.documents || {})) {
+                const hasFileData = uploadedDocs[docType] && uploadedDocs[docType].data;
                 docsHtml += `
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div class="flex items-center">
                             <i class="fas ${docIcons[docType] || 'fa-file'} text-[#0b2a5b] mr-3"></i>
                             <span class="font-medium">${docLabels[docType] || docType}</span>
+                            ${hasFileData ? '<span class="text-xs text-gray-500 ml-2">(' + Math.round((uploadedDocs[docType].size || 0) / 1024) + ' KB)</span>' : ''}
                         </div>
-                        <div>
+                        <div class="flex items-center gap-2">
                             ${uploaded ? 
-                                `<span class="text-green-600 text-sm mr-2"><i class="fas fa-check-circle"></i> Uploaded</span>
-                                <button onclick="downloadFirebaseDoc('${candidate.id}', '${docType}')" class="text-blue-600 hover:text-blue-700 text-sm" title="Download"><i class="fas fa-download"></i> Download</button>` : 
+                                `<span class="text-green-600 text-sm"><i class="fas fa-check-circle"></i> Uploaded</span>` : 
                                 `<span class="text-red-500 text-sm"><i class="fas fa-times-circle"></i> Not Uploaded</span>`
                             }
+                            ${hasFileData ? `
+                                <button onclick="previewFirebaseDoc('${candidate.id}', '${docType}')" class="text-purple-600 hover:text-purple-700 text-sm ml-2" title="Preview"><i class="fas fa-eye"></i></button>
+                                <button onclick="downloadFirebaseDoc('${candidate.id}', '${docType}')" class="text-blue-600 hover:text-blue-700 text-sm" title="Download"><i class="fas fa-download"></i></button>
+                            ` : `<span class="text-gray-400 text-xs">No file data</span>`}
                         </div>
                     </div>
                 `;
@@ -426,6 +432,52 @@
 
         function downloadFirebaseDoc(candidateId, docType) {
             const candidate = window.allCandidates.find(c => c.id === candidateId);
+            
+            if (!candidate) {
+                showToast('Candidate not found', 'error');
+                return;
+            }
+            
+            console.log('Download request:', { candidateId, docType });
+            console.log('Candidate uploadedDocuments:', candidate.uploadedDocuments);
+            console.log('Document type:', candidate.uploadedDocuments?.[docType]);
+            
+            if (!candidate.uploadedDocuments || !candidate.uploadedDocuments[docType]) {
+                showToast('Document not uploaded by candidate', 'error');
+                return;
+            }
+            
+            const doc = candidate.uploadedDocuments[docType];
+            
+            if (!doc) {
+                showToast('Document data missing', 'error');
+                return;
+            }
+            
+            if (!doc.data) {
+                showToast('Document file data not available. May be too large for storage.', 'error');
+                console.error('Document object:', doc);
+                return;
+            }
+            
+            try {
+                const link = document.createElement('a');
+                link.href = doc.data;
+                const fileName = doc.name || (candidate.name + '_' + docType + '.pdf');
+                link.download = fileName;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast('Document downloaded successfully');
+            } catch (error) {
+                console.error('Download error:', error);
+                showToast('Failed to download document', 'error');
+            }
+        }
+        
+        function previewFirebaseDoc(candidateId, docType) {
+            const candidate = window.allCandidates.find(c => c.id === candidateId);
             if (!candidate || !candidate.uploadedDocuments || !candidate.uploadedDocuments[docType]) {
                 showToast('Document not found', 'error');
                 return;
@@ -437,12 +489,12 @@
                 return;
             }
             
-            const link = document.createElement('a');
-            link.href = doc.data;
-            link.download = doc.name || (candidate.name + '_' + docType + '.pdf');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const previewWindow = window.open('', '_blank');
+            if (doc.type && doc.type.startsWith('image/')) {
+                previewWindow.document.write('<html><head><title>Preview</title></head><body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f3f4f6;"><img src="' + doc.data + '" style="max-width:90%;max-height:90%;"></body></html>');
+            } else {
+                previewWindow.document.write('<html><head><title>Preview - ' + (doc.name || docType) + '</title></head><body style="margin:20px;font-family:sans-serif;"><h2>' + (doc.name || docType) + '</h2><p>File type: ' + (doc.type || 'Unknown') + '</p><p>Size: ' + Math.round((doc.size || 0) / 1024) + ' KB</p><p>Data available: ' + (doc.data ? 'Yes' : 'No') + '</p><hr><p><a href="' + doc.data + '" download="' + (doc.name || 'document.pdf') + '">Download File</a></p></body></html>');
+            }
         }
 
         function closeDeleteModal() {

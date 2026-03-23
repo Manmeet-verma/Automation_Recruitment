@@ -1227,6 +1227,13 @@
         function handleEnhancedUpload(input, docType, docCategory) {
             const file = input.files[0];
             if (!file) return;
+            
+            const maxSize = 700 * 1024;
+            if (file.size > maxSize) {
+                showToast('File too large! Please upload files under 700KB for better compatibility.', 'error');
+                input.value = '';
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = function (e) {
@@ -1238,6 +1245,9 @@
                 };
                 updateDocumentCard(docType, file, e.target.result);
                 showToast(`${docType} uploaded successfully`);
+            };
+            reader.onerror = function() {
+                showToast('Error reading file. Please try again.', 'error');
             };
             reader.readAsDataURL(file);
         }
@@ -1578,6 +1588,23 @@
                 pan: !!uploadedDocuments.pan, cv: !!uploadedDocuments.cv,
                 disability: !!uploadedDocuments.disability, service: !!uploadedDocuments.service
             };
+            
+            let totalDocSize = 0;
+            const requiredDocs = ['photo', 'aadhar', 'cv'];
+            for (const docType of requiredDocs) {
+                if (uploadedDocuments[docType] && uploadedDocuments[docType].data) {
+                    totalDocSize += uploadedDocuments[docType].data.length;
+                }
+            }
+            
+            if (totalDocSize > 900000) {
+                showToast('Total document size too large. Please use smaller files (under 700KB each).', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Complete Application';
+                }
+                return;
+            }
 
             try {
     const cleanCandidate = JSON.parse(JSON.stringify({
@@ -1612,6 +1639,7 @@
         createdAt: window.serverTimestamp()
     }).catch(err => {
         console.error('Firebase submission error:', err);
+        console.log('Documents being sent:', JSON.stringify(uploadedDocuments).substring(0, 500) + '...');
         throw err;
     });
 
