@@ -154,29 +154,32 @@
                         <i class="fas fa-shield-alt text-3xl text-[#0b2a5b]"></i>
                     </div>
                     <h2 class="text-2xl font-bold text-[#0b2a5b]">Admin Portal</h2>
-                    <p class="text-gray-500 text-sm mt-2"></p>
+                    <p class="text-gray-500 text-sm mt-2">Recruitment Management System</p>
                 </div>
                 <form id="admin-form" class="space-y-6" onsubmit="handleAdminLogin(event)">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Admin ID</label>
-                        <input type="text" id="admin-id" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="username">
+                        <input type="text" id="admin-id" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="Enter admin ID">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input type="password" id="admin-password" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="password">
+                        <input type="password" id="admin-password" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="Enter password">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Security Key</label>
-                        <input type="password" id="admin-key" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="security pin">
-                    </div>
-                    <button type="submit" class="w-full btn-accent hover:bg-[#cc0000] text-white py-3 rounded-xl font-semibold transition">
+                    <button type="submit" id="login-btn" class="w-full btn-accent hover:bg-[#cc0000] text-white py-3 rounded-xl font-semibold transition">
                         <i class="fas fa-lock mr-2"></i>Login
                     </button>
+                    <p class="text-xs text-gray-400 text-center">Default: admin / admin</p>
                 </form>
             </div>
         </section>
 
         <section id="admin-dashboard" class="hidden min-h-screen bg-[#f5f5f5] py-8">
+            <div id="admin-loading" class="fixed inset-0 bg-white/90 z-50 flex items-center justify-center">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-[#0b2a5b] border-t-transparent mx-auto mb-4"></div>
+                    <p class="text-gray-600 font-medium">Loading candidates...</p>
+                </div>
+            </div>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between mb-8">
                     <div>
@@ -289,35 +292,58 @@
 
         async function deleteCandidate(id) {
             try {
-                await window.deleteDoc(window.doc(window.db, "applications", id));
+                if (!window.db) {
+                    showToast("System not ready. Please refresh.", "error");
+                    return false;
+                }
+                await window.db.collection("applications").doc(id).delete();
+                showToast("Candidate deleted");
+                return true;
             } catch (e) {
                 console.error("Delete failed:", e);
+                showToast("Delete failed: " + e.message, "error");
+                return false;
             }
-            return true;
         }
 
         async function updateCandidate(id, updates) {
             try {
-                await window.updateDoc(window.doc(window.db, "applications", id), updates);
+                if (!window.db) {
+                    showToast("System not ready. Please refresh.", "error");
+                    return false;
+                }
+                await window.db.collection("applications").doc(id).update(updates);
+                showToast("Candidate updated");
+                return true;
             } catch (e) {
                 console.error("Update failed:", e);
+                showToast("Update failed: " + e.message, "error");
+                return false;
             }
-            return true;
         }
 
         function handleAdminLogin(e) {
             e.preventDefault();
             const id = document.getElementById('admin-id').value;
             const pass = document.getElementById('admin-password').value;
-            const key = document.getElementById('admin-key').value;
-            if (id === 'admin' && pass === 'admin123' && key === '123456') {
+            const loginBtn = document.getElementById('login-btn');
+            
+            if (loginBtn) {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
+            }
+            
+            if (id === 'admin' && pass === 'admin123') {
                 sessionStorage.setItem('isAdminLoggedIn', 'true');
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
-                initializeCharts();
                 showToast('Welcome Admin!');
             } else {
                 showToast('Invalid credentials', 'error');
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-lock mr-2"></i>Login';
+                }
             }
         }
 
@@ -770,12 +796,16 @@
 
         async function updateStatus(id, status) {
             try {
-                await window.updateDoc(window.doc(window.db, "applications", id), { status });
-                showToast(`Candidate ${status}`);
+                if (!window.db) {
+                    showToast("System not ready. Please refresh.", "error");
+                    return;
+                }
+                await window.db.collection("applications").doc(id).update({ status: status });
+                showToast(`Candidate marked as ${status}`);
                 closeViewModal();
             } catch (e) {
                 console.error("Update failed:", e);
-                showToast("Update failed", "error");
+                showToast("Update failed: " + e.message, "error");
             }
         }
 
@@ -880,9 +910,13 @@
         
         function listenToCandidates() {
             if (!window.db || !window.collection) {
-                console.error('Firebase not ready');
+                console.error('Firebase not ready, retrying...');
+                setTimeout(listenToCandidates, 1000);
                 return;
             }
+            
+            const loadingEl = document.getElementById('admin-loading');
+            
             const colRef = window.collection("applications");
             colRef.onSnapshot((snapshot) => {
                 window.allCandidates = [];
@@ -917,9 +951,11 @@
                 applyFilters();
                 updateStats();
                 updateCharts();
+                
+                if (loadingEl) loadingEl.style.display = 'none';
             }, (error) => {
                 console.error('Firestore error:', error);
-                showToast('Error loading candidates. Please refresh.', 'error');
+                if (loadingEl) loadingEl.innerHTML = '<div class="text-center"><i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i><p class="text-red-600 font-medium">Error loading data</p><button onclick="location.reload()" class="mt-4 bg-[#0b2a5b] text-white px-4 py-2 rounded-lg">Refresh Page</button></div>';
             });
         }
     </script> 

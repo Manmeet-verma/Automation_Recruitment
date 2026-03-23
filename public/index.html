@@ -144,6 +144,14 @@
     
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="page-loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-[#0b2a5b] border-t-transparent mx-auto mb-4"></div>
+            <p class="text-gray-600 font-medium">Loading...</p>
+        </div>
+    </div>
 
     <!-- Navigation -->
     <nav class="fixed w-full z-50 glass-effect shadow-lg">
@@ -227,7 +235,7 @@
                         <div class="text-gray-600">Selected Candidates</div>
                     </div>
                     <div class="stat-card p-6 rounded-2xl text-center hover-lift">
-                        <div class="text-3xl font-bold stat-number mb-2">98%</div>
+                        <div class="text-3xl font-bold stat-number mb-2" id="stat-success">--</div>
                         <div class="text-gray-600">Success Rate</div>
                     </div>
                 </div>
@@ -260,30 +268,65 @@
         </section>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2lR2JEBKILxAnekRQSSB_oGusijsymzg",
-            authDomain: "automation-recruitment.firebaseapp.com",
-            projectId: "automation-recruitment",
-            storageBucket: "automation-recruitment.firebasestorage.app",
-            messagingSenderId: "1077317899826",
-            appId: "1:1077317899826:web:c28e920356378073a7ce2b",
-            measurementId: "G-1LVFVT3FXE"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app);
-
-        window.db = db;
-
+    <script>
+        window.db = null;
+        
+        function initIndexFirebase() {
+            return new Promise((resolve, reject) => {
+                const script1 = document.createElement('script');
+                script1.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js';
+                script1.onload = function() {
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js';
+                    script2.onload = function() {
+                        try {
+                            const firebaseConfig = {
+                                apiKey: "AIzaSyD2lR2JEBKILxAnekRQSSB_oGusijsymzg",
+                                authDomain: "automation-recruitment.firebaseapp.com",
+                                projectId: "automation-recruitment",
+                                storageBucket: "automation-recruitment.firebasestorage.app",
+                                messagingSenderId: "1077317899826",
+                                appId: "1:1077317899826:web:c28e920356378073a7ce2b"
+                            };
+                            
+                            firebase.initializeApp(firebaseConfig);
+                            window.db = firebase.firestore();
+                            console.log('Index Firebase initialized');
+                            resolve(true);
+                        } catch(e) {
+                            console.error('Index Firebase init error:', e);
+                            reject(e);
+                        }
+                    };
+                    script2.onerror = function() { reject(new Error('Firestore load failed')); };
+                    document.head.appendChild(script2);
+                };
+                script1.onerror = function() { reject(new Error('Firebase core load failed')); };
+                document.head.appendChild(script1);
+            });
+        }
+        
+        initIndexFirebase().then(() => {
+            const loadingEl = document.getElementById('page-loading');
+            if (loadingEl) loadingEl.style.display = 'none';
+            listenToStats();
+        }).catch(err => {
+            console.error('Index Firebase failed:', err);
+            const loadingEl = document.getElementById('page-loading');
+            if (loadingEl) loadingEl.innerHTML = '<div class="text-center"><i class="fas fa-wifi text-4xl text-gray-400 mb-4"></i><p class="text-gray-600">Loading offline...</p></div>';
+            setTimeout(() => {
+                if (loadingEl) loadingEl.style.display = 'none';
+            }, 2000);
+        });
+        
         function listenToStats() {
-            const colRef = collection(db, "applications");
-            onSnapshot(colRef, (snapshot) => {
+            if (!window.db) {
+                setTimeout(listenToStats, 1000);
+                return;
+            }
+            
+            const colRef = window.db.collection("applications");
+            colRef.onSnapshot((snapshot) => {
                 const candidates = [];
                 snapshot.forEach((docSnap) => {
                     candidates.push(docSnap.data());
@@ -294,10 +337,17 @@
                     candidates.filter(c => ['pending', 'review'].includes(c.status)).length;
                 document.getElementById('stat-selected').textContent =
                     candidates.filter(c => c.status === 'selected').length;
+                    
+                const successRateEl = document.getElementById('stat-success');
+                if (successRateEl && candidates.length > 0) {
+                    const selectedCount = candidates.filter(c => c.status === 'selected').length;
+                    const rate = Math.round((selectedCount / candidates.length) * 100);
+                    successRateEl.textContent = rate + '%';
+                }
+            }, (error) => {
+                console.error('Stats error:', error);
             });
         }
-
-        listenToStats();
     </script>
 
     <script>

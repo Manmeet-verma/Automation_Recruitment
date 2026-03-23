@@ -1743,10 +1743,18 @@
 
             document.getElementById('kyc-submit-btn').addEventListener('click', function () {
                 const form = document.getElementById('kyc-form');
+                const termsCheckbox = document.getElementById('terms-agree');
+                
+                if (!termsCheckbox.checked) {
+                    showToast('Please agree to the Terms & Conditions to continue.', 'error');
+                    return;
+                }
+                
                 if (!form.checkValidity()) {
                     form.reportValidity();
                     return;
                 }
+                
                 const kycData = {
                     name: document.getElementById('kyc-name').value,
                     dob: document.getElementById('kyc-dob').value,
