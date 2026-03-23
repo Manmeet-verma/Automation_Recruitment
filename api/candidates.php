@@ -177,6 +177,7 @@ switch ($method) {
 function mapCandidateFields($row) {
     return [
         'id' => $row['application_id'] ?? $row['id'],
+        'dbId' => intval($row['id'] ?? 0),
         'name' => $row['full_name'] ?? '',
         'email' => $row['email'] ?? '',
         'phone' => $row['phone'] ?? '',
@@ -195,6 +196,7 @@ function mapCandidateFields($row) {
         'specialCategories' => json_decode($row['special_categories'] ?? '[]', true),
         'status' => $row['status'] ?? 'pending',
         'documents' => json_decode($row['documents'] ?? '{}', true),
+        'cvFilename' => $row['cv_filename'] ?? '',
         'violations' => intval($row['violations'] ?? 0),
         'notes' => $row['notes'] ?? '',
         'appliedDate' => $row['applied_date'] ?? $row['created_at'] ?? date('Y-m-d H:i:s')

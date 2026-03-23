@@ -1520,7 +1520,21 @@
         }
 
         async function finalizeApplication() {
-            const kycData = JSON.parse(sessionStorage.getItem('kycData') || '{}');
+            const kycDataRaw = sessionStorage.getItem('kycData');
+            let kycData = {};
+            try {
+                kycData = kycDataRaw ? JSON.parse(kycDataRaw) : {};
+            } catch (e) {
+                console.error('KYC data parse error:', e);
+                showToast('Session expired. Please start again.', 'error');
+                return;
+            }
+            
+            let specialCategories = kycData.specialCategories;
+            if (!Array.isArray(specialCategories) || !specialCategories.every(c => typeof c === 'string')) {
+                specialCategories = Array.from(document.querySelectorAll('input[name="special-category"]:checked')).map(cb => cb.value);
+            }
+            
             const examScore = parseInt(sessionStorage.getItem('examScore') || 0);
             const jobCategory = document.querySelector('input[name="job-category"]:checked');
 
@@ -1530,10 +1544,10 @@
 
             let bonus = 0;
             let specialText = 'None';
-            if (kycData.specialCategories) {
-                if (kycData.specialCategories.some(c => ['pwd', 'widow', 'ex-serviceman'].includes(c))) bonus += 20;
-                if (kycData.specialCategories.includes('experienced')) bonus += 10;
-                specialText = kycData.specialCategories.join(', ');
+            if (specialCategories && Array.isArray(specialCategories)) {
+                if (specialCategories.some(c => ['pwd', 'widow', 'ex-serviceman'].includes(c))) bonus += 20;
+                if (specialCategories.includes('experienced')) bonus += 10;
+                specialText = specialCategories.join(', ');
             }
 
             const finalScore = Math.min(100, examScore + bonus);
@@ -1544,27 +1558,40 @@
                 disability: !!uploadedDocuments.disability, service: !!uploadedDocuments.service
             };
 
-            const candidate = {
-                name: kycData.name, email: kycData.email, phone: kycData.phone,
-                aadhar: kycData.aadhar, pan: kycData.pan, dob: kycData.dob,
-                city: kycData.city, state: kycData.state,
-                role: jobCategory ? jobCategory.parentElement.querySelector('.font-medium').textContent : 'Unknown',
-                roleType: jobCategory ? jobCategory.value : 'unknown',
-                score: finalScore, baseScore: examScore, iqScore: iqScore,
-                bonus: bonus, special: specialText,
-                specialCategories: kycData.specialCategories || [],
-                status: finalScore >= 60 ? 'review' : 'rejected',
-                documents: documents, violations: parseInt(sessionStorage.getItem('violations') || 0),
-                notes: ''
-            };
             try {
+    const cleanCandidate = JSON.parse(JSON.stringify({
+        name: kycData.name || '', 
+        email: kycData.email || '', 
+        phone: kycData.phone || '',
+        aadhar: kycData.aadhar || '', 
+        pan: kycData.pan || '', 
+        dob: kycData.dob || '',
+        city: kycData.city || '', 
+        state: kycData.state || '',
+        role: jobCategory ? jobCategory.parentElement.querySelector('.font-medium').textContent : 'Unknown',
+        roleType: jobCategory ? jobCategory.value : 'unknown',
+        score: finalScore, 
+        baseScore: examScore, 
+        iqScore: iqScore,
+        bonus: bonus, 
+        special: specialText,
+        specialCategories: (specialCategories || []).filter(c => typeof c === 'string'),
+        status: finalScore >= 60 ? 'review' : 'rejected',
+        documents: documents, 
+        violations: parseInt(sessionStorage.getItem('violations') || 0),
+        notes: ''
+    }));
+
     const docRef = await addDoc(collection(db, "applications"), {
-        ...candidate, // ✅ full object
+        ...cleanCandidate,
         examAnswers: examAnswers,
         iqAnswers: iqAnswers,
         reasoningAnswers: reasoningAnswers,
         uploadedDocuments: uploadedDocuments,
-        createdAt: new Date()
+        createdAt: window.serverTimestamp()
+    }).catch(err => {
+        console.error('Firebase submission error:', err);
+        throw err;
     });
 
         const id = docRef.id;
@@ -1578,7 +1605,15 @@
 
 } catch (error) {
     console.error("Firebase Error:", error);
-    showToast("Error saving application ❌", "error");
+    let errorMsg = "Error saving application. Please try again.";
+    if (error.code === 'invalid-argument' || (error.message && error.message.includes('invalid nested entry'))) {
+        errorMsg = "Data format error. Please refresh and try again.";
+    } else if (error.code === 'permission-denied') {
+        errorMsg = "Permission denied. Check your internet connection and try again.";
+    } else if (error.code === 'unavailable') {
+        errorMsg = "Firebase unavailable. Please try again later.";
+    }
+    showToast(errorMsg + " (" + (error.code || 'unknown') + ")", "error");
     return;
 }
 
@@ -1678,7 +1713,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";        // TODO: Add SDKs for Firebase products that you want to use
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";        // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
 
         // Your web app's Firebase configuration
@@ -1701,6 +1736,7 @@
         window.db = db;
         window.addDoc = addDoc;
         window.collection = collection;
+        window.serverTimestamp = serverTimestamp;
     </script>
 </body>
 

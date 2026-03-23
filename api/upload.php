@@ -40,14 +40,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $destination = $uploadDir . $newName;
     
     if (move_uploaded_file($file['tmp_name'], $destination)) {
-        // Update database if CV
+        $conn = getDB();
+        
         if ($type === 'cv') {
-            $conn = getDB();
             $stmt = $conn->prepare("UPDATE candidates SET cv_filename = ? WHERE id = ?");
             $stmt->bind_param("si", $newName, $candidateId);
             $stmt->execute();
-            $conn->close();
         }
+        
+        $stmt = $conn->prepare("SELECT documents FROM candidates WHERE id = ?");
+        $stmt->bind_param("i", $candidateId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        
+        $documents = json_decode($row['documents'] ?? '{}', true);
+        $docMap = ['cv' => 'cv'];
+        if (isset($docMap[$type])) {
+            $documents[$docMap[$type]] = true;
+            $stmt = $conn->prepare("UPDATE candidates SET documents = ? WHERE id = ?");
+            $stmt->bind_param("si", json_encode($documents), $candidateId);
+            $stmt->execute();
+        }
+        
+        $conn->close();
         
         jsonResponse([
             'success' => true,

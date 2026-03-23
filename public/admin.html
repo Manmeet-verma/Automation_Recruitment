@@ -348,7 +348,7 @@
                         <div>
                             ${uploaded ? 
                                 `<span class="text-green-600 text-sm mr-2"><i class="fas fa-check-circle"></i> Uploaded</span>
-                                <a href="uploads/${candidate.id}/${docType}" download="${candidate.name}_${docType}" class="text-blue-600 hover:text-blue-700 text-sm" title="Download"><i class="fas fa-download"></i> Download</a>` : 
+                                <button onclick="downloadFirebaseDoc('${candidate.id}', '${docType}')" class="text-blue-600 hover:text-blue-700 text-sm" title="Download"><i class="fas fa-download"></i> Download</button>` : 
                                 `<span class="text-red-500 text-sm"><i class="fas fa-times-circle"></i> Not Uploaded</span>`
                             }
                         </div>
@@ -417,6 +417,27 @@
 
         function closeViewModal() {
             document.getElementById('view-modal').classList.add('hidden');
+        }
+
+        function downloadFirebaseDoc(candidateId, docType) {
+            const candidate = window.allCandidates.find(c => c.id === candidateId);
+            if (!candidate || !candidate.uploadedDocuments || !candidate.uploadedDocuments[docType]) {
+                showToast('Document not found', 'error');
+                return;
+            }
+            
+            const doc = candidate.uploadedDocuments[docType];
+            if (!doc.data) {
+                showToast('Document data not available', 'error');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.href = doc.data;
+            link.download = doc.name || (candidate.name + '_' + docType + '.pdf');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function closeDeleteModal() {
@@ -780,6 +801,7 @@ function listenToCandidates() {
                 city: data.city || '',
                 state: data.state || '',
                 documents: data.documents || {},
+                uploadedDocuments: data.uploadedDocuments || {},
                 appliedDate: appliedDate
             });
         });
