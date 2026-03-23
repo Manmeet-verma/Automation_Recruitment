@@ -306,6 +306,12 @@
 
 <body class="bg-white text-gray-800 min-h-screen overflow-x-hidden">
 
+    <script>
+        if (window.location.protocol === 'file:') {
+            document.write('<div style="background:#ff9800;color:#000;padding:12px;text-align:center;font-weight:bold;font-family:sans-serif;position:fixed;top:0;left:0;right:0;z-index:99999;">⚠️ Please open this page via a web server (http://localhost...) not by double-clicking the file. <a href="#" onclick="alert(\'Right-click the file and choose Open with > Browser or use XAMPP/VS Code Live Server\');return false;" style="color:#000;text-decoration:underline;">Learn more</a></div><div style="height:40px;"></div>');
+        }
+    </script>
+
     <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div>
 
     <div id="doc-preview-modal" class="hidden modal-overlay">
@@ -1025,7 +1031,7 @@
 
                     <div class="space-y-6" id="reasoning-container"></div>
 
-                    <button onclick="finalizeApplication()"
+                    <button id="submit-application-btn" onclick="finalizeApplication()"
                         class="w-full mt-8 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl font-bold text-lg transition transform hover:scale-105">
                         Complete Application <i class="fas fa-check-circle ml-2"></i>
                     </button>
@@ -1520,6 +1526,17 @@
         }
 
         async function finalizeApplication() {
+            if (!window.db || !window.addDoc) {
+                showToast('System not ready. Please refresh the page and try again.', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submit-application-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            }
+            
             const kycDataRaw = sessionStorage.getItem('kycData');
             let kycData = {};
             try {
@@ -1527,6 +1544,10 @@
             } catch (e) {
                 console.error('KYC data parse error:', e);
                 showToast('Session expired. Please start again.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Complete Application';
+                }
                 return;
             }
             
@@ -1614,6 +1635,10 @@
         errorMsg = "Firebase unavailable. Please try again later.";
     }
     showToast(errorMsg + " (" + (error.code || 'unknown') + ")", "error");
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Complete Application';
+    }
     return;
 }
 
@@ -1729,14 +1754,30 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app);
-        // Make db global
-        window.db = db;
-        window.addDoc = addDoc;
-        window.collection = collection;
-        window.serverTimestamp = serverTimestamp;
+        try {
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+            const db = getFirestore(app);
+            // Make db global
+            window.db = db;
+            window.addDoc = addDoc;
+            window.collection = collection;
+            window.serverTimestamp = serverTimestamp;
+            window.firebaseReady = true;
+            console.log('Firebase initialized successfully');
+            
+            // Enable submit button if it exists
+            const btn = document.getElementById('submit-application-btn');
+            if (btn) btn.disabled = false;
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            window.firebaseReady = false;
+            const btn = document.getElementById('submit-application-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> System Error - Refresh Page';
+            }
+        }
     </script>
 </body>
 
