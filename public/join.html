@@ -1800,7 +1800,7 @@
                             firebase.initializeApp(firebaseConfig);
                             window.db = firebase.firestore();
                             window.addDoc = function(collectionRef, data) {
-                                return window.db.collection(collectionRef).add(data);
+                                return collectionRef.add(data);
                             };
                             window.collection = function(db, name) {
                                 return window.db.collection(name);

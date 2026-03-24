@@ -159,16 +159,20 @@
                 <form id="admin-form" class="space-y-6" onsubmit="handleAdminLogin(event)">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Admin ID</label>
-                        <input type="text" id="admin-id" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="Enter admin ID">
+                        <input type="text" id="admin-id" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="Enter admin ID" oninput="checkLoginFields()">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input type="password" id="admin-password" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="Enter password">
+                        <input type="password" id="admin-password" required class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="Enter password" oninput="checkLoginFields()">
                     </div>
-                    <button type="submit" id="login-btn" class="w-full btn-accent hover:bg-[#cc0000] text-white py-3 rounded-xl font-semibold transition">
+                    <div id="pin-section" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Security PIN</label>
+                        <input type="password" id="admin-pin" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-gray-800 focus:border-[#0b2a5b]" placeholder="Enter security PIN" maxlength="6">
+                    </div>
+                    <button type="submit" id="login-btn" class="w-full btn-accent hover:bg-[#cc0000] text-white py-3 rounded-xl font-semibold transition opacity-50 cursor-not-allowed" disabled>
                         <i class="fas fa-lock mr-2"></i>Login
                     </button>
-                    <p class="text-xs text-gray-400 text-center">Default: admin / admin</p>
+                    <p class="text-xs text-gray-400 text-center"></p>
                 </form>
             </div>
         </section>
@@ -322,10 +326,27 @@
             }
         }
 
+        function checkLoginFields() {
+            const id = document.getElementById('admin-id').value;
+            const pass = document.getElementById('admin-password').value;
+            const pinSection = document.getElementById('pin-section');
+            const loginBtn = document.getElementById('login-btn');
+            
+            if (id.length > 0 && pass.length > 0) {
+                pinSection.classList.remove('hidden');
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-lock mr-2"></i>Login';
+            } else {
+                pinSection.classList.add('hidden');
+                loginBtn.disabled = true;
+            }
+        }
+
         function handleAdminLogin(e) {
             e.preventDefault();
             const id = document.getElementById('admin-id').value;
             const pass = document.getElementById('admin-password').value;
+            const pin = document.getElementById('admin-pin').value;
             const loginBtn = document.getElementById('login-btn');
             
             if (loginBtn) {
@@ -333,7 +354,7 @@
                 loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
             }
             
-            if (id === 'admin' && pass === 'admin123') {
+            if (id === 'admin' && pass === 'admin123' && pin === '123456') {
                 sessionStorage.setItem('isAdminLoggedIn', 'true');
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
@@ -517,9 +538,31 @@
             
             const previewWindow = window.open('', '_blank');
             if (doc.type && doc.type.startsWith('image/')) {
-                previewWindow.document.write('<html><head><title>Preview</title></head><body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f3f4f6;"><img src="' + doc.data + '" style="max-width:90%;max-height:90%;"></body></html>');
+                const docBody = previewWindow.document.body;
+                docBody.style.cssText = 'margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f3f4f6;';
+                const img = previewWindow.document.createElement('img');
+                img.src = String(doc.data).replace(/[\r\n\t]/g, '');
+                img.style.cssText = 'max-width:90%;max-height:90%;';
+                docBody.appendChild(img);
             } else {
-                previewWindow.document.write('<html><head><title>Preview - ' + (doc.name || docType) + '</title></head><body style="margin:20px;font-family:sans-serif;"><h2>' + (doc.name || docType) + '</h2><p>File type: ' + (doc.type || 'Unknown') + '</p><p>Size: ' + Math.round((doc.size || 0) / 1024) + ' KB</p><p>Data available: ' + (doc.data ? 'Yes' : 'No') + '</p><hr><p><a href="' + doc.data + '" download="' + (doc.name || 'document.pdf') + '">Download File</a></p></body></html>');
+                const docBody = previewWindow.document.body;
+                docBody.style.cssText = 'margin:20px;font-family:sans-serif;';
+                const h2 = previewWindow.document.createElement('h2');
+                h2.textContent = doc.name || docType;
+                docBody.appendChild(h2);
+                const p1 = previewWindow.document.createElement('p');
+                p1.textContent = 'File type: ' + (doc.type || 'Unknown');
+                docBody.appendChild(p1);
+                const p2 = previewWindow.document.createElement('p');
+                p2.textContent = 'Size: ' + Math.round((doc.size || 0) / 1024) + ' KB';
+                docBody.appendChild(p2);
+                const hr = previewWindow.document.createElement('hr');
+                docBody.appendChild(hr);
+                const link = previewWindow.document.createElement('a');
+                link.href = String(doc.data).replace(/[\r\n\t]/g, '');
+                link.download = doc.name || 'document.pdf';
+                link.textContent = 'Download File';
+                docBody.appendChild(link);
             }
         }
 
