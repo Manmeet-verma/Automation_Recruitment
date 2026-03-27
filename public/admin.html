@@ -291,7 +291,22 @@
         }
 
         function isAdminLoggedIn() {
-            return sessionStorage.getItem('isAdminLoggedIn') === 'true';
+            return localStorage.getItem('adminCredentials') !== null;
+        }
+
+        function getStoredCredentials() {
+            const stored = localStorage.getItem('adminCredentials');
+            return stored ? JSON.parse(stored) : null;
+        }
+
+        function checkStoredCredentials() {
+            const creds = getStoredCredentials();
+            if (creds) {
+                document.getElementById('admin-id').value = creds.id || '';
+                document.getElementById('admin-password').value = creds.password || '';
+                document.getElementById('admin-pin').value = creds.pin || '';
+                checkLoginFields();
+            }
         }
 
         async function deleteCandidate(id) {
@@ -355,7 +370,7 @@
             }
             
             if (id === 'admin' && pass === 'admin123' && pin === '123456') {
-                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                localStorage.setItem('adminCredentials', JSON.stringify({ id, password: pass, pin }));
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 showToast('Welcome Admin!');
@@ -369,9 +384,13 @@
         }
 
         function logout() {
-            sessionStorage.removeItem('isAdminLoggedIn');
+            localStorage.removeItem('adminCredentials');
             document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('admin-login').classList.remove('hidden');
+            document.getElementById('admin-id').value = '';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-pin').value = '';
+            checkLoginFields();
             showToast('Logged out');
         }
 
@@ -880,6 +899,8 @@
             document.querySelectorAll('.nav-link').forEach(link => { if (link.getAttribute('href') === currentPage) link.classList.add('active'); });
             document.getElementById('delete-modal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
             document.getElementById('view-modal').addEventListener('click', function(e) { if (e.target === this) closeViewModal(); });
+            
+            checkStoredCredentials();
             
             if (isAdminLoggedIn()) {
                 document.getElementById('admin-login').classList.add('hidden');
