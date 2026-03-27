@@ -482,9 +482,11 @@
                     <div class="space-y-2">${docsHtml || '<p class="text-gray-500 text-sm">No documents uploaded</p>'}</div>
                 </div>
 
+
+
                 <div class="flex space-x-3">
                     <button onclick="updateStatus('${candidate.id}', 'selected')" class="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"><i class="fas fa-check mr-2"></i>Select</button>
-                    <button onclick="closeViewModal(); updateStatus('${candidate.id}', 'rejected')" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium"><i class="fas fa-times mr-2"></i>Reject</button>
+                    <button onclick="updateStatus('${candidate.id}', 'rejected')" class="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium"><i class="fas fa-times mr-2"></i>Reject</button>
                 </div>
             `;
 
@@ -863,10 +865,11 @@
                     return;
                 }
                 await window.db.collection("applications").doc(id).update({ status: status });
-                showToast(`Candidate marked as ${status}`);
+                
+                const statusText = status === 'selected' ? 'Selected' : 'Rejected';
+                showToast(`Candidate marked as ${statusText}. Email sent automatically.`);
                 closeViewModal();
                 
-                // Send email notification for selected/rejected candidates
                 if (status === 'selected' || status === 'rejected') {
                     sendStatusEmailNotification(id);
                 }
@@ -898,9 +901,9 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    showToast('Status email sent to candidate');
+                    console.log('Email sent successfully to:', candidate.email);
                 } else {
-                    console.log('Email notification skipped or failed:', result.error);
+                    console.log('Email failed:', result.error);
                 }
             } catch (e) {
                 console.error('Email notification error:', e);

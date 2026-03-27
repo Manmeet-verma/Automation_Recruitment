@@ -15,12 +15,11 @@ define('DB_USER', 'root');
 define('DB_PASS', ''); // Your MySQL password (empty for default XAMPP)
 define('DB_NAME', 'techon_recruitment');
 
-// Email configuration (Update these with your SMTP details)
-define('EMAIL_HOST', 'smtp.gmail.com');
-define('EMAIL_PORT', 587);
-define('EMAIL_USER', 'your-email@gmail.com'); // REPLACE with your Gmail address
-define('EMAIL_PASS', 'your-app-password'); // REPLACE with Gmail App Password (16 chars)
+// Email configuration (Using SendGrid API - Free tier: 100 emails/day)
+// Sign up at https://sendgrid.com and get a free API key
+define('SENDGRID_API_KEY', 'YOUR_SENDGRID_API_KEY'); // Replace with your SendGrid API key
 define('EMAIL_FROM_NAME', 'Techon Recruitment');
+define('EMAIL_FROM', 'your-email@example.com'); // Replace with your verified sender email
 
 // Create connection
 function getDB() {
@@ -56,45 +55,10 @@ function generateAppId() {
     return 'TECH-' . date('Y') . '-' . str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
 }
 
-// Send Email Function
-function sendEmail($to, $subject, $body, $isHtml = true) {
-    $headers = [
-        'From: ' . EMAIL_FROM_NAME . ' <' . EMAIL_USER . '>',
-        'Reply-To: ' . EMAIL_USER,
-        'MIME-Version: 1.0',
-        'Content-Type: text/' . ($isHtml ? 'html' : 'plain') . '; charset=UTF-8',
-        'X-Mailer: PHP/' . phpversion()
-    ];
-    
-    $ch = curl_init();
-    curl_setopt_array($ch, [
-        CURLOPT_URL => 'https://api.sendgrid.com/api/mail.send.json',
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => http_build_query([
-            'api_user' => EMAIL_USER,
-            'api_key' => EMAIL_PASS,
-            'to' => $to,
-            'subject' => $subject,
-            'html' => $body,
-            'from' => EMAIL_USER
-        ]),
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded']
-    ]);
-    
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    
-    return $httpCode === 200 || $httpCode === 201;
-}
-
-// Simple mail fallback using PHP mail()
 function sendStatusEmail($to, $name, $applicationId, $status) {
-    $statusText = ucfirst($status);
     $isSelected = $status === 'selected';
     
-    $subject = "Application Status Update - $applicationId";
+    $subject = $isSelected ? "Congratulations! You are Selected - $applicationId" : "Application Status Update - $applicationId";
     
     $body = "
     <!DOCTYPE html>
@@ -121,13 +85,28 @@ function sendStatusEmail($to, $name, $applicationId, $status) {
                 <h2>Dear $name,</h2>
                 <p>Thank you for applying through our recruitment portal. We have reviewed your application.</p>
                 <div class='status-box " . ($isSelected ? 'selected' : 'rejected') . "'>
-                    <h3 style='margin:0;'>Application Status: $statusText</h3>
+                    <h3 style='margin:0;'>" . ($isSelected ? 'YOU ARE SELECTED!' : 'APPLICATION NOT SELECTED') . "</h3>
                     <p style='margin:10px 0 0 0;'>Application ID: <strong>$applicationId</strong></p>
                 </div>
                 " . ($isSelected ? 
-                    "<p>Congratulations! We are pleased to inform you that your application has been <strong>selected</strong>. Our HR team will contact you shortly with further details regarding the next steps.</p>" :
-                    "<p>We regret to inform you that your application has not been <strong>selected</strong> at this time. We encourage you to apply for future openings that match your profile.</p>
-                    <p>We appreciate your interest in Techon LED and wish you all the best in your career.</p>"
+                    "<p><strong>Why You Are Selected:</strong></p>
+                    <p>Your application score is good and you have qualified for the position. We are pleased to inform you that you are <strong>SELECTED</strong>.</p>
+                    <div style='background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;'>
+                        <p style='margin:0;'><strong>Joining Details:</strong></p>
+                        <p style='margin:5px 0 0 0;'>Your joining date is <strong>tomorrow</strong>.</p>
+                        <p style='margin:5px 0 0 0;'>Before joining, please note that your <strong>final interview will be conducted by HR Sir</strong>.</p>
+                    </div>
+                    <p>Our HR team will contact you shortly with more details regarding documentation and other formalities.</p>
+                    <p>Please be available for the HR interview at the scheduled time.</p>" :
+                    "<p><strong>Why You Are Not Selected:</strong></p>
+                    <p>After careful review of your application, we regret to inform you that your profile did not meet the current requirements for this position.</p>
+                    <p>Your score was not sufficient to qualify for this round. We encourage you to:</p>
+                    <ul>
+                        <li>Apply for future openings that match your profile</li>
+                        <li>Work on improving your skills and qualifications</li>
+                        <li>Keep checking our career portal for new opportunities</li>
+                    </ul>
+                    <p>We appreciate your interest in Techon LED and wish you all the best in your career journey.</p>"
                 ) . "
                 <p>If you have any questions, please don't hesitate to contact our HR department.</p>
                 <p>Best regards,<br><strong>Techon LED Recruitment Team</strong></p>
@@ -140,11 +119,55 @@ function sendStatusEmail($to, $name, $applicationId, $status) {
     </body>
     </html>";
     
-    $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: " . EMAIL_FROM_NAME . " <" . EMAIL_USER . ">\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+    return sendSendGridEmail($to, $subject, $body);
+}
+
+function sendSendGridEmail($to, $subject, $body) {
+    $apiKey = SENDGRID_API_KEY;
+    $fromEmail = EMAIL_FROM;
+    $fromName = EMAIL_FROM_NAME;
     
-    return mail($to, $subject, $body, $headers);
+    if ($apiKey === 'YOUR_SENDGRID_API_KEY' || empty($apiKey)) {
+        return 'SendGrid API key not configured. Please update api/config.php with your SendGrid API key.';
+    }
+    
+    $data = [
+        'personalizations' => [
+            [
+                'to' => [['email' => $to]],
+                'subject' => $subject
+            ]
+        ],
+        'from' => ['email' => $fromEmail, 'name' => $fromName],
+        'content' => [
+            [
+                'type' => 'text/html',
+                'value' => $body
+            ]
+        ]
+    ];
+    
+    $ch = curl_init('https://api.sendgrid.com/v3/mail/send');
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($data),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $apiKey,
+            'Content-Type: application/json'
+        ],
+        CURLOPT_SSL_VERIFYPEER => false
+    ]);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+    
+    if ($httpCode >= 200 && $httpCode < 300) {
+        return true;
+    }
+    
+    return "SendGrid error: HTTP $httpCode - $response";
 }
 ?>

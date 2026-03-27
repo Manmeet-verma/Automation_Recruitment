@@ -1,6 +1,9 @@
 <?php
 require_once 'config.php';
 
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
@@ -14,18 +17,21 @@ if ($method === 'POST') {
         $status = $data['status'] ?? '';
         $applicationId = $data['applicationId'] ?? $candidateId;
         
-        if (empty($candidateEmail) || empty($status)) {
-            jsonResponse(['error' => 'Missing required fields (email or status)'], 400);
+        if (empty($candidateEmail)) {
+            jsonResponse(['error' => 'No email address provided'], 400);
+        }
+        
+        if (empty($status)) {
+            jsonResponse(['error' => 'No status selected'], 400);
         }
         
         if (!in_array($status, ['selected', 'rejected'])) {
-            jsonResponse(['error' => 'Invalid status. Only selected/rejected triggers email.'], 400);
+            jsonResponse(['error' => 'Invalid status. Must be selected or rejected'], 400);
         }
         
-        // Send email
-        $emailSent = sendStatusEmail($candidateEmail, $candidateName, $applicationId, $status);
+        $result = sendStatusEmail($candidateEmail, $candidateName, $applicationId, $status);
         
-        if ($emailSent) {
+        if ($result === true) {
             jsonResponse([
                 'success' => true,
                 'message' => "Email sent to $candidateEmail"
@@ -33,9 +39,17 @@ if ($method === 'POST') {
         } else {
             jsonResponse([
                 'success' => false,
-                'error' => 'Failed to send email. Check PHP mail configuration.'
+                'error' => $result
             ], 500);
         }
+    }
+    
+    if ($action === 'test_email') {
+        $result = sendStatusEmail('test@example.com', 'Test User', 'TEST-001', 'selected');
+        jsonResponse([
+            'success' => $result,
+            'message' => $result ? 'Test email sent!' : 'Test email failed'
+        ]);
     }
 }
 
