@@ -865,9 +865,45 @@
                 await window.db.collection("applications").doc(id).update({ status: status });
                 showToast(`Candidate marked as ${status}`);
                 closeViewModal();
+                
+                // Send email notification for selected/rejected candidates
+                if (status === 'selected' || status === 'rejected') {
+                    sendStatusEmailNotification(id);
+                }
             } catch (e) {
                 console.error("Update failed:", e);
                 showToast("Update failed: " + e.message, "error");
+            }
+        }
+        
+        async function sendStatusEmailNotification(candidateId) {
+            const candidate = window.allCandidates.find(c => c.id === candidateId);
+            if (!candidate || !candidate.email) {
+                console.log('No email found for candidate:', candidateId);
+                return;
+            }
+            
+            try {
+                const response = await fetch('../api/notification.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'send_status_email',
+                        candidateId: candidateId,
+                        candidateName: candidate.name,
+                        candidateEmail: candidate.email,
+                        status: candidate.status,
+                        applicationId: candidateId
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast('Status email sent to candidate');
+                } else {
+                    console.log('Email notification skipped or failed:', result.error);
+                }
+            } catch (e) {
+                console.error('Email notification error:', e);
             }
         }
 
